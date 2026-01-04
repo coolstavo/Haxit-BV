@@ -53,7 +53,15 @@
             </div>
 
              <div class="col-md-4">
-                <h4 class="mb-3">Actuele Opdrachten & Lessen</h4>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Actuele Opdrachten & Lessen</h4>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                        </svg>
+                        Toevoegen
+                    </button>
+                </div>
                 <div class="list-group overflow-auto" style="max-height: 85vh;">
                     
                     <a href="#"
@@ -75,20 +83,83 @@
         </div>
     </div>
 
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEventModalLabel">Nieuw Event Toevoegen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addEventForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Titel</label>
+                            <input type="text" class="form-control" id="eventTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Beschrijving</label>
+                            <textarea class="form-control" id="eventDescription" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventType" class="form-label">Type</label>
+                            <select class="form-select" id="eventType" name="type" required>
+                                <option value="">Selecteer type...</option>
+                                <option value="Opdracht">Opdracht</option>
+                                <option value="Les">Les</option>
+                                <option value="Bedrijf">Bedrijf</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="eventLat" class="form-label">Latitude</label>
+                                <input type="number" step="0.000001" class="form-control" id="eventLat" name="lat" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="eventLng" class="form-label">Longitude</label>
+                                <input type="number" step="0.000001" class="form-control" id="eventLng" name="lng" required>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>Klik op de kaart om automatisch coördinaten in te vullen!</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+                        <button type="submit" class="btn btn-primary">Event Toevoegen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script th:inline="javascript">
         var events = /*[[${events}]]*/ [];
         var markers = {};
+        var eventIndex = events.length;
 
-        var map = L.map('map').setView([53.2194, 6.5665], 13);
+        // Groningen and Drenthe
+        var maxBounds = L.latLngBounds(
+            L.latLng(52.9, 6.0),   
+            L.latLng(53.6, 7.3)   
+        );
+
+        var map = L.map('map', {
+            maxBounds: maxBounds,
+            maxBoundsViscosity: 1.0
+        }).setView([53.2194, 6.5665], 13);
+        
+        map.setMaxBounds(maxBounds);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         var customIcon = L.icon({
-            iconUrl: /*[[@{/assets/pin.png}]]*/,
+            iconUrl: '/assets/marker-icon.png',
             iconSize: [15, 40],
             iconAnchor: [15, 40],
             popupAnchor: [-6, -40],
@@ -127,6 +198,76 @@
                 }
             }
         }
+
+        // click op map voor coordinaten! dan toevoegen clicken
+        map.on('click', function(e) {
+            document.getElementById('eventLat').value = e.latlng.lat.toFixed(6);
+            document.getElementById('eventLng').value = e.latlng.lng.toFixed(6);
+        });
+
+        document.getElementById('addEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = {
+                title: document.getElementById('eventTitle').value,
+                description: document.getElementById('eventDescription').value,
+                type: document.getElementById('eventType').value,
+                lat: parseFloat(document.getElementById('eventLat').value),
+                lng: parseFloat(document.getElementById('eventLng').value)
+            };
+
+            // Send to backend
+            fetch('/api/events/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // toevoegen aan map
+                var marker = L.marker([data.lat, data.lng], {icon: customIcon}).addTo(map);
+                var popupText = "<b>" + data.title + "</b><br>" + 
+                                "" + data.description + "<br>" +
+                                "<span class='badge rounded-pill navbar-orange'>" + data.type + "</span>";
+                marker.bindPopup(popupText);
+                markers[eventIndex] = marker;
+
+                // toevoegen aan lijst
+                var eventCard = document.createElement('a');
+                eventCard.href = '#';
+                eventCard.className = 'list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded';
+                eventCard.dataset.lat = data.lat;
+                eventCard.dataset.lng = data.lng;
+                eventCard.dataset.index = eventIndex;
+                eventCard.onclick = function() {
+                    focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index);
+                };
+                eventCard.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1 text-dark">${data.title}</h5>
+                        <span class="badge rounded-pill navbar-orange">${data.type}</span>
+                    </div>
+                    <p class="mb-1">${data.description}</p>
+                `;
+                document.querySelector('.list-group').appendChild(eventCard);
+
+                eventIndex++;
+
+                bootstrap.Modal.getInstance(document.getElementById('addEventModal')).hide();
+                document.getElementById('addEventForm').reset();
+
+                map.flyTo([data.lat, data.lng], 15);
+                setTimeout(function() {
+                    marker.openPopup();
+                }, 500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Er is een fout opgetreden bij het toevoegen van het event.');
+            });
+        });
     </script>
 </body>
 </html>

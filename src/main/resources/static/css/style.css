@@ -24,3 +24,12 @@
 #logo {
     height: 32px;
 }
+
+.modal-header {
+    background-color: var(--hexit-orange);
+    color: white;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}

@@ -31,27 +31,33 @@ public class HomeController {
     }
 
     private List<Map<String, Object>> getDummyEvents() {
-        List<Event> events = new ArrayList<>();
-        events.add(new Event("Gitarist Gezocht", "Rockband zoekt lead gitarist voor optredens.", 53.2194, 6.5665, "Opdracht"));
-        events.add(new Event("Pianoles Aangeboden", "Beginners tot gevorderden welkom.", 53.1900, 6.5500, "Les"));
-        events.add(new Event("Jazz Trio zoekt Drummer", "Voor bruiloften en partijen.", 53.2100, 6.5800, "Opdracht"));
-        events.add(new Event("Studio Ruimte Te Huur", "Volledig ingerichte studio per uur.", 53.1800, 6.6000, "Bedrijf"));
-        events.add(new Event("Vinyl DJ gezocht", "House/techno DJ voor zaterdagavond set.", 53.2250, 6.5600, "Opdracht"));
-        events.add(new Event("Zangles Aangeboden", "Privélessen moderne zangtechniek.", 53.2050, 6.5750, "Les"));
-        events.add(new Event("Bassist gezocht voor coverband", "We spelen pop/rock classics.", 53.1950, 6.5900, "Opdracht"));
-        events.add(new Event("Saxofoon workshop", "Eendaagse workshop voor beginners.", 53.2300, 6.6100, "Les"));
-        events.add(new Event("PA-set te huur", "Complete geluidsinstallatie per dag.", 53.2400, 6.5400, "Bedrijf"));
-        events.add(new Event("Producer zoekt vocalist", "Samenwerkingen voor nieuwe EDM-track.", 53.2000, 6.5200, "Opdracht"));
-        events.add(new Event("Kinderkoor repetities", "Nieuwe leden welkom, elke woensdag.", 53.1850, 6.5550, "Les"));
-        events.add(new Event("Celloles aan huis", "Klassieke cellolessen op locatie.", 53.1750, 6.5850, "Les"));
-        events.add(new Event("Drumstel verhuur", "Akoestisch en elektronisch beschikbaar.", 53.2600, 6.6000, "Bedrijf"));
-        events.add(new Event("Open mic avond", "Meld je aan voor een optreden.", 53.2100, 6.5450, "Opdracht"));
 
-        List<Map<String, Object>> eventMaps = new ArrayList<>();
-        for (Event event : events) {
-            eventMaps.add(event.toMap());
-        }
-        return eventMaps;
+        // events vanuit EventController storage
+        List<Map<String, Object>> allEvents = new ArrayList<>(EventController.getAllEvents());
+        
+        // if (allEvents.isEmpty()) {
+            List<Event> events = new ArrayList<>();
+            events.add(new Event("Gitarist Gezocht", "Rockband zoekt lead gitarist voor optredens.", 53.2194, 6.5665, "Opdracht"));
+            events.add(new Event("Pianoles Aangeboden", "Beginners tot gevorderden welkom.", 53.1900, 6.5500, "Les"));
+            events.add(new Event("Jazz Trio zoekt Drummer", "Voor bruiloften en partijen.", 53.2100, 6.5800, "Opdracht"));
+            events.add(new Event("Studio Ruimte Te Huur", "Volledig ingerichte studio per uur.", 53.1800, 6.6000, "Bedrijf"));
+            events.add(new Event("Vinyl DJ gezocht", "House/techno DJ voor zaterdagavond set.", 53.2250, 6.5600, "Opdracht"));
+            events.add(new Event("Zangles Aangeboden", "Privélessen moderne zangtechniek.", 53.2050, 6.5750, "Les"));
+            events.add(new Event("Bassist gezocht voor coverband", "We spelen pop/rock classics.", 53.1950, 6.5900, "Opdracht"));
+            events.add(new Event("Saxofoon workshop", "Eendaagse workshop voor beginners.", 53.2300, 6.6100, "Les"));
+            events.add(new Event("PA-set te huur", "Complete geluidsinstallatie per dag.", 53.2400, 6.5400, "Bedrijf"));
+            events.add(new Event("Producer zoekt vocalist", "Samenwerkingen voor nieuwe EDM-track.", 53.2000, 6.5200, "Opdracht"));
+            events.add(new Event("Kinderkoor repetities", "Nieuwe leden welkom, elke woensdag.", 53.1850, 6.5550, "Les"));
+            events.add(new Event("Celloles aan huis", "Klassieke cellolessen op locatie.", 53.1750, 6.5850, "Les"));
+            events.add(new Event("Drumstel verhuur", "Akoestisch en elektronisch beschikbaar.", 53.2600, 6.6000, "Bedrijf"));
+            events.add(new Event("Open mic avond", "Meld je aan voor een optreden.", 53.2100, 6.5450, "Opdracht"));
+
+            for (Event event : events) {
+                allEvents.add(event.toMap());
+            }
+        // }
+        
+        return allEvents;
     }
 
     @GetMapping("/")
