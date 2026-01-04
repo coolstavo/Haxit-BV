@@ -1,0 +1,26 @@
+:root {
+    --hexit-orange: #ff7f0e;
+    --hexit-orange-dark: #e36f00;
+}
+
+#map { height: 89vh; width: 100%; border-radius: 8px; }
+.event-card { cursor: pointer; transition: transform 0.2s; }
+.event-card:hover { transform: scale(1.02); background-color: #f8f9fa; }
+
+@media (max-width: 768px) {
+    #map { height: 400px; }
+}
+
+.navbar-orange { background-color: var(--hexit-orange); }
+.btn-primary {
+    background-color: var(--hexit-orange);
+    border-color: var(--hexit-orange);
+}
+.btn-primary:hover {
+    background-color: var(--hexit-orange-dark);
+    border-color: var(--hexit-orange-dark);
+}
+
+#logo {
+    height: 32px;
+}

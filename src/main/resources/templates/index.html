@@ -1,11 +1,132 @@
 <!DOCTYPE html>
-  <html xmlns:th="http://www.thymeleaf.org">
-  <head>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
     <meta charset="UTF-8" />
-    <title>Spring Boot + Thymeleaf + Docker</title>
-  </head>
-  <body>
-    <h1 th:text="${message}">Default message</h1>
-    <p>If you see this, everything works 🎉</p>
-  </body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexit - Muziek Platform</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-orange mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center"
+               th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">
+                <img src="/assets/logo.svg" alt="Haxit logo" id="logo" class="me-2">
+                Haxit
+              </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Zoeken</a></li>
+                    <li class="nav-item" th:if="${username} != 'Gast'">
+                        <a class="nav-link" th:href="@{'/profile/' + ${username}}">Profiel</a>
+                    </li>
+                    <li class="nav-item" th:if="${username} == 'Gast'">
+                        <a class="nav-link btn btn-primary text-white ms-2 px-3" href="#">Inloggen</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <div th:if="${loginRequired}" class="alert alert-warning">Log in om je profiel te bekijken.</div>
+        <div class="row">
+            
+            <div class="col-md-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="col-md-4">
+                <h4 class="mb-3">Actuele Opdrachten & Lessen</h4>
+                <div class="list-group overflow-auto" style="max-height: 85vh;">
+                    
+                    <a href="#"
+                       class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded" 
+                       th:each="event, iterStat : ${events}" 
+                       th:data-lat="${event.lat}" 
+                       th:data-lng="${event.lng}" 
+                       th:data-index="${iterStat.index}"
+                       th:onclick="'focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index)'">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
+                            <span class="badge rounded-pill navbar-orange" th:text="${event.type}">Type</span>
+                        </div>
+                        <p class="mb-1" th:text="${event.description}">Beschrijving</p>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script th:inline="javascript">
+        var events = /*[[${events}]]*/ [];
+        var markers = {};
+
+        var map = L.map('map').setView([53.2194, 6.5665], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var customIcon = L.icon({
+            iconUrl: /*[[@{/assets/pin.png}]]*/,
+            iconSize: [15, 40],
+            iconAnchor: [15, 40],
+            popupAnchor: [-6, -40],
+            className: 'custom-div-icon'
+        });
+
+
+        if (Array.isArray(events) && events.length > 0) {
+            events.forEach(function(event, index) {
+                var lat = Number(event.lat);
+                var lng = Number(event.lng);
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+                var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
+                var popupText = "<b>" + event.title + "</b><br>" + 
+                                "" + event.description + "<br>" +
+                                "<span class='badge rounded-pill navbar-orange'>" + event.type + "</span>";
+                marker.bindPopup(popupText);
+                
+                markers[index] = marker;
+            });
+        } else {
+            console.warn("Geen evenementen gevonden om weer te geven op de kaart.");
+        }
+
+        function focusOnMap(lat, lng, index) {
+            var nLat = Number(lat);
+            var nLng = Number(lng);
+            if (Number.isFinite(nLat) && Number.isFinite(nLng)) {
+                map.flyTo([nLat, nLng], 15);
+                
+                if (markers[index]) {
+                    setTimeout(function() {
+                        markers[index].openPopup();
+                    }, 500);
+                }
+            }
+        }
+    </script>
+</body>
 </html>
