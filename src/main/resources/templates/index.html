@@ -1,11 +1,73 @@
 <!DOCTYPE html>
-  <html xmlns:th="http://www.thymeleaf.org">
-  <head>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
     <meta charset="UTF-8" />
-    <title>Spring Boot + Thymeleaf + Docker</title>
-  </head>
-  <body>
-    <h1 th:text="${message}">Default message</h1>
-    <p>If you see this, everything works 🎉</p>
-  </body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen - Muziek Platform</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+</head>
+<body class="bg">
+
+  <!-- Navbar -->
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+    <div class="container-fluid px-4">
+        <div th:if="${loginRequired}" class="alert alert-warning">Log in om je profiel te bekijken.</div>
+        <div class="row">
+            
+            <div class="col-md-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="col-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Actuele Opdrachten & Lessen</h4>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                        </svg>
+                        Toevoegen
+                    </button>
+                </div>
+                <div class="list-group overflow-auto" style="max-height: 85vh;">
+                    
+                    <a href="#"
+                       class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded" 
+                       th:each="event, iterStat : ${events}" 
+                       th:data-lat="${event.lat}" 
+                       th:data-lng="${event.lng}" 
+                       th:data-index="${iterStat.index}"
+                       th:onclick="'focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index)'">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
+                            <span class="badge rounded-pill navbar-brown" th:text="${event.type}">Type</span>
+                        </div>
+                        <p class="mb-1" th:text="${event.description}">Beschrijving</p>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div th:insert="~{fragments/_addEventModal :: addEventModal}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script th:inline="javascript">
+        var initialEvents = /*[[${events}]]*/ [];
+        var pinIconUrl = /*[[@{/assets/pin-red.png}]]*/ [];
+    </script>
+    <script th:src="@{/js/map.js}"></script>
+</body>
 </html>
