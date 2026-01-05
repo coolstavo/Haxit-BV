@@ -1,6 +1,6 @@
 :root {
-    --hexit-orange: #ff7f0e;
-    --hexit-orange-dark: #e36f00;
+    --hexit-brown: #8f4e15;
+    --hexit-brown-dark: #5d3108;
 }
 
 #map { height: 89vh; width: 100%; border-radius: 8px; }
@@ -11,14 +11,20 @@
     #map { height: 400px; }
 }
 
-.navbar-orange { background-color: var(--hexit-orange); }
+.navbar-brown { background-color: var(--hexit-brown);
+}
+
 .btn-primary {
-    background-color: var(--hexit-orange);
-    border-color: var(--hexit-orange);
+    background-color: var(--hexit-brown);
+    border-color: var(--hexit-brown);
 }
 .btn-primary:hover {
-    background-color: var(--hexit-orange-dark);
-    border-color: var(--hexit-orange-dark);
+    background-color: var(--hexit-brown-dark);
+    border-color: var(--hexit-brown-dark);
+}
+
+.bg {
+    background-color: #f1eeea;
 }
 
 #logo {
@@ -26,7 +32,7 @@
 }
 
 .modal-header {
-    background-color: var(--hexit-orange);
+    background-color: var(--hexit-brown);
     color: white;
 }
 

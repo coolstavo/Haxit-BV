@@ -3,42 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexit - Muziek Platform</title>
+    <title>Listen - Muziek Platform</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" th:href="@{/css/style.css}">
 
 </head>
-<body class="bg-light">
+<body class="bg">
 
   <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-orange mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center"
-               th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">
-                <img src="/assets/logo.svg" alt="Haxit logo" id="logo" class="me-2">
-                Haxit
-              </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Zoeken</a></li>
-                    <li class="nav-item" th:if="${username} != 'Gast'">
-                        <a class="nav-link" th:href="@{'/profile/' + ${username}}">Profiel</a>
-                    </li>
-                    <li class="nav-item" th:if="${username} == 'Gast'">
-                        <a class="nav-link btn btn-primary text-white ms-2 px-3" href="#">Inloggen</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
 
     <div class="container-fluid px-4">
         <div th:if="${loginRequired}" class="alert alert-warning">Log in om je profiel te bekijken.</div>
@@ -73,7 +48,7 @@
                        th:onclick="'focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index)'">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
-                            <span class="badge rounded-pill navbar-orange" th:text="${event.type}">Type</span>
+                            <span class="badge rounded-pill navbar-brown" th:text="${event.type}">Type</span>
                         </div>
                         <p class="mb-1" th:text="${event.description}">Beschrijving</p>
                     </a>
@@ -84,190 +59,15 @@
     </div>
 
     <!-- Add Event Modal -->
-    <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addEventModalLabel">Nieuw Event Toevoegen</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="addEventForm">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="eventTitle" class="form-label">Titel</label>
-                            <input type="text" class="form-control" id="eventTitle" name="title" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventDescription" class="form-label">Beschrijving</label>
-                            <textarea class="form-control" id="eventDescription" name="description" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="eventType" class="form-label">Type</label>
-                            <select class="form-select" id="eventType" name="type" required>
-                                <option value="">Selecteer type...</option>
-                                <option value="Opdracht">Opdracht</option>
-                                <option value="Les">Les</option>
-                                <option value="Bedrijf">Bedrijf</option>
-                            </select>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="eventLat" class="form-label">Latitude</label>
-                                <input type="number" step="0.000001" class="form-control" id="eventLat" name="lat" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="eventLng" class="form-label">Longitude</label>
-                                <input type="number" step="0.000001" class="form-control" id="eventLng" name="lng" required>
-                            </div>
-                        </div>
-                        <div class="alert alert-info">
-                            <small>Klik op de kaart om automatisch coördinaten in te vullen!</small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
-                        <button type="submit" class="btn btn-primary">Event Toevoegen</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <div th:insert="~{fragments/_addEventModal :: addEventModal}"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script th:inline="javascript">
-        var events = /*[[${events}]]*/ [];
-        var markers = {};
-        var eventIndex = events.length;
-
-        // Groningen and Drenthe
-        var maxBounds = L.latLngBounds(
-            L.latLng(52.9, 6.0),   
-            L.latLng(53.6, 7.3)   
-        );
-
-        var map = L.map('map', {
-            maxBounds: maxBounds,
-            maxBoundsViscosity: 1.0
-        }).setView([53.2194, 6.5665], 13);
-        
-        map.setMaxBounds(maxBounds);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        var customIcon = L.icon({
-            iconUrl: '/assets/marker-icon.png',
-            iconSize: [15, 40],
-            iconAnchor: [15, 40],
-            popupAnchor: [-6, -40],
-            className: 'custom-div-icon'
-        });
-
-
-        if (Array.isArray(events) && events.length > 0) {
-            events.forEach(function(event, index) {
-                var lat = Number(event.lat);
-                var lng = Number(event.lng);
-                if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-                var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
-                var popupText = "<b>" + event.title + "</b><br>" + 
-                                "" + event.description + "<br>" +
-                                "<span class='badge rounded-pill navbar-orange'>" + event.type + "</span>";
-                marker.bindPopup(popupText);
-                
-                markers[index] = marker;
-            });
-        } else {
-            console.warn("Geen evenementen gevonden om weer te geven op de kaart.");
-        }
-
-        function focusOnMap(lat, lng, index) {
-            var nLat = Number(lat);
-            var nLng = Number(lng);
-            if (Number.isFinite(nLat) && Number.isFinite(nLng)) {
-                map.flyTo([nLat, nLng], 15);
-                
-                if (markers[index]) {
-                    setTimeout(function() {
-                        markers[index].openPopup();
-                    }, 500);
-                }
-            }
-        }
-
-        // click op map voor coordinaten! dan toevoegen clicken
-        map.on('click', function(e) {
-            document.getElementById('eventLat').value = e.latlng.lat.toFixed(6);
-            document.getElementById('eventLng').value = e.latlng.lng.toFixed(6);
-        });
-
-        document.getElementById('addEventForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            var formData = {
-                title: document.getElementById('eventTitle').value,
-                description: document.getElementById('eventDescription').value,
-                type: document.getElementById('eventType').value,
-                lat: parseFloat(document.getElementById('eventLat').value),
-                lng: parseFloat(document.getElementById('eventLng').value)
-            };
-
-            // Send to backend
-            fetch('/api/events/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // toevoegen aan map
-                var marker = L.marker([data.lat, data.lng], {icon: customIcon}).addTo(map);
-                var popupText = "<b>" + data.title + "</b><br>" + 
-                                "" + data.description + "<br>" +
-                                "<span class='badge rounded-pill navbar-orange'>" + data.type + "</span>";
-                marker.bindPopup(popupText);
-                markers[eventIndex] = marker;
-
-                // toevoegen aan lijst
-                var eventCard = document.createElement('a');
-                eventCard.href = '#';
-                eventCard.className = 'list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded';
-                eventCard.dataset.lat = data.lat;
-                eventCard.dataset.lng = data.lng;
-                eventCard.dataset.index = eventIndex;
-                eventCard.onclick = function() {
-                    focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index);
-                };
-                eventCard.innerHTML = `
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1 text-dark">${data.title}</h5>
-                        <span class="badge rounded-pill navbar-orange">${data.type}</span>
-                    </div>
-                    <p class="mb-1">${data.description}</p>
-                `;
-                document.querySelector('.list-group').appendChild(eventCard);
-
-                eventIndex++;
-
-                bootstrap.Modal.getInstance(document.getElementById('addEventModal')).hide();
-                document.getElementById('addEventForm').reset();
-
-                map.flyTo([data.lat, data.lng], 15);
-                setTimeout(function() {
-                    marker.openPopup();
-                }, 500);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Er is een fout opgetreden bij het toevoegen van het event.');
-            });
-        });
+        var initialEvents = /*[[${events}]]*/ [];
+        var pinIconUrl = /*[[@{/assets/pin-red.png}]]*/ [];
     </script>
+    <script th:src="@{/js/map.js}"></script>
 </body>
 </html>
