@@ -1,0 +1,41 @@
+:root {
+    --hexit-brown: #8f4e15;
+    --hexit-brown-dark: #5d3108;
+}
+
+#map { height: 89vh; width: 100%; border-radius: 8px; }
+.event-card { cursor: pointer; transition: transform 0.2s; }
+.event-card:hover { transform: scale(1.02); background-color: #f8f9fa; }
+
+@media (max-width: 768px) {
+    #map { height: 400px; }
+}
+
+.navbar-brown { background-color: var(--hexit-brown);
+}
+
+.btn-primary {
+    background-color: var(--hexit-brown);
+    border-color: var(--hexit-brown);
+}
+.btn-primary:hover {
+    background-color: var(--hexit-brown-dark);
+    border-color: var(--hexit-brown-dark);
+}
+
+.bg {
+    background-color: #f1eeea;
+}
+
+#logo {
+    height: 32px;
+}
+
+.modal-header {
+    background-color: var(--hexit-brown);
+    color: white;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
