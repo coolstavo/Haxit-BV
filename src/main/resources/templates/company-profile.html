@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedrijfsprofiel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg">
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+    <div class="container">
+        <h3 class="mb-3">Bedrijfsprofiel van <span th:text="${companyName}">Bedrijf</span></h3>
+        
+        <!-- View Mode -->
+        <div th:if="${!edit}" class="card shadow-sm mb-4">
+            <div class="card-body">
+                <p class="text-muted">Nog geen gegevens ingevuld</p>
+                <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary">Profiel Invullen</a>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div th:if="${edit}" class="card shadow-sm">
+            <div class="card-body">
+                <form method="post" action="/profile/bedrijf/save" enctype="multipart/form-data">
+                    <input type="hidden" name="companyName" th:value="${companyName}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Bedrijfsnaam</label>
+                        <input type="text" class="form-control" th:value="${companyName}" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Locatie (stad/regio)</label>
+                        <input type="text" name="location" class="form-control" placeholder="Bijv. Groningen" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Website-URL</label>
+                        <input type="url" name="websiteUrl" class="form-control" placeholder="https://www.bedrijf.nl">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Over ons</label>
+                        <textarea name="aboutUs" class="form-control" rows="4" required placeholder="Beschrijf wie jullie zijn..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bedrijfslogo (JPG, PNG; max. 5MB)</label>
+                        <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png">
+                        <small class="text-muted">Ondersteunde formaten: JPG, PNG. Maximaal 5MB.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Gezochte genres</label>
+                        <div class="form-control" style="height: auto; padding: 10px;">
+                            <div th:each="genre : ${genresOptions}" class="form-check">
+                                <input class="form-check-input" type="checkbox" name="genres" th:value="${genre}" th:id="${'genre-' + genre}">
+                                <label class="form-check-label" th:for="${'genre-' + genre}" th:text="${genre}"></label>
+                            </div>
+                        </div>
+                        <small class="text-muted">Selecteer een of meer genres waarin jullie muzikanten zoeken</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Gezochte muzikanten</label>
+                        <textarea name="musiciansWanted" class="form-control" rows="5" required placeholder="Beschrijf welke muzikanten jullie zoeken (ervaring, instrumenten, genre, etc.)"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Opslaan</button>
+                    <a th:href="@{'/profile/bedrijf/' + ${companyName}}" class="btn btn-secondary">Annuleren</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
