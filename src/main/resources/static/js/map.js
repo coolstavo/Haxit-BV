@@ -15,18 +15,10 @@ var map = L.map('map', {
 
 map.setMaxBounds(maxBounds);
 
-// Oude map 
-// Removed the L.mapkitMutant layer
-// var roads = L.mapkitMutant({
-// 	type: 'hybrid', // valid values are 'default', 'satellite' and 'hybrid'
-// 	language: 'en',
-// 	debugRectangle: false
-// }).addTo(map);
-
-var Stadia_AlidadeSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
-	minZoom: 0,
-	maxZoom: 20,
-	ext: 'png'
+// Oude map
+var roads = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap-bijdragers'
 }).addTo(map);
 
 var customIcon = L.icon({
