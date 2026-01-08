@@ -24,6 +24,7 @@
                         th:object="${profile}"
                         method="post"
                     >
+                        <input type="hidden" th:field="*{id}" />
                         <div class="mb-3">
                             <label class="form-label">Naam</label>
                             <input
@@ -32,6 +33,7 @@
                                 class="form-control"
                                 th:field="*{username}"
                                 placeholder="Naam"
+                                readonly
                             />
                         </div>
 

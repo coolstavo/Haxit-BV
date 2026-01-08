@@ -21,7 +21,6 @@ public class ProfileController {
         this.profileRepository = profileRepository;
     }
 
-    // PROFIEL BEKIJKEN
     @GetMapping("/profile/{username}")
     public String profile(@PathVariable String username, Model model) {
         Profile profile = profileRepository
