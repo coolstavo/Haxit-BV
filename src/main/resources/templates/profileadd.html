@@ -10,5 +10,87 @@
         />
         <link rel="stylesheet" th:href="@{/css/style.css}" />
     </head>
-    <body class="bg"></body>
+    <body class="bg">
+        <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+        <div class="container">
+            <h3 class="mb-3">
+                Profiel van <span th:text="${username}">Gebruiker</span>
+            </h3>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form
+                        th:action="@{/profile/save}"
+                        th:object="${profile}"
+                        method="post"
+                    >
+                        <div class="mb-3">
+                            <label class="form-label">Naam</label>
+                            <input
+                                type="text"
+                                name="username"
+                                class="form-control"
+                                th:field="*{username}"
+                                placeholder="Naam"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Leeftijd</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                th:field="*{age}"
+                                placeholder="Leeftijd"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Instrument</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                th:field="*{instrument}"
+                                placeholder="Bijv. Gitaar, Piano"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Genres</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                th:field="*{genres}"
+                                placeholder="Bijv. Rock, Jazz, EDM"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Opleiding</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                th:field="*{education}"
+                                placeholder="Bijv. Conservatorium, HBO-ICT"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Doelen</label>
+                            <textarea
+                                class="form-control"
+                                rows="3"
+                                th:field="*{goals}"
+                                placeholder="Wat wil je bereiken?"
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Opslaan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
