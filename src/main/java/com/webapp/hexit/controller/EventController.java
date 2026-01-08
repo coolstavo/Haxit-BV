@@ -1,4 +1,4 @@
-package com.webapp.hexit;
+package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.repository.EventRepository;

@@ -1,4 +1,4 @@
-package com.webapp.hexit;
+package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.repository.EventRepository;
@@ -47,6 +47,12 @@ public class HomeController {
     model.addAttribute("username", "Gast");
     model.addAttribute("loginRequired", false);
     return "index";
+  }
+
+  @GetMapping("/admin")
+  public String adminDashboard() {
+    // Return the admin dashboard template
+    return "admin";
   }
 
   @GetMapping("/{username}")
