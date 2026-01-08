@@ -1,0 +1,68 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+    <div class="container mt-4">
+      <h1>Admin Dashboard</h1>
+
+      <!-- Add User Form -->
+      <form id="addUserForm" class="mb-4">
+        <div class="row">
+          <div class="col-md-4">
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              placeholder="Gebruikersnaam"
+              required
+            />
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" id="role" required>
+              <option value="" disabled selected>Kies een rol</option>
+              <option value="MUZIKANT">Muzikant</option>
+              <option value="BEDRIJF">Bedrijf</option>
+              <option value="DOCENT">Docent</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">
+              Gebruiker toevoegen
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Users Table -->
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Gebruikersnaam</th>
+            <th>Rol</th>
+            <th>Acties</th>
+          </tr>
+        </thead>
+        <tbody id="usersTable">
+          <!-- Rows will be dynamically added here -->
+        </tbody>
+      </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script th:src="@{/js/admin.js}"></script>
+  </body>
+</html>
