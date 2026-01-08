@@ -1,0 +1,23 @@
+<div th:fragment="searchbox">
+  <form class="mb-3" method="get" action="/">
+    <div class="input-group mb-2">
+      <input
+        type="text"
+        name="name"
+        class="form-control"
+        placeholder="Zoek op naam"
+        th:value="${param.name}"
+      />
+    </div>
+    <div class="input-group mb-2">
+      <input
+        type="text"
+        name="type"
+        class="form-control"
+        placeholder="Zoek op type"
+        th:value="${param.type}"
+      />
+    </div>
+    <button class="btn btn-outline-secondary" type="submit">Zoeken</button>
+  </form>
+</div>
