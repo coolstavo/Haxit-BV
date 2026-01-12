@@ -10,14 +10,51 @@
 <body class="bg">
     <div th:insert="~{fragments/_navbar :: navbar}"></div>
 
-    <div class="container">
+    <div class="container mt-4">
         <h3 class="mb-3">Bedrijfsprofiel van <span th:text="${companyName}">Bedrijf</span></h3>
         
         <!-- View Mode -->
         <div th:if="${!edit}" class="card shadow-sm mb-4">
             <div class="card-body">
-                <p class="text-muted">Nog geen gegevens ingevuld</p>
-                <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary">Profiel Invullen</a>
+                <div th:if="${!hasData}">
+                    <p class="text-muted">Nog geen gegevens ingevuld</p>
+                    <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary">Profiel Invullen</a>
+                </div>
+                
+                <div th:if="${hasData}">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div th:if="${company.logo}" class="mb-3">
+                                <img th:src="@{'/api/company/logo/' + ${company.id}}" alt="Logo" class="img-fluid" style="max-width: 150px; border-radius: 8px;">
+                            </div>
+                            <div th:unless="${company.logo}" class="mb-3">
+                                <div class="bg-light p-3 text-center rounded" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+                                    <small class="text-muted">Geen logo</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <p><strong>Locatie:</strong> <span th:text="${company.location}">-</span></p>
+                            <p th:if="${company.websiteUrl}">
+                                <strong>Website:</strong> 
+                                <a th:href="${company.websiteUrl}" th:text="${company.websiteUrl}" target="_blank" rel="noopener">-</a>
+                            </p>
+                            <p th:if="${company.genres}"><strong>Gezochte genres:</strong> <span th:text="${company.genres}">-</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Over ons</h5>
+                        <p style="white-space: pre-line;" th:text="${company.aboutUs}">-</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Gezochte muzikanten</h5>
+                        <p style="white-space: pre-line;" th:text="${company.musiciansWanted}">-</p>
+                    </div>
+
+                    <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary mt-4">Bewerken</a>
+                </div>
             </div>
         </div>
 
@@ -33,31 +70,38 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Locatie (stad/regio)</label>
-                        <input type="text" name="location" class="form-control" placeholder="Bijv. Groningen" required>
+                        <label class="form-label">Locatie (stad/regio) *</label>
+                        <input type="text" name="location" class="form-control" th:value="${company.location}" placeholder="Bijv. Groningen" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Website-URL</label>
-                        <input type="url" name="websiteUrl" class="form-control" placeholder="https://www.bedrijf.nl">
+                        <input type="url" name="websiteUrl" class="form-control" th:value="${company.websiteUrl}" placeholder="https://www.bedrijf.nl">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Over ons</label>
-                        <textarea name="aboutUs" class="form-control" rows="4" required placeholder="Beschrijf wie jullie zijn..."></textarea>
+                        <label class="form-label">Over ons *</label>
+                        <textarea name="aboutUs" class="form-control" rows="4" required placeholder="Beschrijf wie jullie zijn..." th:text="${company.aboutUs}"></textarea>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Bedrijfslogo (JPG, PNG; max. 5MB)</label>
                         <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png">
                         <small class="text-muted">Ondersteunde formaten: JPG, PNG. Maximaal 5MB.</small>
+                        <div th:if="${company.logo}" class="mt-2">
+                            <small class="text-muted">Huidig logo:</small><br>
+                            <img th:src="@{'/api/company/logo/' + ${company.id}}" alt="Logo" class="img-fluid mt-2" style="max-width: 150px; border-radius: 8px;">
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Gezochte genres</label>
-                        <div class="form-control" style="height: auto; padding: 10px;">
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
                             <div th:each="genre : ${genresOptions}" class="form-check">
-                                <input class="form-check-input" type="checkbox" name="genres" th:value="${genre}" th:id="${'genre-' + genre}">
+                                <input class="form-check-input" type="checkbox" name="genres" 
+                                       th:value="${genre}" 
+                                       th:id="${'genre-' + genre}"
+                                       th:checked="${company.genres != null && #strings.contains(company.genres, genre)}">
                                 <label class="form-check-label" th:for="${'genre-' + genre}" th:text="${genre}"></label>
                             </div>
                         </div>
@@ -65,8 +109,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Gezochte muzikanten</label>
-                        <textarea name="musiciansWanted" class="form-control" rows="5" required placeholder="Beschrijf welke muzikanten jullie zoeken (ervaring, instrumenten, genre, etc.)"></textarea>
+                        <label class="form-label">Gezochte muzikanten *</label>
+                        <textarea name="musiciansWanted" class="form-control" rows="5" required placeholder="Beschrijf welke muzikanten jullie zoeken (ervaring, instrumenten, genre, etc.)" th:text="${company.musiciansWanted}"></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Opslaan</button>
