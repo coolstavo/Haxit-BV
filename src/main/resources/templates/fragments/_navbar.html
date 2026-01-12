@@ -14,7 +14,6 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link active" th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">Home</a></li>
-                <!-- <li class="nav-item"><a class="nav-link" href="#">Zoeken</a></li> -->
                 <li class="nav-item" th:if="${username} != 'Gast'">
                     <a class="nav-link" th:href="@{'/profile/' + ${username}}">Profiel</a>
                 </li>
