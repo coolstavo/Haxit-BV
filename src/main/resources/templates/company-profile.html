@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bedrijfsprofiel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        #eventMap { height: 300px; width: 100%; border-radius: 8px; margin-bottom: 15px; }
+    </style>
 </head>
 <body class="bg">
     <div th:insert="~{fragments/_navbar :: navbar}"></div>
@@ -120,6 +124,155 @@
         </div>
     </div>
 
+    <!-- Event aanmaken sectie (alleen als bedrijf data heeft en NIET in edit mode) -->
+    <div th:if="${hasData && !edit}" class="container mt-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-3">Nieuw Event Aanmaken</h5>
+                <form id="companyEventForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Titel *</label>
+                            <input type="text" class="form-control" name="title" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Type *</label>
+                            <select class="form-select" name="type" required>
+                                <option value="Bedrijf" selected>Bedrijf</option>
+                                <option value="Opdracht">Opdracht</option>
+                                <option value="Les">Les</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Beschrijving *</label>
+                            <textarea class="form-control" name="description" rows="3" required></textarea>
+                        </div>
+                        
+                        <!-- Mini Map -->
+                        <div class="col-12">
+                            <label class="form-label">Locatie *</label>
+                            <small class="text-muted d-block mb-2">Klik op de kaart om de locatie te selecteren</small>
+                            <div id="eventMap"></div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">Latitude *</label>
+                            <input type="number" step="0.000001" class="form-control" id="eventLat" name="lat" required placeholder="53.2194" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Longitude *</label>
+                            <input type="number" step="0.000001" class="form-control" id="eventLng" name="lng" required placeholder="6.5665" readonly />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Event Opslaan</button>
+                    <div id="companyEventMsg" class="mt-2" style="display:none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize mini map for event location
+        let eventMap = null;
+        let eventMarker = null;
+        
+        if (document.getElementById('eventMap')) {
+            const maxBounds = L.latLngBounds(
+                L.latLng(52.9, 6.0),   
+                L.latLng(53.6, 7.3)   
+            );
+            
+            eventMap = L.map('eventMap', {
+                maxBounds: maxBounds,
+                maxBoundsViscosity: 1.0
+            }).setView([53.2194, 6.5665], 12);
+            
+            eventMap.setMaxBounds(maxBounds);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap-bijdragers'
+            }).addTo(eventMap);
+            
+            const pinIcon = L.icon({
+                iconUrl: '/assets/pin-red.png',
+                iconSize: [15, 40],
+                iconAnchor: [15, 40],
+                popupAnchor: [-6, -40]
+            });
+            
+            // Click handler for map
+            eventMap.on('click', function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+                
+                document.getElementById('eventLat').value = lat;
+                document.getElementById('eventLng').value = lng;
+                
+                // Remove old marker if exists
+                if (eventMarker) {
+                    eventMap.removeLayer(eventMarker);
+                }
+                
+                // Add new marker
+                eventMarker = L.marker([e.latlng.lat, e.latlng.lng], {icon: pinIcon}).addTo(eventMap);
+                eventMarker.bindPopup('Event locatie').openPopup();
+            });
+        }
+        
+        // Event form submission
+        const form = document.getElementById('companyEventForm');
+        const msg = document.getElementById('companyEventMsg');
+        
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                msg.style.display = 'none';
+                
+                const formData = new FormData(form);
+                const data = {
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    type: formData.get('type'),
+                    lat: parseFloat(formData.get('lat')),
+                    lng: parseFloat(formData.get('lng'))
+                };
+
+                try {
+                    const response = await fetch('/api/events/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) throw new Error('Request failed');
+                    
+                    const savedEvent = await response.json();
+                    form.reset();
+                    
+                    // Remove marker from map
+                    if (eventMarker) {
+                        eventMap.removeLayer(eventMarker);
+                        eventMarker = null;
+                    }
+                    
+                    msg.textContent = 'Event succesvol opgeslagen! Het verschijnt nu op de kaart.';
+                    msg.className = 'mt-2 alert alert-success';
+                    msg.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        msg.style.display = 'none';
+                    }, 5000);
+                } catch (error) {
+                    console.error('Error:', error);
+                    msg.textContent = 'Fout bij opslaan. Probeer opnieuw.';
+                    msg.className = 'mt-2 alert alert-danger';
+                    msg.style.display = 'block';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
