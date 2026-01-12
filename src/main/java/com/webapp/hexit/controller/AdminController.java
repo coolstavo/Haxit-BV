@@ -1,6 +1,5 @@
 package com.webapp.hexit.controller;
 
-import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.UserRepository;
 import java.util.List;
