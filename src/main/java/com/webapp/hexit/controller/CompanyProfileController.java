@@ -48,9 +48,11 @@ public class CompanyProfileController {
     
     if (company.isPresent()) {
       model.addAttribute("company", company.get());
+      model.addAttribute("hasData", true);
     } else {
       Company newCompany = new Company(bedrijfnaam);
       model.addAttribute("company", newCompany);
+      model.addAttribute("hasData", false);
     }
     
     model.addAttribute("companyName", bedrijfnaam);

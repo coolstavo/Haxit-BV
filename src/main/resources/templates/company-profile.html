@@ -125,7 +125,7 @@
     </div>
 
     <!-- Event aanmaken sectie (alleen als bedrijf data heeft en NIET in edit mode) -->
-    <div th:if="${hasData && !edit}" class="container mt-4">
+    <div th:if="${hasData != null && hasData == true && edit != null && edit == false}" class="container mt-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="mb-3">Nieuw Event Aanmaken</h5>
