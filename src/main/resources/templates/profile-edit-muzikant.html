@@ -18,13 +18,8 @@
             <h3 class="mb-3">
                 Profiel van
                 <span th:text="${muzikant.user.username}">Gebruiker</span>
-                <div
-                    th:if="${#fields.hasErrors('user.username')}"
-                    class="text-danger"
-                >
-                    <span th:errors="*{user.username}">Foutmelding</span>
-                </div>
             </h3>
+
             <div class="card shadow-sm">
                 <div class="card-body">
                     <form
@@ -32,15 +27,11 @@
                         th:object="${muzikant}"
                         method="post"
                     >
-                        <input
-                            type="hidden"
-                            th:field="*{id}"
-                            th:value="${muzikant.id}"
-                        />
+                        <input type="hidden" th:field="*{id}" name="id" />
                         <input
                             type="hidden"
                             th:field="*{user.id}"
-                            th:value="${muzikant.user.id}"
+                            name="user.id"
                         />
 
                         <div class="mb-3">
@@ -49,8 +40,13 @@
                                 type="text"
                                 class="form-control"
                                 th:field="*{naam}"
-                                placeholder="Naam"
+                                th:classappend="${#fields.hasErrors('naam')} ? 'is-invalid' : ''"
                             />
+                            <div
+                                class="invalid-feedback"
+                                th:if="${#fields.hasErrors('naam')}"
+                                th:errors="*{naam}"
+                            ></div>
                         </div>
 
                         <div class="mb-3">
@@ -59,8 +55,13 @@
                                 type="number"
                                 class="form-control"
                                 th:field="*{leeftijd}"
-                                placeholder="Leeftijd"
+                                th:classappend="${#fields.hasErrors('leeftijd')} ? 'is-invalid' : ''"
                             />
+                            <div
+                                class="invalid-feedback"
+                                th:if="${#fields.hasErrors('leeftijd')}"
+                                th:errors="*{leeftijd}"
+                            ></div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">

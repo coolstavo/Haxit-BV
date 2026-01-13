@@ -6,6 +6,7 @@ import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
+import java.security.Principal;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -81,27 +82,57 @@ public class ProfileController {
     }
 
     @PostMapping("/profile/save-muzikant")
-    public String saveMuzikant(@ModelAttribute Muzikant muzikant) {
-        System.out.println("Ontvangen Muzikant ID: " + muzikant.getId());
+    public String saveMuzikant(
+        @ModelAttribute("muzikant") Muzikant muzikant,
+        Principal principal,
+        Model model
+    ) {
+        System.out.println("DEBUG: Ontvangen ID: " + muzikant.getId());
 
-        // Haal de bestaande muzikant op uit de database
+        // 1. Controleer of de gebruiker wel is ingelogd
+        if (principal == null) {
+            System.out.println(
+                "DEBUG: Geen principal gevonden! Gebruiker is niet ingelogd."
+            );
+            return "redirect:/login";
+        }
+
+        // 2. Haal de bestaande muzikant op uit de DB inclusief de User
         Muzikant existingMuzikant = muzikantRepository
             .findById(muzikant.getId())
-            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+            .orElseThrow(() ->
+                new RuntimeException(
+                    "Muzikant met ID " + muzikant.getId() + " niet gevonden"
+                )
+            );
 
-        System.out.println("Bestaande Muzikant: " + existingMuzikant);
+        // 3. De cruciale beveiligingscheck
+        String ingelogdeNaam = principal.getName();
+        String eigenaarNaam = existingMuzikant.getUser().getUsername();
 
-        // Werk de waarden bijc
+        System.out.println("DEBUG: Ingelogd als: " + ingelogdeNaam);
+        System.out.println("DEBUG: Eigenaar van profiel: " + eigenaarNaam);
+
+        if (!ingelogdeNaam.equals(eigenaarNaam)) {
+            System.out.println(
+                "DEBUG: Toegang geweigerd! Namen komen niet overeen."
+            );
+            model.addAttribute(
+                "errorMessage",
+                "Je mag alleen je eigen profiel bewerken."
+            );
+            return "error";
+        }
+
+        // 4. Update de velden
         existingMuzikant.setNaam(muzikant.getNaam());
         existingMuzikant.setLeeftijd(muzikant.getLeeftijd());
 
-        // Sla de bijgewerkte muzikant op
+        // 5. Opslaan
         muzikantRepository.save(existingMuzikant);
+        System.out.println("DEBUG: Opslaan geslaagd voor: " + eigenaarNaam);
 
-        System.out.println("Muzikant opgeslagen: " + existingMuzikant);
-
-        // Redirect naar de profielpagina
-        return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
+        return "redirect:/profile/" + eigenaarNaam;
     }
 
     @ExceptionHandler(Exception.class)

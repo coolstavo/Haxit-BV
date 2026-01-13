@@ -33,6 +33,11 @@ public class Muzikant {
         return user;
     }
 
+    // In Muzikant.java
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
