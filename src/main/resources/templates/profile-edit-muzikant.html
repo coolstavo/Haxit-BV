@@ -22,6 +22,7 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <!-- Form to update Muzikant details -->
                     <form
                         th:action="@{/profile/save-muzikant}"
                         th:object="${muzikant}"
@@ -69,6 +70,113 @@
                         </button>
                     </form>
                 </div>
+            </div>
+
+            <!-- Table to display instruments with levels -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Instrumenten</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Instrument</th>
+                                <th>Niveau</th>
+                                <th>Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                th:each="muzikantInstrument : ${muzikantInstruments}"
+                            >
+                                <td
+                                    th:text="${muzikantInstrument.instrument.naam}"
+                                ></td>
+                                <td th:text="${muzikantInstrument.level}"></td>
+                                <td>
+                                    <form
+                                        th:action="@{/profile/remove-instrument}"
+                                        method="post"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="muzikantInstrumentId"
+                                            th:value="${muzikantInstrument.id}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Verwijderen
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Form to add a new instrument with level -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Voeg een instrument toe</h4>
+                    <form th:action="@{/profile/add-instrument}" method="post">
+                        <input
+                            type="hidden"
+                            name="muzikantId"
+                            th:value="${muzikant.id}"
+                        />
+                        <div class="mb-3">
+                            <label for="instrument">Instrument</label>
+                            <select
+                                class="form-select"
+                                name="instrumentId"
+                                id="instrument"
+                            >
+                                <option
+                                    th:each="instrument : ${allInstruments}"
+                                    th:value="${instrument.id}"
+                                    th:text="${instrument.naam}"
+                                ></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="level">Niveau</label>
+                            <select class="form-select" name="level" id="level">
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">
+                                    Intermediate
+                                </option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Toevoegen
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="container">
+                <h1>Manage Genres</h1>
+                <form action="/genres/add" method="post">
+                    <div class="form-group">
+                        <label</head> for="genreName">Genre Name</label></title>
+                        <input type</body></h1>="text" id="genreName" name="name" class="form-control" placeholder="Enter genre name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Genre</button>
+                </form>
+
+                <h2>Existing Genres</h2>
+                <ul></h2></ul>
+                    <li th:each="genre : ${genres}">
+                        <span th:text="${genre.name}"></span>
+                        <form action="/genres/delete" method="post" style="display:inline;">
+                            <input type="hidden" name="id" th:value="${genre.id}">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </div>
     </body>

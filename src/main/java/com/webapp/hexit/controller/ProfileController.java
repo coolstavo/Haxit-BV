@@ -1,12 +1,19 @@
 package com.webapp.hexit.controller;
 
+import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Muzikant;
+import com.webapp.hexit.model.MuzikantInstrument;
 import com.webapp.hexit.model.Profile;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
+import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
@@ -22,13 +30,19 @@ public class ProfileController {
 
     private final UserRepository userRepository;
     private final MuzikantRepository muzikantRepository;
+    private final MuzikantInstrumentRepository muzikantInstrumentRepository;
+    private final InstrumentRepository instrumentRepository;
 
     public ProfileController(
         UserRepository userRepository,
-        MuzikantRepository muzikantRepository
+        MuzikantRepository muzikantRepository,
+        MuzikantInstrumentRepository muzikantInstrumentRepository,
+        InstrumentRepository instrumentRepository
     ) {
         this.userRepository = userRepository;
         this.muzikantRepository = muzikantRepository;
+        this.muzikantInstrumentRepository = muzikantInstrumentRepository;
+        this.instrumentRepository = instrumentRepository;
     }
 
     @GetMapping("/profile/{username}")
@@ -74,7 +88,13 @@ public class ProfileController {
                     new RuntimeException("Muzikant niet gevonden")
                 );
 
+            List<MuzikantInstrument> muzikantInstruments =
+                muzikantInstrumentRepository.findByMuzikantId(muzikant.getId());
+            List<Instrument> allInstruments = instrumentRepository.findAll();
+
             model.addAttribute("muzikant", muzikant);
+            model.addAttribute("muzikantInstruments", muzikantInstruments);
+            model.addAttribute("allInstruments", allInstruments);
             return "profile-edit-muzikant";
         }
 
@@ -82,27 +102,58 @@ public class ProfileController {
     }
 
     @PostMapping("/profile/save-muzikant")
-    public String saveMuzikant(
-        @ModelAttribute("muzikant") Muzikant muzikant,
-        Principal principal,
-        Model model
-    ) {
-        System.out.println("DEBUG: Ontvangen ID: " + muzikant.getId());
-
+    public String saveMuzikant(@ModelAttribute Muzikant muzikant) {
         Muzikant existingMuzikant = muzikantRepository
             .findById(muzikant.getId())
-            .orElseThrow(() ->
-                new RuntimeException(
-                    "Muzikant met ID " + muzikant.getId() + " niet gevonden"
-                )
-            );
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
 
         existingMuzikant.setNaam(muzikant.getNaam());
         existingMuzikant.setLeeftijd(muzikant.getLeeftijd());
 
-        muzikantRepository.save(existingMuzikant);
+        List<Instrument> selectedInstruments = muzikant.getInstruments();
+        existingMuzikant.setInstruments(selectedInstruments);
 
+        muzikantRepository.save(existingMuzikant);
         return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
+    }
+
+    @PostMapping("/profile/add-instrument")
+    public String addInstrument(
+        @RequestParam Long muzikantId,
+        @RequestParam Long instrumentId,
+        @RequestParam String level
+    ) {
+        Muzikant muzikant = muzikantRepository
+            .findById(muzikantId)
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        Instrument instrument = instrumentRepository
+            .findById(instrumentId)
+            .orElseThrow(() ->
+                new RuntimeException("Instrument niet gevonden")
+            );
+
+        MuzikantInstrument muzikantInstrument = new MuzikantInstrument();
+        muzikantInstrument.setMuzikant(muzikant);
+        muzikantInstrument.setInstrument(instrument);
+        muzikantInstrument.setLevel(level);
+
+        muzikantInstrumentRepository.save(muzikantInstrument);
+
+        return "redirect:/profile/edit/" + muzikant.getUser().getUsername();
+    }
+
+    @PostMapping("/profile/remove-instrument")
+    public String removeInstrument(@RequestParam Long muzikantInstrumentId) {
+        Muzikant muzikant = muzikantInstrumentRepository
+            .findById(muzikantInstrumentId)
+            .orElseThrow(() ->
+                new RuntimeException("MuzikantInstrument niet gevonden")
+            )
+            .getMuzikant();
+
+        muzikantInstrumentRepository.deleteById(muzikantInstrumentId);
+        return "redirect:/profile/edit/" + muzikant.getUser().getUsername();
     }
 
     @ExceptionHandler(Exception.class)

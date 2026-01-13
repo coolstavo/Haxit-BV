@@ -1,6 +1,9 @@
 package com.webapp.hexit.model;
 
+import com.webapp.hexit.model.Instrument;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Muzikant {
@@ -24,7 +27,20 @@ public class Muzikant {
         this.leeftijd = leeftijd;
     }
 
+    @ManyToMany
+    @JoinTable(
+        name = "musician_instrument",
+        joinColumns = @JoinColumn(name = "muzikant_id"),
+        inverseJoinColumns = @JoinColumn(name = "instrument_id")
+    )
+    private List<Instrument> instruments = new ArrayList<>();
+
     // Getters and Setters
+
+    public Muzikant getMuzikant() {
+        return this;
+    }
+
     public Long getId() {
         return id;
     }
@@ -56,5 +72,13 @@ public class Muzikant {
 
     public void setLeeftijd(int leeftijd) {
         this.leeftijd = leeftijd;
+    }
+
+    public List<Instrument> getInstruments() {
+        return instruments;
+    }
+
+    public void setInstruments(List<Instrument> instruments) {
+        this.instruments = instruments;
     }
 }
