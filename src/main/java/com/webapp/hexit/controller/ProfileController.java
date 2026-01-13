@@ -89,15 +89,6 @@ public class ProfileController {
     ) {
         System.out.println("DEBUG: Ontvangen ID: " + muzikant.getId());
 
-        // 1. Controleer of de gebruiker wel is ingelogd
-        if (principal == null) {
-            System.out.println(
-                "DEBUG: Geen principal gevonden! Gebruiker is niet ingelogd."
-            );
-            return "redirect:/login";
-        }
-
-        // 2. Haal de bestaande muzikant op uit de DB inclusief de User
         Muzikant existingMuzikant = muzikantRepository
             .findById(muzikant.getId())
             .orElseThrow(() ->
@@ -106,33 +97,12 @@ public class ProfileController {
                 )
             );
 
-        // 3. De cruciale beveiligingscheck
-        String ingelogdeNaam = principal.getName();
-        String eigenaarNaam = existingMuzikant.getUser().getUsername();
-
-        System.out.println("DEBUG: Ingelogd als: " + ingelogdeNaam);
-        System.out.println("DEBUG: Eigenaar van profiel: " + eigenaarNaam);
-
-        if (!ingelogdeNaam.equals(eigenaarNaam)) {
-            System.out.println(
-                "DEBUG: Toegang geweigerd! Namen komen niet overeen."
-            );
-            model.addAttribute(
-                "errorMessage",
-                "Je mag alleen je eigen profiel bewerken."
-            );
-            return "error";
-        }
-
-        // 4. Update de velden
         existingMuzikant.setNaam(muzikant.getNaam());
         existingMuzikant.setLeeftijd(muzikant.getLeeftijd());
 
-        // 5. Opslaan
         muzikantRepository.save(existingMuzikant);
-        System.out.println("DEBUG: Opslaan geslaagd voor: " + eigenaarNaam);
 
-        return "redirect:/profile/" + eigenaarNaam;
+        return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
     }
 
     @ExceptionHandler(Exception.class)
