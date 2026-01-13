@@ -19,6 +19,14 @@ public class Muzikant {
     private String naam;
     private int leeftijd;
 
+    @ManyToMany
+    @JoinTable(
+        name = "musician_genre",
+        joinColumns = @JoinColumn(name = "muzikant_id"),
+        inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private List<Genre> genres = new ArrayList<>();
+
     public Muzikant() {}
 
     public Muzikant(User user, String naam, int leeftijd) {
@@ -68,6 +76,14 @@ public class Muzikant {
 
     public int getLeeftijd() {
         return leeftijd;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<Genre> genres) {
+        this.genres = genres;
     }
 
     public void setLeeftijd(int leeftijd) {

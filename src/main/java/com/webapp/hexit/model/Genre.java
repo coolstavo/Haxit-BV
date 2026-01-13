@@ -1,5 +1,3 @@
-Haxit-BV\src\main\java\com\webapp\hexit\model\Genre.java
-```
 package com.webapp.hexit.model;
 
 import jakarta.persistence.*;
@@ -14,8 +12,7 @@ public class Genre {
     @Column(nullable = false, unique = true)
     private String name;
 
-    public Genre() {
-    }
+    public Genre() {}
 
     public Genre(String name) {
         this.name = name;

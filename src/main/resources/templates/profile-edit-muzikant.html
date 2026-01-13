@@ -157,26 +157,76 @@
                     </form>
                 </div>
             </div>
-            <div class="container">
-                <h1>Manage Genres</h1>
-                <form action="/genres/add" method="post">
-                    <div class="form-group">
-                        <label</head> for="genreName">Genre Name</label></title>
-                        <input type</body></h1>="text" id="genreName" name="name" class="form-control" placeholder="Enter genre name" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Genre</button>
-                </form>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Genres</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Genre</th>
+                                <th>Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="genre : ${muzikant.genres}">
+                                <td th:text="${genre.name}"></td>
+                                <td>
+                                    <form
+                                        th:action="@{/profiel/remove-genre}"
+                                        method="post"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="muzikantId"
+                                            th:value="${muzikant.id}"
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="genreId"
+                                            th:value="${genre.id}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Verwijderen
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                <h2>Existing Genres</h2>
-                <ul></h2></ul>
-                    <li th:each="genre : ${genres}">
-                        <span th:text="${genre.name}"></span>
-                        <form action="/genres/delete" method="post" style="display:inline;">
-                            <input type="hidden" name="id" th:value="${genre.id}">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </li>
-                </ul>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Genres</h4>
+                    <form th:action="@{/profiel/add-genre}" method="post">
+                        <input
+                            type="hidden"
+                            name="muzikantId"
+                            th:value="${muzikant.id}"
+                        />
+                        <div class="mb-3">
+                            <label for="genre">Voeg een genre toe</label>
+                            <select
+                                class="form-select"
+                                name="genreId"
+                                id="genre"
+                            >
+                                <option
+                                    th:each="genre : ${allGenres}"
+                                    th:value="${genre.id}"
+                                    th:text="${genre.name}"
+                                ></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Toevoegen
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </body>

@@ -1,12 +1,13 @@
 package com.webapp.hexit.controller;
 
+import com.webapp.hexit.model.Genre;
 import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Muzikant;
 import com.webapp.hexit.model.MuzikantInstrument;
 import com.webapp.hexit.model.Profile;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
-import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
@@ -32,17 +33,20 @@ public class ProfileController {
     private final MuzikantRepository muzikantRepository;
     private final MuzikantInstrumentRepository muzikantInstrumentRepository;
     private final InstrumentRepository instrumentRepository;
+    private final GenreRepository genreRepository;
 
     public ProfileController(
         UserRepository userRepository,
         MuzikantRepository muzikantRepository,
         MuzikantInstrumentRepository muzikantInstrumentRepository,
-        InstrumentRepository instrumentRepository
+        InstrumentRepository instrumentRepository,
+        GenreRepository genreRepository
     ) {
         this.userRepository = userRepository;
         this.muzikantRepository = muzikantRepository;
         this.muzikantInstrumentRepository = muzikantInstrumentRepository;
         this.instrumentRepository = instrumentRepository;
+        this.genreRepository = genreRepository;
     }
 
     @GetMapping("/profile/{username}")
@@ -66,6 +70,8 @@ public class ProfileController {
                 } else {
                     return handleError(model);
                 }
+                List<Genre> allGenres = genreRepository.findAll();
+                model.addAttribute("allGenres", allGenres);
                 return "profile-muzikant";
             case Role.BEDRIJF:
             case Role.DOCENT:
@@ -95,6 +101,8 @@ public class ProfileController {
             model.addAttribute("muzikant", muzikant);
             model.addAttribute("muzikantInstruments", muzikantInstruments);
             model.addAttribute("allInstruments", allInstruments);
+            List<Genre> allGenres = genreRepository.findAll();
+            model.addAttribute("allGenres", allGenres);
             return "profile-edit-muzikant";
         }
 
@@ -113,6 +121,8 @@ public class ProfileController {
         List<Instrument> selectedInstruments = muzikant.getInstruments();
         existingMuzikant.setInstruments(selectedInstruments);
 
+        List<Genre> selectedGenres = muzikant.getGenres();
+        existingMuzikant.setGenres(selectedGenres);
         muzikantRepository.save(existingMuzikant);
         return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
     }
@@ -153,6 +163,40 @@ public class ProfileController {
             .getMuzikant();
 
         muzikantInstrumentRepository.deleteById(muzikantInstrumentId);
+        return "redirect:/profile/edit/" + muzikant.getUser().getUsername();
+    }
+
+    @PostMapping("/profiel/add-genre")
+    public String addGenre(
+        @RequestParam Long muzikantId,
+        @RequestParam Long genreId
+    ) {
+        Muzikant muzikant = muzikantRepository
+            .findById(muzikantId)
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        Genre genre = genreRepository
+            .findById(genreId)
+            .orElseThrow(() -> new RuntimeException("Genre niet gevonden"));
+
+        muzikant.getGenres().add(genre);
+        muzikantRepository.save(muzikant);
+
+        return "redirect:/profile/edit/" + muzikant.getUser().getUsername();
+    }
+
+    @PostMapping("/profiel/remove-genre")
+    public String removeGenre(
+        @RequestParam Long muzikantId,
+        @RequestParam Long genreId
+    ) {
+        Muzikant muzikant = muzikantRepository
+            .findById(muzikantId)
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        muzikant.getGenres().removeIf(genre -> genre.getId().equals(genreId));
+        muzikantRepository.save(muzikant);
+
         return "redirect:/profile/edit/" + muzikant.getUser().getUsername();
     }
 
