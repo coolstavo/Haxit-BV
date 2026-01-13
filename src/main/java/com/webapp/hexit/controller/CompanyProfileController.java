@@ -38,6 +38,7 @@ public class CompanyProfileController {
     
     model.addAttribute("companyName", bedrijfnaam);
     model.addAttribute("username", bedrijfnaam);
+    model.addAttribute("userRole", "BEDRIJF");
     model.addAttribute("edit", false);
     return "company-profile";
   }
@@ -57,6 +58,7 @@ public class CompanyProfileController {
     
     model.addAttribute("companyName", bedrijfnaam);
     model.addAttribute("username", bedrijfnaam);
+    model.addAttribute("userRole", "BEDRIJF");
     model.addAttribute("edit", true);
     model.addAttribute("genresOptions", new String[]{
       "Jazz", "Pop", "Klassiek", "Rock", "Hip Hop", "Elektronisch", "R&B", "Country", "Blues", "Metal"
