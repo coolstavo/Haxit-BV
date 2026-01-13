@@ -17,10 +17,10 @@
 
         <div class="container mt-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 th:text="'Profiel van ' + ${profile.username}">Profiel</h2>
+                <h2 th:text="'Profiel van ' + ${muzikant.user.username}">Profiel</h2>
 
                 <a
-                    th:href="@{/profileadd/{username}(username=${profile.username})}"
+                    th:href="@{/profile/edit/{username}(username=${muzikant.user.username})}"
                     class="btn btn-primary"
                 >
                     Profiel bewerken
@@ -39,8 +39,8 @@
                                 width="120"
                             />
 
-                            <h5 th:text="${profile.username}">Naam</h5>
-                            <p th:text="${profile.instrument}">Instrument</p>
+                            <h5 th:text="${muzikant.naam}">Naam</h5>
+                            <!--<p th:text="${profile.instrument}">Instrument</p>-->
 
                             <!-- spacer -->
                             <div class="mt-auto"></div>
@@ -52,10 +52,10 @@
                 <div class="col-md-8 d-flex">
                     <div class="card mb-3 w-100">
                         <div class="card-body">
-                            <p><strong>Leeftijd:</strong> <span th:text="${profile.age}">0</span></p>
-                            <p><strong>Genres:</strong> <span th:text="${profile.genres}">Geen</span></p>
-                            <p><strong>Opleiding:</strong> <span th:text="${profile.education}">Geen</span></p>
-                            <p><strong>Doelen:</strong> <span th:text="${profile.goals}">Geen</span></p>
+                            <p><strong>Leeftijd:</strong> <span th:text="${muzikant.leeftijd}">0</span></p>
+                            <!--<p><strong>Genres:</strong> <span th:text="${profile.genres}">Geen</span></p>-->
+                            <!--<p><strong>Opleiding:</strong> <span th:text="${profile.education}">Geen</span></p>-->
+                            <!--<p><strong>Doelen:</strong> <span th:text="${profile.goals}">Geen</span></p>-->
                         </div>
                     </div>
                 </div>
