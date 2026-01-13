@@ -53,9 +53,41 @@
                     <div class="card mb-3 w-100">
                         <div class="card-body">
                             <p><strong>Leeftijd:</strong> <span th:text="${muzikant.leeftijd}">0</span></p>
-                            <!--<p><strong>Genres:</strong> <span th:text="${profile.genres}">Geen</span></p>-->
-                            <!--<p><strong>Opleiding:</strong> <span th:text="${profile.education}">Geen</span></p>-->
-                            <!--<p><strong>Doelen:</strong> <span th:text="${profile.goals}">Geen</span></p>-->
+                            <p>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Genre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                <trtr th:each="genre : ${muzikant.genres}">
+                                    <td th:text="${genre.name}"></td>
+                                </trtr>
+                                    </tbody>
+                                </table>
+                            </p>
+                            <p>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Instrument</th>
+                                            <th>Niveau</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            th:each="muzikantInstrument : ${muzikantInstruments}"
+                                        >
+                                            <td
+                                                th:text="${muzikantInstrument.instrument.naam}"
+                                            ></td>
+                                            <td th:text="${muzikantInstrument.level}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </p>
+
                         </div>
                     </div>
                 </div>

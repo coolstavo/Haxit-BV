@@ -70,6 +70,16 @@ public class ProfileController {
                 } else {
                     return handleError(model);
                 }
+                List<MuzikantInstrument> muzikantInstruments =
+                    muzikantInstrumentRepository.findByMuzikantId(
+                        muzikant.getId()
+                    );
+                List<Instrument> allInstruments =
+                    instrumentRepository.findAll();
+
+                model.addAttribute("muzikant", muzikant);
+                model.addAttribute("muzikantInstruments", muzikantInstruments);
+                model.addAttribute("allInstruments", allInstruments);
                 List<Genre> allGenres = genreRepository.findAll();
                 model.addAttribute("allGenres", allGenres);
                 return "profile-muzikant";
