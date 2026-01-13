@@ -16,7 +16,7 @@
                 <li class="nav-item"><a class="nav-link active" th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">Home</a></li>
                 <li class="nav-item" th:if="${username} != 'Gast'">
                     <a class="nav-link"
-                       th:href="${userRole} == 'BEDRIJF' ? @{'/profile/bedrijf/' + ${username}} : @{'/profile/' + ${username}}">
+                       th:href="${userRole == 'BEDRIJF'} ? @{'/profile/bedrijf/' + ${username}} : (${userRole == 'DOCENT'} ? @{'/profile/docent/' + ${username}} : @{'/profile/' + ${username}})">
                         Profiel
                     </a>
                 </li>

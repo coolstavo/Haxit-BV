@@ -3,6 +3,7 @@ package com.webapp.hexit.controller;
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.CompanyRepository;
+import com.webapp.hexit.repository.DocentRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
@@ -14,10 +15,16 @@ public class HomeController {
 
   private final EventRepository eventRepository;
   private final CompanyRepository companyRepository;
+  private final DocentRepository docentRepository;
 
-  public HomeController(EventRepository eventRepository, CompanyRepository companyRepository) {
+  public HomeController(
+    EventRepository eventRepository,
+    CompanyRepository companyRepository,
+    DocentRepository docentRepository
+  ) {
     this.eventRepository = eventRepository;
     this.companyRepository = companyRepository;
+    this.docentRepository = docentRepository;
   }
 
   @GetMapping("/")
@@ -68,7 +75,16 @@ public class HomeController {
     List<Event> events = eventRepository.findAll();
     model.addAttribute("events", events);
     model.addAttribute("username", (username != null && !username.isBlank()) ? username : "Gast");
-    model.addAttribute("userRole", companyRepository.findByCompanyName(username).isPresent() ? "BEDRIJF" : "MUZIKANT");
+
+    // Bepaal userRole
+    String userRole = "MUZIKANT"; // default
+    if (companyRepository.findByCompanyName(username).isPresent()) {
+      userRole = "BEDRIJF";
+    } else if (docentRepository.findByNaam(username).isPresent()) {
+      userRole = "DOCENT";
+    }
+
+    model.addAttribute("userRole", userRole);
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";
   }

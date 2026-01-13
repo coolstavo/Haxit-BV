@@ -1,6 +1,7 @@
 package com.webapp.hexit.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 public class Docent {
@@ -13,7 +14,21 @@ public class Docent {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @Column(nullable = false, unique = true)
   private String naam;
+
+  private String specialisatie; // Bijv. "Klassieke muziek", "Jazz"
+
+  @Column(columnDefinition = "TEXT")
+  private String biografie; // Uitgebreide beschrijving
+
+  private Integer ervaringsjaren; // Aantal jaren onderwijservaring
+
+  @Column(columnDefinition = "TEXT")
+  private String kwalificaties; // Diploma's, certificaten, etc.
+
+  @OneToMany(mappedBy = "docent", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Lesson> lessons;
 
   public Docent() {}
 
@@ -41,5 +56,45 @@ public class Docent {
 
   public void setNaam(String naam) {
     this.naam = naam;
+  }
+
+  public String getSpecialisatie() {
+    return specialisatie;
+  }
+
+  public void setSpecialisatie(String specialisatie) {
+    this.specialisatie = specialisatie;
+  }
+
+  public String getBiografie() {
+    return biografie;
+  }
+
+  public void setBiografie(String biografie) {
+    this.biografie = biografie;
+  }
+
+  public Integer getErvaringsjaren() {
+    return ervaringsjaren;
+  }
+
+  public void setErvaringsjaren(Integer ervaringsjaren) {
+    this.ervaringsjaren = ervaringsjaren;
+  }
+
+  public String getKwalificaties() {
+    return kwalificaties;
+  }
+
+  public void setKwalificaties(String kwalificaties) {
+    this.kwalificaties = kwalificaties;
+  }
+
+  public List<Lesson> getLessons() {
+    return lessons;
+  }
+
+  public void setLessons(List<Lesson> lessons) {
+    this.lessons = lessons;
   }
 }
