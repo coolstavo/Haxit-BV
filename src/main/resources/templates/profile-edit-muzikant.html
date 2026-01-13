@@ -22,7 +22,18 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <!-- Form to update Muzikant details -->
+                    <form th:action="@{/profile/change-profile-pic}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="id" th:value="${muzikant.id}" />
+
+                        <div class="form-group">
+                            <label for="imageFile">Wijzig Profielfoto:</label>
+                            <input type="file" id="imageFile" name="imageFile" accept="image/*" class="form-control-file">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-2">Foto Uploaden</button>
+                    </form>
+
+                    <hr>
                     <form
                         th:action="@{/profile/save-muzikant}"
                         th:object="${muzikant}"
