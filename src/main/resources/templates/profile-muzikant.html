@@ -33,11 +33,17 @@
                 <div class="col-md-4 d-flex">
                     <div class="card mb-3 w-100">
                         <div class="card-body text-center d-flex flex-column">
-                            <img
-                                src="/img/avatar.png"
-                                class="rounded-circle mb-3"
-                                width="120"
-                            />
+                            <div th:if="${muzikantImage}">
+                                <img th:src="|data:image/jpeg;base64,${muzikantImage}|"
+                                         alt="Profielfoto"
+                                         style="width: 200px; height: 200px; object-fit: cover; border-radius: 50%;" />
+                                </div>
+
+                                <div th:unless="${muzikantImage}">
+                                    <img src="/images/default-placeholder.png"
+                                         alt="Geen foto"
+                                         style="width: 200px; height: 200px; border-radius: 50%;" />
+                                </div>
 
                             <h5 th:text="${muzikant.naam}">Naam</h5>
                             <!--<p th:text="${profile.instrument}">Instrument</p>-->

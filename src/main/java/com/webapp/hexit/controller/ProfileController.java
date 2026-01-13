@@ -12,8 +12,10 @@ import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class ProfileController {
@@ -53,22 +56,19 @@ public class ProfileController {
     public String profile(@PathVariable String username, Model model) {
         User profile = userRepository.findByUsername(username).orElse(null);
 
-        if (profile == null) {
-            return handleError(model);
-        }
+        if (profile == null) return handleError(model);
 
-        Role userRole = profile.getRole();
-
-        switch (userRole) {
-            case Role.MUZIKANT:
-                Muzikant muzikant = muzikantRepository
-                    .findByUser(profile)
-                    .orElse(null);
-
-                if (muzikant != null) {
-                    model.addAttribute("muzikant", muzikant);
-                } else {
-                    return handleError(model);
+        if (profile.getRole() == Role.MUZIKANT) {
+            Muzikant muzikant = muzikantRepository
+                .findByUser(profile)
+                .orElse(null);
+            if (muzikant != null) {
+                // CONVERT BLOB TO BASE64
+                if (muzikant.getProfilePic() != null) {
+                    String base64Image = Base64.getEncoder().encodeToString(
+                        muzikant.getProfilePic()
+                    );
+                    model.addAttribute("muzikantImage", base64Image);
                 }
                 List<MuzikantInstrument> muzikantInstruments =
                     muzikantInstrumentRepository.findByMuzikantId(
@@ -83,12 +83,9 @@ public class ProfileController {
                 List<Genre> allGenres = genreRepository.findAll();
                 model.addAttribute("allGenres", allGenres);
                 return "profile-muzikant";
-            case Role.BEDRIJF:
-            case Role.DOCENT:
-            case Role.ADMIN:
-            default:
-                return handleError(model);
+            }
         }
+        return handleError(model);
     }
 
     @GetMapping("/profile/edit/{username}")
@@ -117,6 +114,24 @@ public class ProfileController {
         }
 
         return handleError(model);
+    }
+
+    @PostMapping("/profile/change-profile-pic")
+    public String saveMuzikant(
+        @ModelAttribute Muzikant muzikant,
+        @RequestParam("imageFile") MultipartFile file
+    ) throws IOException {
+        Muzikant existingMuzikant = muzikantRepository
+            .findById(muzikant.getId())
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        if (!file.isEmpty()) {
+            existingMuzikant.setProfilePic(file.getBytes());
+        }
+
+        muzikantRepository.save(existingMuzikant);
+
+        return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
     }
 
     @PostMapping("/profile/save-muzikant")
