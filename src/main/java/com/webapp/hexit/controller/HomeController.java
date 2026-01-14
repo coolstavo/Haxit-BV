@@ -27,31 +27,31 @@ public class HomeController {
     this.docentRepository = docentRepository;
   }
 
-  @GetMapping("/")
-  public String home(
-    @RequestParam(name = "titel", required = false) String titel,
-    @RequestParam(name = "type", required = false) String type,
-    Model model
-  ) {
-    List<Event> events = eventRepository.findAll();
+    @GetMapping("/")
+    public String home(
+        @RequestParam(name = "titel", required = false) String titel,
+        @RequestParam(name = "type", required = false) String type,
+        Model model
+    ) {
+        List<Event> events = eventRepository.findAll();
 
-    if (titel != null && !titel.isBlank()) {
-      events = events
-        .stream()
-        .filter(event ->
-          event.getTitle().toLowerCase().contains(titel.toLowerCase())
-        )
-        .collect(Collectors.toList());
-    }
+        if (titel != null && !titel.isBlank()) {
+            events = events
+                .stream()
+                .filter(event ->
+                    event.getTitle().toLowerCase().contains(titel.toLowerCase())
+                )
+                .collect(Collectors.toList());
+        }
 
-    if (type != null && !type.isBlank()) {
-      events = events
-        .stream()
-        .filter(event ->
-          event.getType().toLowerCase().contains(type.toLowerCase())
-        )
-        .collect(Collectors.toList());
-    }
+        if (type != null && !type.isBlank()) {
+            events = events
+                .stream()
+                .filter(event ->
+                    event.getType().toLowerCase().contains(type.toLowerCase())
+                )
+                .collect(Collectors.toList());
+        }
 
     model.addAttribute("events", events);
     model.addAttribute("username", "Gast");
@@ -60,11 +60,11 @@ public class HomeController {
     return "index";
   }
 
-  @GetMapping("/admin")
-  public String adminDashboard() {
-    // Return the admin dashboard template
-    return "admin";
-  }
+    @GetMapping("/admin")
+    public String adminDashboard() {
+        // Return the admin dashboard template
+        return "admin";
+    }
 
   @GetMapping("/{username}")
   public String homeWithUsername(
@@ -89,13 +89,13 @@ public class HomeController {
     return "index";
   }
 
-  @ExceptionHandler(Exception.class)
-  @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-  public String handleError(Model model, Exception ex) {
-    model.addAttribute(
-      "errorMessage",
-      "Er is een fout opgetreden! Probeer het later opnieuw."
-    );
-    return "error";
-  }
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleError(Model model, Exception ex) {
+        model.addAttribute(
+            "errorMessage",
+            "Er is een fout opgetreden! Probeer het later opnieuw."
+        );
+        return "error";
+    }
 }

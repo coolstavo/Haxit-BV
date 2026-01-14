@@ -8,74 +8,86 @@ import jakarta.persistence.Id;
 @Entity
 public class Event {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String title;
-  private String description;
-  private double lat;
-  private double lng;
-  private String type;
+    private String title;
+    private String description;
+    private double lat;
+    private double lng;
+    private String type;
 
-  public Event() {} // default constructor required by JPA
+    private Long userId;
 
-  public Event(
-    String title,
-    String description,
-    double lat,
-    double lng,
-    String type
-  ) {
-    this.title = title;
-    this.description = description;
-    this.lat = lat;
-    this.lng = lng;
-    this.type = type;
-  }
+    public Event() {} // default constructor required by JPA
 
-  // Getters and Setters
-  public Long getId() {
-    return id;
-  }
+    public Event(
+        String title,
+        String description,
+        double lat,
+        double lng,
+        String type,
+        Long userId
+    ) {
+        this.title = title;
+        this.description = description;
+        this.lat = lat;
+        this.lng = lng;
+        this.type = type;
+        this.userId = userId;
+    }
 
-  public String getTitle() {
-    return title;
-  }
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
+    public String getTitle() {
+        return title;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public double getLat() {
-    return lat;
-  }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-  public void setLat(double lat) {
-    this.lat = lat;
-  }
+    public double getLat() {
+        return lat;
+    }
 
-  public double getLng() {
-    return lng;
-  }
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
 
-  public void setLng(double lng) {
-    this.lng = lng;
-  }
+    public double getLng() {
+        return lng;
+    }
 
-  public String getType() {
-    return type;
-  }
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }
