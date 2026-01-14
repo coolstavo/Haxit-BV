@@ -1,4 +1,4 @@
-package com.webapp.hexit;
+package com.webapp.hexit.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;

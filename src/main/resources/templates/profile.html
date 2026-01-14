@@ -44,6 +44,94 @@
                 </form>
             </div>
         </div>
+
+    <br/><br/>
+
+    <div th:if="${errorMessage}" 
+         style="background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 8px; margin-bottom: 20px;">
+        <strong th:text="${errorMessage}">Foutmelding</strong>
+    </div>
+
+    <div th:if="${successMessage}" 
+         style="background-color: #d4edda; color: #155724; padding: 15px; border: 1px solid #c3e6cb; border-radius: 8px; margin-bottom: 20px;">
+        <strong th:text="${successMessage}">Succesmelding</strong>
+    </div>
+
+    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px;">
+        <h2>Nieuwe content toevoegen</h2>
+        <form method="POST" action="/upload" enctype="multipart/form-data">
+            <input type="hidden" name="username" th:value="${username}">
+            <input type="text" name="description" placeholder="Titel / Beschrijving" required style="width: 100%; margin-bottom: 10px;"><br>
+            
+            <p><strong>Kies één van de twee:</strong></p>
+            
+            <label>Optie A: Externe Link (YouTube/SoundCloud):</label><br>
+            <input type="text" name="link" placeholder="https://..." style="width: 100%; margin-bottom: 10px;"><br>
+            
+            <label>Optie B: Upload Bestand (Audio/Video):</label><br>
+            <input type="file" name="file" accept="audio/*,video/*"><br><br>
+            
+            <button type="submit">Uploaden</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <h2>Mijn Uploads</h2>
+    
+    <div th:each="item : ${mediaList}" class="media-item">
+        <h3 th:text="${item.description}">Titel</h3>
+
+        <div th:if="${item.type == 'LINK'}">
+        
+            <div th:if="${item.isYoutube()}" style="width: 50%; aspect-ratio: 16/9; margin-bottom: 40px;">
+                <iframe 
+                    style="width: 100%; height: 100%; display: block;"
+                    th:src="${item.getYoutubeEmbedUrl()}" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+                <form th:action="@{/delete/{id}(id=${item.id})}" method="post" 
+                    th:data-confirm="|Weet je zeker dat je &quot;${item.description}&quot; wilt verwijderen?|"
+                    onsubmit="return confirm(this.getAttribute('data-confirm'));">
+                    <button type="submit" style="background-color: #a95307; color: white;"> Verwijderen</button>
+                </form>
+            </div>
+
+            <div th:if="${item.isSoundCloud()}" style="width: 50%; margin-bottom: 40px;">
+                <iframe 
+                    width="100%" 
+                    height="166" 
+                    scrolling="no" 
+                    frameborder="no" 
+                    allow="autoplay" 
+                    th:src="${item.getSoundCloudEmbedUrl()}">
+                </iframe>
+                <form th:action="@{/delete/{id}(id=${item.id})}" method="post" 
+                    th:data-confirm="|Weet je zeker dat je &quot;${item.description}&quot; wilt verwijderen?|"
+                    onsubmit="return confirm(this.getAttribute('data-confirm'));">
+                    <button type="submit" style="background-color: #a95307; color: white;"> Verwijderen</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${item.type == 'AUDIO' or item.type == 'VIDEO'}" style="margin-bottom: 40px;">
+            <audio th:if="${item.type == 'AUDIO'}" controls style="width: 50%;">
+                <source th:src="${item.link}" type="audio/mpeg">
+            </audio>
+
+            <video th:if="${item.type == 'VIDEO'}" controls style="width: 50%;">
+                <source th:src="${item.link}" type="video/mp4">
+            </video>
+
+            <form th:action="@{/delete/{id}(id=${item.id})}" method="post" 
+                th:data-confirm="|Weet je zeker dat je &quot;${item.description}&quot; wilt verwijderen?|"
+                onsubmit="return confirm(this.getAttribute('data-confirm'));">
+                <button type="submit" style="background-color: #a95307; color: white;"> Verwijderen</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
