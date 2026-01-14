@@ -4,7 +4,6 @@ import com.webapp.hexit.model.Genre;
 import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Muzikant;
 import com.webapp.hexit.model.MuzikantInstrument;
-import com.webapp.hexit.model.Profile;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.GenreRepository;
@@ -13,8 +12,6 @@ import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.io.IOException;
-import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -54,34 +51,102 @@ public class ProfileController {
 
     @GetMapping("/profile/{username}")
     public String profile(@PathVariable String username, Model model) {
-        Profile profile = profileRepository
-            .findByUsername(username)
-            .orElseGet(() -> {
-                Profile p = new Profile();
-                p.setUsername(username);
-                return p;
-            });
+        User profile = userRepository.findByUsername(username).orElse(null);
 
-        model.addAttribute("profile", profile);
-        model.addAttribute("username", username);
-        model.addAttribute("userRole", "MUZIKANT");
-        return "profile";
+        if (profile == null) return handleError(model);
+
+        if (profile.getRole() == Role.MUZIKANT) {
+            Muzikant muzikant = muzikantRepository
+                .findByUser(profile)
+                .orElse(null);
+            if (muzikant != null) {
+                // CONVERT BLOB TO BASE64
+                if (muzikant.getProfilePic() != null) {
+                    String base64Image = Base64.getEncoder().encodeToString(
+                        muzikant.getProfilePic()
+                    );
+                    model.addAttribute("muzikantImage", base64Image);
+                }
+                List<MuzikantInstrument> muzikantInstruments =
+                    muzikantInstrumentRepository.findByMuzikantId(
+                        muzikant.getId()
+                    );
+                List<Instrument> allInstruments =
+                    instrumentRepository.findAll();
+
+                model.addAttribute("muzikant", muzikant);
+                model.addAttribute("muzikantInstruments", muzikantInstruments);
+                model.addAttribute("allInstruments", allInstruments);
+                List<Genre> allGenres = genreRepository.findAll();
+                model.addAttribute("allGenres", allGenres);
+                return "profile-muzikant";
+            }
+        }
+        return handleError(model);
     }
 
     @GetMapping("/profile/edit/{username}")
     public String profileEdit(@PathVariable String username, Model model) {
         User profile = userRepository
             .findByUsername(username)
-            .orElseGet(() -> {
-                Profile p = new Profile();
-                p.setUsername(username);
-                return p;
-            });
+            .orElseThrow(() -> new RuntimeException("Gebruiker niet gevonden"));
 
-        model.addAttribute("profile", profile);
-        model.addAttribute("username", username);
-        model.addAttribute("userRole", "MUZIKANT");
-        return "profileadd";
+        if (profile.getRole() == Role.MUZIKANT) {
+            Muzikant muzikant = muzikantRepository
+                .findByUser(profile)
+                .orElseThrow(() ->
+                    new RuntimeException("Muzikant niet gevonden")
+                );
+
+            List<MuzikantInstrument> muzikantInstruments =
+                muzikantInstrumentRepository.findByMuzikantId(muzikant.getId());
+            List<Instrument> allInstruments = instrumentRepository.findAll();
+
+            model.addAttribute("muzikant", muzikant);
+            model.addAttribute("muzikantInstruments", muzikantInstruments);
+            model.addAttribute("allInstruments", allInstruments);
+            List<Genre> allGenres = genreRepository.findAll();
+            model.addAttribute("allGenres", allGenres);
+            return "profile-edit-muzikant";
+        }
+
+        return handleError(model);
+    }
+
+    @PostMapping("/profile/change-profile-pic")
+    public String saveMuzikant(
+        @ModelAttribute Muzikant muzikant,
+        @RequestParam("imageFile") MultipartFile file
+    ) throws IOException {
+        Muzikant existingMuzikant = muzikantRepository
+            .findById(muzikant.getId())
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        if (!file.isEmpty()) {
+            existingMuzikant.setProfilePic(file.getBytes());
+        }
+
+        muzikantRepository.save(existingMuzikant);
+
+        return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
+    }
+
+    @PostMapping("/profile/save-muzikant")
+    public String saveMuzikant(@ModelAttribute Muzikant muzikant) {
+        Muzikant existingMuzikant = muzikantRepository
+            .findById(muzikant.getId())
+            .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
+
+        existingMuzikant.setNaam(muzikant.getNaam());
+        existingMuzikant.setLeeftijd(muzikant.getLeeftijd());
+
+        List<Instrument> selectedInstruments = muzikant.getInstruments();
+        existingMuzikant.setInstruments(selectedInstruments);
+
+        List<Genre> selectedGenres = muzikant.getGenres();
+        existingMuzikant.setGenres(selectedGenres);
+        muzikantRepository.save(existingMuzikant);
+        return "redirect:/profile/" + existingMuzikant.getUser().getUsername();
     }
 
     @PostMapping("/profile/add-instrument")

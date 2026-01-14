@@ -1,9 +1,11 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
+import com.webapp.hexit.model.Role;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.CompanyRepository;
 import com.webapp.hexit.repository.DocentRepository;
+import com.webapp.hexit.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
@@ -16,15 +18,18 @@ public class HomeController {
   private final EventRepository eventRepository;
   private final CompanyRepository companyRepository;
   private final DocentRepository docentRepository;
+  private final UserRepository userRepository;
 
   public HomeController(
     EventRepository eventRepository,
     CompanyRepository companyRepository,
-    DocentRepository docentRepository
+    DocentRepository docentRepository,
+    UserRepository userRepository
   ) {
     this.eventRepository = eventRepository;
     this.companyRepository = companyRepository;
     this.docentRepository = docentRepository;
+    this.userRepository = userRepository;
   }
 
     @GetMapping("/")
@@ -75,15 +80,24 @@ public class HomeController {
     List<Event> events = eventRepository.findAll();
     model.addAttribute("events", events);
     model.addAttribute("username", (username != null && !username.isBlank()) ? username : "Gast");
-
-    // Bepaal userRole
+    
+    // Bepaal userRole op basis van User role of repository checks
     String userRole = "MUZIKANT"; // default
-    if (companyRepository.findByCompanyName(username).isPresent()) {
+    var user = userRepository.findByUsername(username);
+    if (user.isPresent()) {
+      if (user.get().getRole() == Role.BEDRIJF) {
+        userRole = "BEDRIJF";
+      } else if (user.get().getRole() == Role.DOCENT) {
+        userRole = "DOCENT";
+      } else {
+        userRole = "MUZIKANT";
+      }
+    } else if (companyRepository.findByCompanyName(username).isPresent()) {
       userRole = "BEDRIJF";
     } else if (docentRepository.findByNaam(username).isPresent()) {
       userRole = "DOCENT";
     }
-
+    
     model.addAttribute("userRole", userRole);
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";

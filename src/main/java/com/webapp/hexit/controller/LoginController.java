@@ -1,9 +1,11 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Docent;
+import com.webapp.hexit.model.Muzikant;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.repository.DocentRepository;
+import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +16,12 @@ public class LoginController {
 
   private final DocentRepository docentRepository;
   private final UserRepository userRepository;
+  private final MuzikantRepository muzikantRepository;
 
-  public LoginController(DocentRepository docentRepository, UserRepository userRepository) {
+  public LoginController(DocentRepository docentRepository, UserRepository userRepository, MuzikantRepository muzikantRepository) {
     this.docentRepository = docentRepository;
     this.userRepository = userRepository;
+    this.muzikantRepository = muzikantRepository;
   }
 
   @GetMapping("/login")
@@ -43,6 +47,20 @@ public class LoginController {
       return "redirect:/profile/bedrijf/" + username;
     } else {
       // default: muzikant
+      // Maak User en Muzikant aan als ze niet bestaan
+      User user = userRepository.findByUsername(username).orElse(null);
+      if (user == null) {
+        user = new User(username, Role.MUZIKANT);
+        userRepository.save(user);
+      }
+      
+      if (muzikantRepository.findByUser(user).isEmpty()) {
+        Muzikant muzikant = new Muzikant();
+        muzikant.setUser(user);
+        muzikant.setNaam(username);
+        muzikantRepository.save(muzikant);
+      }
+      
       return "redirect:/profile/" + username;
     }
   }

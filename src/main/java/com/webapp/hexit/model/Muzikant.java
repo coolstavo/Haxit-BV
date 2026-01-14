@@ -1,6 +1,5 @@
 package com.webapp.hexit.model;
 
-import com.webapp.hexit.model.Instrument;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
