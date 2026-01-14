@@ -2,6 +2,8 @@ package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.CompanyRepository;
+import com.webapp.hexit.repository.DocentRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
@@ -12,9 +14,17 @@ import org.springframework.web.bind.annotation.*;
 public class HomeController {
 
   private final EventRepository eventRepository;
+  private final CompanyRepository companyRepository;
+  private final DocentRepository docentRepository;
 
-  public HomeController(EventRepository eventRepository) {
+  public HomeController(
+    EventRepository eventRepository,
+    CompanyRepository companyRepository,
+    DocentRepository docentRepository
+  ) {
     this.eventRepository = eventRepository;
+    this.companyRepository = companyRepository;
+    this.docentRepository = docentRepository;
   }
 
   @GetMapping("/")
@@ -45,6 +55,7 @@ public class HomeController {
 
     model.addAttribute("events", events);
     model.addAttribute("username", "Gast");
+    model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
     return "index";
   }
@@ -58,18 +69,22 @@ public class HomeController {
   @GetMapping("/{username}")
   public String homeWithUsername(
     @PathVariable String username,
-    @RequestParam(
-      name = "loginRequired",
-      required = false
-    ) Boolean loginRequired,
+    @RequestParam(name = "loginRequired", required = false) Boolean loginRequired,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
     model.addAttribute("events", events);
-    model.addAttribute(
-      "username",
-      (username != null && !username.isBlank()) ? username : "Gast"
-    );
+    model.addAttribute("username", (username != null && !username.isBlank()) ? username : "Gast");
+
+    // Bepaal userRole
+    String userRole = "MUZIKANT"; // default
+    if (companyRepository.findByCompanyName(username).isPresent()) {
+      userRole = "BEDRIJF";
+    } else if (docentRepository.findByNaam(username).isPresent()) {
+      userRole = "DOCENT";
+    }
+
+    model.addAttribute("userRole", userRole);
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";
   }

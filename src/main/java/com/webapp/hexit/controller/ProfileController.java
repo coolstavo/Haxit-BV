@@ -32,6 +32,8 @@ public class ProfileController {
             });
 
         model.addAttribute("profile", profile);
+        model.addAttribute("username", username);
+        model.addAttribute("userRole", "MUZIKANT");
         return "profile";
     }
 
@@ -46,6 +48,8 @@ public class ProfileController {
             });
 
         model.addAttribute("profile", profile);
+        model.addAttribute("username", username);
+        model.addAttribute("userRole", "MUZIKANT");
         return "profileadd";
     }
 
