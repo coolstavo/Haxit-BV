@@ -8,7 +8,6 @@ import java.util.List;
 @Repository
 public interface MediaItemRepository extends JpaRepository<MediaItem, Long> {
     
-    // Door "extends JpaRepository" kan er gebruik worden gemaakt van standaard CRUD operaties
     // Haalt een lijst van media-items op die gekoppeld zijn aan een gebruiker
     List<MediaItem> findByUsername(String username);
 }
