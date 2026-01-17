@@ -31,6 +31,7 @@ services:
     volumes:
       - ./uploads:/app/uploads 
     environment:
+      - MYSQL_HOST=db
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/hexit_db
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpassword
