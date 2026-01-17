@@ -1,0 +1,68 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="docentLessonsTable(lessons, docentName, edit)">
+      <div th:if="${!lessons.isEmpty()}" class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="mb-3">Mijn Lesaanbiedingen</h5>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Instrument</th>
+                  <th>Niveaus</th>
+                  <th>Lesvorm</th>
+                  <th>Tarief</th>
+                  <th>Locatie</th>
+                  <th th:if="${edit}">Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="lesson : ${lessons}">
+                  <td th:text="${lesson.instrument?.naam}">-</td>
+                  <td th:text="${lesson.levels}">-</td>
+                  <td th:text="${lesson.lessonForm}">-</td>
+                  <td>
+                    €<span
+                      th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+                      >0.00</span
+                    >
+                    <small th:text="${lesson.rateType}">-</small>
+                  </td>
+                  <td>
+                    <span
+                      th:if="${lesson.location}"
+                      th:text="${lesson.location}"
+                      >-</span
+                    >
+                    <span th:if="${lesson.location == null}" class="text-muted"
+                      >Niet ingesteld</span
+                    >
+                  </td>
+                  <td th:if="${edit}">
+                    <a
+                      th:href="@{'/profile/docent/delete-lesson/' + ${lesson.id}(docentName=${docentName})}"
+                      class="btn btn-sm btn-danger"
+                      onclick="return confirm('Zeker weten?');"
+                    >
+                      Verwijderen
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${lessons.isEmpty() && !edit}" class="card shadow-sm">
+        <div class="card-body text-center">
+          <p class="text-muted mb-0">
+            Je hebt nog geen lesaanbiedingen. Klik op "Profiel bewerken" om te
+            starten.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

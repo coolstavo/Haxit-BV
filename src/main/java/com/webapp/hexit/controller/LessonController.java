@@ -41,7 +41,6 @@ public class LessonController {
     @PathVariable String username,
     Model model
   ) {
-    // Fetch the lesson
     Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
     if (lessonOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Les niet gevonden");
@@ -51,7 +50,6 @@ public class LessonController {
     Lesson lesson = lessonOpt.get();
     model.addAttribute("lesson", lesson);
 
-    // Fetch the user
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -62,21 +60,17 @@ public class LessonController {
     model.addAttribute("user", user);
     model.addAttribute("username", username);
 
-    // Determine if user is teacher (docent) or student (muzikant)
     boolean isTeacher = user.getRole() == Role.DOCENT;
     boolean isStudent = user.getRole() == Role.MUZIKANT;
 
     model.addAttribute("isTeacher", isTeacher);
     model.addAttribute("isStudent", isStudent);
 
-    // Fetch bookings based on role
     List<LessonBooking> bookings;
 
     if (isTeacher) {
-      // Teacher sees all bookings for this lesson type
       bookings = lessonBookingRepository.findByLessonId(lessonId);
     } else if (isStudent) {
-      // Student sees only their own bookings
       Optional<Muzikant> muzikantOpt = muzikantRepository.findByUser(user);
       if (muzikantOpt.isPresent()) {
         bookings = lessonBookingRepository.findByLessonIdAndStudent(
@@ -87,7 +81,6 @@ public class LessonController {
         bookings = List.of();
       }
     } else {
-      // Other roles see all bookings (read-only)
       bookings = lessonBookingRepository.findByLessonId(lessonId);
     }
 
@@ -113,7 +106,6 @@ public class LessonController {
     @RequestParam(required = false) String message,
     Model model
   ) {
-    // Fetch the lesson
     Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
     if (lessonOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Les niet gevonden");
@@ -122,7 +114,6 @@ public class LessonController {
 
     Lesson lesson = lessonOpt.get();
 
-    // Fetch the user
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -131,7 +122,6 @@ public class LessonController {
 
     User user = userOpt.get();
 
-    // Only students can request lessons
     if (user.getRole() != Role.MUZIKANT) {
       model.addAttribute(
         "errorMessage",
@@ -140,7 +130,6 @@ public class LessonController {
       return "error";
     }
 
-    // Get the muzikant (student)
     Optional<Muzikant> muzikantOpt = muzikantRepository.findByUser(user);
     if (muzikantOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Student profiel niet gevonden");
@@ -149,15 +138,13 @@ public class LessonController {
 
     Muzikant student = muzikantOpt.get();
 
-    // Create the booking
     LessonBooking booking = new LessonBooking();
     booking.setStudent(student);
     booking.setLesson(lesson);
     booking.setStatus(LessonStatus.AANGEVRAAGD);
-    booking.setAcceptedByStudent(true); // Student is requesting, so they accept
+    booking.setAcceptedByStudent(true);
     booking.setAcceptedByDocent(false);
 
-    // Add proposed times
     List<LocalDateTime> proposals = new ArrayList<>();
     if (proposal1 != null) proposals.add(proposal1);
     if (proposal2 != null) proposals.add(proposal2);
@@ -169,15 +156,16 @@ public class LessonController {
     return "redirect:/lesson/" + lessonId + "/" + username + "?success=true";
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/update-approval")
-  public String updateApproval(
+  @PostMapping("/lesson/{lessonId}/{username}/accept")
+  public String acceptBooking(
     @PathVariable Long lessonId,
     @PathVariable String username,
     @RequestParam Long bookingId,
-    @RequestParam boolean approved,
+    @RequestParam @DateTimeFormat(
+      iso = DateTimeFormat.ISO.DATE_TIME
+    ) LocalDateTime chosenTime,
     Model model
   ) {
-    // Fetch the user
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -186,7 +174,11 @@ public class LessonController {
 
     User user = userOpt.get();
 
-    // Fetch the booking
+    if (user.getRole() != Role.DOCENT) {
+      model.addAttribute("errorMessage", "Alleen docenten kunnen accepteren");
+      return "error";
+    }
+
     Optional<LessonBooking> bookingOpt = lessonBookingRepository.findById(
       bookingId
     );
@@ -197,50 +189,159 @@ public class LessonController {
 
     LessonBooking booking = bookingOpt.get();
 
-    // Check user role and update appropriate field
-    if (user.getRole() == Role.DOCENT) {
-      // Verify this teacher owns the lesson
-      if (
-        booking.getLesson().getDocent().getUser().getId().equals(user.getId())
-      ) {
-        booking.setAcceptedByDocent(approved);
-
-        // Update status if both approved
-        if (booking.isAcceptedByStudent() && approved) {
-          booking.setStatus(LessonStatus.GEACCEPTEERD);
-        }
-      } else {
-        model.addAttribute("errorMessage", "Geen toegang tot deze boeking");
-        return "error";
-      }
-    } else if (user.getRole() == Role.MUZIKANT) {
-      // Verify this student owns the booking
-      Optional<Muzikant> muzikantOpt = muzikantRepository.findByUser(user);
-      if (
-        muzikantOpt.isPresent() &&
-        booking.getStudent().getId().equals(muzikantOpt.get().getId())
-      ) {
-        booking.setAcceptedByStudent(approved);
-
-        // Update status if both approved
-        if (approved && booking.isAcceptedByDocent()) {
-          booking.setStatus(LessonStatus.GEACCEPTEERD);
-        }
-      } else {
-        model.addAttribute("errorMessage", "Geen toegang tot deze boeking");
-        return "error";
-      }
-    } else {
-      model.addAttribute(
-        "errorMessage",
-        "Geen rechten om goedkeuring te wijzigen"
-      );
+    // Verify this teacher owns the lesson
+    if (
+      !booking.getLesson().getDocent().getUser().getId().equals(user.getId())
+    ) {
+      model.addAttribute("errorMessage", "Geen toegang tot deze boeking");
       return "error";
+    }
+
+    booking.setAcceptedByDocent(true);
+    booking.setConfirmedTime(chosenTime);
+
+    // If student already accepted, mark as fully accepted
+    if (booking.isAcceptedByStudent()) {
+      booking.setStatus(LessonStatus.GEACCEPTEERD);
     }
 
     lessonBookingRepository.save(booking);
 
     return "redirect:/lesson/" + lessonId + "/" + username;
+  }
+
+  @PostMapping("/lesson/{lessonId}/{username}/reject")
+  public String rejectBooking(
+    @PathVariable Long lessonId,
+    @PathVariable String username,
+    @RequestParam Long bookingId,
+    Model model
+  ) {
+    Optional<User> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Gebruiker niet gevonden");
+      return "error";
+    }
+
+    User user = userOpt.get();
+
+    if (user.getRole() != Role.DOCENT) {
+      model.addAttribute("errorMessage", "Alleen docenten kunnen afwijzen");
+      return "error";
+    }
+
+    Optional<LessonBooking> bookingOpt = lessonBookingRepository.findById(
+      bookingId
+    );
+    if (bookingOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Boeking niet gevonden");
+      return "error";
+    }
+
+    LessonBooking booking = bookingOpt.get();
+
+    // Verify this teacher owns the lesson
+    if (
+      !booking.getLesson().getDocent().getUser().getId().equals(user.getId())
+    ) {
+      model.addAttribute("errorMessage", "Geen toegang tot deze boeking");
+      return "error";
+    }
+
+    booking.setStatus(LessonStatus.AFGEWEZEN);
+    booking.setAcceptedByDocent(false);
+
+    lessonBookingRepository.save(booking);
+
+    return "redirect:/lesson/" + lessonId + "/" + username;
+  }
+
+  @PostMapping("/lesson/{lessonId}/{username}/update-proposals")
+  public String updateProposals(
+    @PathVariable Long lessonId,
+    @PathVariable String username,
+    @RequestParam Long bookingId,
+    @RequestParam(required = false) @DateTimeFormat(
+      iso = DateTimeFormat.ISO.DATE_TIME
+    ) LocalDateTime proposal1,
+    @RequestParam(required = false) @DateTimeFormat(
+      iso = DateTimeFormat.ISO.DATE_TIME
+    ) LocalDateTime proposal2,
+    @RequestParam(required = false) @DateTimeFormat(
+      iso = DateTimeFormat.ISO.DATE_TIME
+    ) LocalDateTime proposal3,
+    Model model
+  ) {
+    Optional<User> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Gebruiker niet gevonden");
+      return "error";
+    }
+
+    User user = userOpt.get();
+
+    if (user.getRole() != Role.MUZIKANT) {
+      model.addAttribute(
+        "errorMessage",
+        "Alleen studenten kunnen voorstellen wijzigen"
+      );
+      return "error";
+    }
+
+    Optional<LessonBooking> bookingOpt = lessonBookingRepository.findById(
+      bookingId
+    );
+    if (bookingOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Boeking niet gevonden");
+      return "error";
+    }
+
+    LessonBooking booking = bookingOpt.get();
+
+    // Verify this student owns the booking
+    Optional<Muzikant> muzikantOpt = muzikantRepository.findByUser(user);
+    if (
+      muzikantOpt.isEmpty() ||
+      !booking.getStudent().getId().equals(muzikantOpt.get().getId())
+    ) {
+      model.addAttribute("errorMessage", "Geen toegang tot deze boeking");
+      return "error";
+    }
+
+    // Only allow updating if rejected
+    if (booking.getStatus() != LessonStatus.AFGEWEZEN) {
+      model.addAttribute(
+        "errorMessage",
+        "Je kunt alleen afgewezen aanvragen opnieuw indienen"
+      );
+      return "error";
+    }
+
+    // Update proposals
+    List<LocalDateTime> proposals = new ArrayList<>();
+    if (proposal1 != null) proposals.add(proposal1);
+    if (proposal2 != null) proposals.add(proposal2);
+    if (proposal3 != null) proposals.add(proposal3);
+
+    if (proposals.isEmpty()) {
+      model.addAttribute(
+        "errorMessage",
+        "Je moet minimaal één voorstel indienen"
+      );
+      return "error";
+    }
+
+    booking.setLessonProposals(proposals);
+    booking.setStatus(LessonStatus.AANGEVRAAGD);
+    booking.setAcceptedByStudent(true);
+    booking.setAcceptedByDocent(false);
+    booking.setConfirmedTime(null);
+
+    lessonBookingRepository.save(booking);
+
+    return (
+      "redirect:/lesson/" + lessonId + "/" + username + "?resubmitted=true"
+    );
   }
 
   @PostMapping("/lesson/{lessonId}/{username}/cancel-booking")

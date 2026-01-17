@@ -1,5 +1,6 @@
 package com.webapp.hexit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -12,10 +13,13 @@ public class Lesson {
 
   @ManyToOne
   @JoinColumn(name = "docent_id", nullable = false)
+  @JsonIgnoreProperties({ "lessons", "user", "biografie", "kwalificaties" })
   private Docent docent;
 
-  @Column(nullable = false)
-  private String instrument;
+  @ManyToOne
+  @JoinColumn(name = "instrument_id", nullable = false)
+  @JsonIgnoreProperties({ "lessons" })
+  private Instrument instrument;
 
   @Column(columnDefinition = "TEXT")
   private String levels; // comma-separated: Beginner, Intermediate, Advanced
@@ -32,6 +36,16 @@ public class Lesson {
   @Column(columnDefinition = "TEXT")
   private String description;
 
+  // Locatie velden
+  @Column(nullable = true)
+  private String location; // Adres of locatienaam
+
+  @Column(nullable = true)
+  private Double lat; // Latitude
+
+  @Column(nullable = true)
+  private Double lng; // Longitude
+
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
@@ -43,29 +57,102 @@ public class Lesson {
   }
 
   // Getters and Setters
-  public Long getId() { return id; }
-  
-  public Docent getDocent() { return docent; }
-  public void setDocent(Docent docent) { this.docent = docent; }
+  public Long getId() {
+    return id;
+  }
 
-  public String getInstrument() { return instrument; }
-  public void setInstrument(String instrument) { this.instrument = instrument; }
+  public Docent getDocent() {
+    return docent;
+  }
 
-  public String getLevels() { return levels; }
-  public void setLevels(String levels) { this.levels = levels; }
+  public void setDocent(Docent docent) {
+    this.docent = docent;
+  }
 
-  public String getLessonForm() { return lessonForm; }
-  public void setLessonForm(String lessonForm) { this.lessonForm = lessonForm; }
+  public Instrument getInstrument() {
+    return instrument;
+  }
 
-  public Double getRate() { return rate; }
-  public void setRate(Double rate) { this.rate = rate; }
+  public void setInstrument(Instrument instrument) {
+    this.instrument = instrument;
+  }
 
-  public String getRateType() { return rateType; }
-  public void setRateType(String rateType) { this.rateType = rateType; }
+  /**
+   * Helper method to get instrument name for display purposes
+   */
+  public String getInstrumentName() {
+    return instrument != null ? instrument.getNaam() : null;
+  }
 
-  public String getDescription() { return description; }
-  public void setDescription(String description) { this.description = description; }
+  public String getLevels() {
+    return levels;
+  }
 
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+  public void setLevels(String levels) {
+    this.levels = levels;
+  }
+
+  public String getLessonForm() {
+    return lessonForm;
+  }
+
+  public void setLessonForm(String lessonForm) {
+    this.lessonForm = lessonForm;
+  }
+
+  public Double getRate() {
+    return rate;
+  }
+
+  public void setRate(Double rate) {
+    this.rate = rate;
+  }
+
+  public String getRateType() {
+    return rateType;
+  }
+
+  public void setRateType(String rateType) {
+    this.rateType = rateType;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getLocation() {
+    return location;
+  }
+
+  public void setLocation(String location) {
+    this.location = location;
+  }
+
+  public Double getLat() {
+    return lat;
+  }
+
+  public void setLat(Double lat) {
+    this.lat = lat;
+  }
+
+  public Double getLng() {
+    return lng;
+  }
+
+  public void setLng(Double lng) {
+    this.lng = lng;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 }

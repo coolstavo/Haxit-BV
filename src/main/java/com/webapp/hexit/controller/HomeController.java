@@ -1,10 +1,12 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
+import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.model.Role;
-import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.CompanyRepository;
 import com.webapp.hexit.repository.DocentRepository;
+import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,71 +18,107 @@ import org.springframework.web.bind.annotation.*;
 public class HomeController {
 
   private final EventRepository eventRepository;
+  private final LessonRepository lessonRepository;
   private final CompanyRepository companyRepository;
   private final DocentRepository docentRepository;
   private final UserRepository userRepository;
 
   public HomeController(
     EventRepository eventRepository,
+    LessonRepository lessonRepository,
     CompanyRepository companyRepository,
     DocentRepository docentRepository,
     UserRepository userRepository
   ) {
     this.eventRepository = eventRepository;
+    this.lessonRepository = lessonRepository;
     this.companyRepository = companyRepository;
     this.docentRepository = docentRepository;
     this.userRepository = userRepository;
   }
 
-    @GetMapping("/")
-    public String home(
-        @RequestParam(name = "titel", required = false) String titel,
-        @RequestParam(name = "type", required = false) String type,
-        Model model
-    ) {
-        List<Event> events = eventRepository.findAll();
+  @GetMapping("/")
+  public String home(
+    @RequestParam(name = "titel", required = false) String titel,
+    @RequestParam(name = "type", required = false) String type,
+    Model model
+  ) {
+    List<Event> events = eventRepository.findAll();
+    List<Lesson> lessons = lessonRepository.findAll();
 
-        if (titel != null && !titel.isBlank()) {
-            events = events
-                .stream()
-                .filter(event ->
-                    event.getTitle().toLowerCase().contains(titel.toLowerCase())
-                )
-                .collect(Collectors.toList());
-        }
+    if (titel != null && !titel.isBlank()) {
+      events = events
+        .stream()
+        .filter(event ->
+          event.getTitle().toLowerCase().contains(titel.toLowerCase())
+        )
+        .collect(Collectors.toList());
 
-        if (type != null && !type.isBlank()) {
-            events = events
-                .stream()
-                .filter(event ->
-                    event.getType().toLowerCase().contains(type.toLowerCase())
-                )
-                .collect(Collectors.toList());
-        }
+      lessons = lessons
+        .stream()
+        .filter(
+          lesson ->
+            (lesson.getInstrument() != null &&
+              lesson
+                .getInstrument()
+                .getNaam()
+                .toLowerCase()
+                .contains(titel.toLowerCase())) ||
+            (lesson.getDescription() != null &&
+              lesson
+                .getDescription()
+                .toLowerCase()
+                .contains(titel.toLowerCase()))
+        )
+        .collect(Collectors.toList());
+    }
+
+    if (type != null && !type.isBlank()) {
+      events = events
+        .stream()
+        .filter(event ->
+          event.getType().toLowerCase().contains(type.toLowerCase())
+        )
+        .collect(Collectors.toList());
+
+      // Filter lessons only if type is "Les"
+      if (!type.equalsIgnoreCase("les")) {
+        lessons = List.of();
+      }
+    }
 
     model.addAttribute("events", events);
+    model.addAttribute("lessons", lessons);
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
     return "index";
   }
 
-    @GetMapping("/admin")
-    public String adminDashboard() {
-        // Return the admin dashboard template
-        return "admin";
-    }
+  @GetMapping("/admin")
+  public String adminDashboard() {
+    return "admin";
+  }
 
   @GetMapping("/{username}")
   public String homeWithUsername(
     @PathVariable String username,
-    @RequestParam(name = "loginRequired", required = false) Boolean loginRequired,
+    @RequestParam(
+      name = "loginRequired",
+      required = false
+    ) Boolean loginRequired,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
+    List<Lesson> lessons = lessonRepository.findAll();
+
     model.addAttribute("events", events);
-    model.addAttribute("username", (username != null && !username.isBlank()) ? username : "Gast");
-    
+    model.addAttribute("lessons", lessons);
+    model.addAttribute(
+      "username",
+      (username != null && !username.isBlank()) ? username : "Gast"
+    );
+
     // Bepaal userRole op basis van User role of repository checks
     String userRole = "MUZIKANT"; // default
     var user = userRepository.findByUsername(username);
@@ -97,19 +135,19 @@ public class HomeController {
     } else if (docentRepository.findByNaam(username).isPresent()) {
       userRole = "DOCENT";
     }
-    
+
     model.addAttribute("userRole", userRole);
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";
   }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleError(Model model, Exception ex) {
-        model.addAttribute(
-            "errorMessage",
-            "Er is een fout opgetreden! Probeer het later opnieuw."
-        );
-        return "error";
-    }
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+  public String handleError(Model model, Exception ex) {
+    model.addAttribute(
+      "errorMessage",
+      "Er is een fout opgetreden! Probeer het later opnieuw."
+    );
+    return "error";
+  }
 }

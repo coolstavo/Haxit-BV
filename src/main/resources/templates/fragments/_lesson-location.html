@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="lessonLocation(lesson)">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">📍 Locatie</h5>
+        </div>
+        <div class="card-body">
+          <div th:if="${lesson.lat != null && lesson.lng != null}">
+            <p th:if="${lesson.location}">
+              <strong>Adres:</strong>
+              <span th:text="${lesson.location}">-</span>
+            </p>
+            <div id="lessonLocationMap"></div>
+            <input type="hidden" id="lessonLat" th:value="${lesson.lat}" />
+            <input type="hidden" id="lessonLng" th:value="${lesson.lng}" />
+          </div>
+          <div th:if="${lesson.lat == null || lesson.lng == null}">
+            <p class="text-muted mb-0">
+              <em>Geen locatie opgegeven voor deze les.</em>
+            </p>
+            <p th:if="${lesson.location}" class="mt-2">
+              <strong>Locatie beschrijving:</strong>
+              <span th:text="${lesson.location}">-</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
