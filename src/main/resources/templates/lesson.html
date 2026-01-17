@@ -1,0 +1,470 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Les Details</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+  </head>
+  <body class="bg">
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+    <div class="container mt-4">
+      <!-- Success Message -->
+      <div
+        th:if="${param.success}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <strong>Gelukt!</strong> Je lesaanvraag is succesvol verstuurd. De
+        docent zal deze beoordelen.
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>
+          <span th:text="${lesson.instrument}">Instrument</span> Les
+          <small class="text-muted" th:text="'door ' + ${lesson.docent.naam}"
+            >door Docent</small
+          >
+        </h3>
+        <span class="badge bg-info" th:if="${isTeacher}">Docent Weergave</span>
+        <span class="badge bg-primary" th:if="${isStudent}"
+          >Student Weergave</span
+        >
+      </div>
+
+      <!-- Lesson Details Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Les Informatie</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p>
+                <strong>Instrument:</strong>
+                <span th:text="${lesson.instrument}">-</span>
+              </p>
+              <p>
+                <strong>Niveaus:</strong>
+                <span
+                  th:text="${lesson.levels != null && !lesson.levels.isEmpty()} ? ${lesson.levels} : 'Niet gespecificeerd'"
+                  >-</span
+                >
+              </p>
+              <p>
+                <strong>Lesvorm:</strong>
+                <span th:text="${lesson.lessonForm}">-</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p>
+                <strong>Tarief:</strong>
+                €<span th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+                  >0.00</span
+                >
+                <span th:text="${lesson.rateType}">per uur</span>
+              </p>
+              <p>
+                <strong>Docent:</strong>
+                <a
+                  th:href="@{'/profile/docent/' + ${lesson.docent.naam}}"
+                  th:text="${lesson.docent.naam}"
+                  >Docent</a
+                >
+              </p>
+              <p th:if="${lesson.docent.specialisatie}">
+                <strong>Specialisatie:</strong>
+                <span th:text="${lesson.docent.specialisatie}">-</span>
+              </p>
+            </div>
+          </div>
+
+          <div th:if="${lesson.description}" class="mt-3">
+            <h6>Beschrijving</h6>
+            <p
+              class="text-muted"
+              style="white-space: pre-line"
+              th:text="${lesson.description}"
+            >
+              Geen beschrijving
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Request Lesson Form (only for students) -->
+      <div th:if="${isStudent}" class="card shadow-sm mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">📅 Les Aanvragen</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-3">
+            Vul hieronder je voorkeursdata en -tijden in. De docent ontvangt je
+            aanvraag en kan deze goedkeuren.
+          </p>
+          <form
+            th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/request'}"
+            method="post"
+          >
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 1 *</label>
+                <input
+                  type="datetime-local"
+                  name="proposal1"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 2 (optioneel)</label>
+                <input
+                  type="datetime-local"
+                  name="proposal2"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 3 (optioneel)</label>
+                <input
+                  type="datetime-local"
+                  name="proposal3"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Bericht aan docent (optioneel)</label>
+                <textarea
+                  name="message"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Bijv. ik ben beginner en wil graag gitaar leren spelen..."
+                ></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              <span>📨</span> Les Aanvragen
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Bookings Section -->
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">
+            <span th:if="${isTeacher}">Alle Geplande Lessen</span>
+            <span th:if="${isStudent}">Mijn Geboekte Lessen</span>
+            <span th:if="${!isTeacher && !isStudent}">Geplande Lessen</span>
+          </h5>
+          <span
+            class="badge bg-secondary"
+            th:text="${bookings.size()} + ' boeking(en)'"
+            >0 bookingen</span
+          >
+        </div>
+        <div class="card-body">
+          <!-- No Bookings Message -->
+          <div th:if="${!hasBookings}" class="text-center py-4">
+            <p class="text-muted mb-0">
+              <span th:if="${isTeacher}"
+                >Er zijn nog geen boekingen voor deze les.</span
+              >
+              <span th:if="${isStudent}"
+                >Je hebt nog geen lessen geboekt. Gebruik het formulier
+                hierboven om een les aan te vragen.</span
+              >
+              <span th:if="${!isTeacher && !isStudent}"
+                >Geen boekingen gevonden.</span
+              >
+            </p>
+          </div>
+
+          <!-- Bookings List -->
+          <div th:if="${hasBookings}">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th th:if="${isTeacher}">Student</th>
+                    <th>Datum & Tijd</th>
+                    <th>Status</th>
+                    <th>Student Akkoord</th>
+                    <th>Docent Akkoord</th>
+                    <th>Acties</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="booking : ${bookings}">
+                    <!-- Student Name (only for teacher) -->
+                    <td th:if="${isTeacher}">
+                      <span th:text="${booking.student.naam}">Student</span>
+                    </td>
+
+                    <!-- Date/Time -->
+                    <td>
+                      <span th:if="${booking.confirmedTime != null}">
+                        <strong class="text-success">Bevestigd:</strong><br />
+                        <span
+                          th:text="${#temporals.format(booking.confirmedTime, 'dd-MM-yyyy HH:mm')}"
+                          >-</span
+                        >
+                      </span>
+                      <span
+                        th:if="${booking.confirmedTime == null && booking.lessonProposals != null && !booking.lessonProposals.isEmpty()}"
+                      >
+                        <strong>Voorstellen:</strong><br />
+                        <small
+                          th:each="proposal, iterStat : ${booking.lessonProposals}"
+                        >
+                          <span
+                            th:text="${#temporals.format(proposal, 'dd-MM-yyyy HH:mm')}"
+                            >-</span
+                          >
+                          <span th:if="${!iterStat.last}"><br /></span>
+                        </small>
+                      </span>
+                      <span
+                        th:if="${booking.confirmedTime == null && (booking.lessonProposals == null || booking.lessonProposals.isEmpty())}"
+                        class="text-muted"
+                      >
+                        Nog niet gepland
+                      </span>
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                      <span
+                        class="badge"
+                        th:classappend="${booking.status.name() == 'AANGEVRAAGD'} ? 'bg-warning' :
+                                                             (${booking.status.name() == 'GEACCEPTEERD'} ? 'bg-success' :
+                                                             (${booking.status.name() == 'AFGEWEZEN'} ? 'bg-danger' : 'bg-secondary'))"
+                        th:text="${booking.status}"
+                        >Status</span
+                      >
+                      <br th:if="${booking.isConfirmed()}" />
+                      <small
+                        th:if="${booking.isConfirmed()}"
+                        class="text-success"
+                        >✓ Dubbele handdruk!</small
+                      >
+                    </td>
+
+                    <!-- Student Approval -->
+                    <td>
+                      <span
+                        th:if="${booking.acceptedByStudent}"
+                        class="text-success"
+                      >
+                        ✓ Ja
+                      </span>
+                      <span
+                        th:if="${!booking.acceptedByStudent}"
+                        class="text-danger"
+                      >
+                        ✗ Nee
+                      </span>
+                    </td>
+
+                    <!-- Teacher Approval -->
+                    <td>
+                      <span
+                        th:if="${booking.acceptedByDocent}"
+                        class="text-success"
+                      >
+                        ✓ Ja
+                      </span>
+                      <span
+                        th:if="${!booking.acceptedByDocent}"
+                        class="text-danger"
+                      >
+                        ✗ Nee
+                      </span>
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                      <!-- Student can update their approval -->
+                      <div
+                        th:if="${isStudent && booking.status.name() != 'GEANNULEERD'}"
+                      >
+                        <form
+                          th:if="${!booking.acceptedByStudent}"
+                          th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-approval'}"
+                          method="post"
+                          class="d-inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="bookingId"
+                            th:value="${booking.id}"
+                          />
+                          <input type="hidden" name="approved" value="true" />
+                          <button type="submit" class="btn btn-sm btn-success">
+                            Goedkeuren
+                          </button>
+                        </form>
+                        <form
+                          th:if="${booking.acceptedByStudent}"
+                          th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-approval'}"
+                          method="post"
+                          class="d-inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="bookingId"
+                            th:value="${booking.id}"
+                          />
+                          <input type="hidden" name="approved" value="false" />
+                          <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-warning"
+                          >
+                            Intrekken
+                          </button>
+                        </form>
+                      </div>
+
+                      <!-- Teacher can update their approval -->
+                      <div
+                        th:if="${isTeacher && booking.status.name() != 'GEANNULEERD'}"
+                      >
+                        <form
+                          th:if="${!booking.acceptedByDocent}"
+                          th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-approval'}"
+                          method="post"
+                          class="d-inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="bookingId"
+                            th:value="${booking.id}"
+                          />
+                          <input type="hidden" name="approved" value="true" />
+                          <button type="submit" class="btn btn-sm btn-success">
+                            Goedkeuren
+                          </button>
+                        </form>
+                        <form
+                          th:if="${booking.acceptedByDocent}"
+                          th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-approval'}"
+                          method="post"
+                          class="d-inline"
+                        >
+                          <input
+                            type="hidden"
+                            name="bookingId"
+                            th:value="${booking.id}"
+                          />
+                          <input type="hidden" name="approved" value="false" />
+                          <button
+                            type="submit"
+                            class="btn btn-sm btn-outline-warning"
+                          >
+                            Intrekken
+                          </button>
+                        </form>
+                      </div>
+
+                      <!-- Cancel booking button -->
+                      <form
+                        th:if="${(isStudent || isTeacher) && booking.status.name() != 'GEANNULEERD'}"
+                        th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/cancel-booking'}"
+                        method="post"
+                        class="d-inline ms-1"
+                      >
+                        <input
+                          type="hidden"
+                          name="bookingId"
+                          th:value="${booking.id}"
+                        />
+                        <button
+                          type="submit"
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="
+                            return confirm(
+                              'Weet je zeker dat je deze boeking wilt annuleren?',
+                            );
+                          "
+                        >
+                          Annuleren
+                        </button>
+                      </form>
+
+                      <!-- Cancelled badge -->
+                      <span
+                        th:if="${booking.status.name() == 'GEANNULEERD'}"
+                        class="text-muted"
+                      >
+                        Geannuleerd
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Status Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Legenda</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p>
+                <span class="badge bg-warning">AANGEVRAAGD</span> - Les is
+                aangevraagd, wacht op goedkeuring
+              </p>
+              <p>
+                <span class="badge bg-success">GEACCEPTEERD</span> - Beide
+                partijen hebben goedgekeurd
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p>
+                <span class="badge bg-danger">AFGEWEZEN</span> - De les is
+                afgewezen
+              </p>
+              <p>
+                <span class="badge bg-secondary">GEANNULEERD</span> - De les is
+                geannuleerd
+              </p>
+            </div>
+          </div>
+          <hr />
+          <p class="mb-0 text-muted">
+            <strong>Dubbele Handdruk:</strong> Een les wordt pas definitief
+            bevestigd wanneer zowel de student als de docent akkoord gaan.
+          </p>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="mb-4">
+        <a href="javascript:history.back()" class="btn btn-secondary"
+          >← Terug</a
+        >
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
