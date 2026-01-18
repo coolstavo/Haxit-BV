@@ -1,5 +1,25 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <style>
+      .lesson-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .lesson-row:hover {
+        background-color: #f0f0f0 !important;
+      }
+
+      .lesson-row td {
+        vertical-align: middle;
+      }
+
+      .lesson-row .btn {
+        pointer-events: auto;
+      }
+    </style>
+  </head>
   <body>
     <div th:fragment="docentLessonsTable(lessons, docentName, edit)">
       <div th:if="${!lessons.isEmpty()}" class="card shadow-sm">
@@ -14,11 +34,19 @@
                   <th>Lesvorm</th>
                   <th>Tarief</th>
                   <th>Locatie</th>
+                  <th>Geplande Lessen</th>
+                  <th>Wachtende Goedkeuring</th>
                   <th th:if="${edit}">Acties</th>
                 </tr>
               </thead>
               <tbody>
-                <tr th:each="lesson : ${lessons}">
+                <tr
+                  th:each="lesson : ${lessons}"
+                  class="lesson-row"
+                  th:data-lesson-id="${lesson.id}"
+                  th:data-username="${docentName}"
+                  onclick="navigateToLesson(this)"
+                >
                   <td th:text="${lesson.instrument?.naam}">-</td>
                   <td th:text="${lesson.levels}">-</td>
                   <td th:text="${lesson.lessonForm}">-</td>
@@ -39,11 +67,28 @@
                       >Niet ingesteld</span
                     >
                   </td>
-                  <td th:if="${edit}">
+                  <td>
+                    <span
+                      class="badge bg-success"
+                      th:text="${lessonStats[lesson.id]['planned']} ?: 0"
+                      >0</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      class="badge bg-warning"
+                      th:text="${lessonStats[lesson.id]['pending']} ?: 0"
+                      >0</span
+                    >
+                  </td>
+                  <td th:if="${edit}" onclick="event.stopPropagation()">
                     <a
                       th:href="@{'/profile/docent/delete-lesson/' + ${lesson.id}(docentName=${docentName})}"
                       class="btn btn-sm btn-danger"
-                      onclick="return confirm('Zeker weten?');"
+                      onclick="
+                        event.stopPropagation();
+                        return confirm('Zeker weten?');
+                      "
                     >
                       Verwijderen
                     </a>
@@ -63,6 +108,14 @@
           </p>
         </div>
       </div>
+
+      <script>
+        function navigateToLesson(rowElement) {
+          const lessonId = rowElement.getAttribute("data-lesson-id");
+          const username = rowElement.getAttribute("data-username");
+          window.location.href = `/lesson/${lessonId}/${username}`;
+        }
+      </script>
     </div>
   </body>
 </html>

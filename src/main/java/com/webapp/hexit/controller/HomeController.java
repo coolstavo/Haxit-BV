@@ -6,9 +6,13 @@ import com.webapp.hexit.model.Role;
 import com.webapp.hexit.repository.CompanyRepository;
 import com.webapp.hexit.repository.DocentRepository;
 import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,36 +26,52 @@ public class HomeController {
   private final CompanyRepository companyRepository;
   private final DocentRepository docentRepository;
   private final UserRepository userRepository;
+  private final InstrumentRepository instrumentRepository;
 
   public HomeController(
     EventRepository eventRepository,
     LessonRepository lessonRepository,
     CompanyRepository companyRepository,
     DocentRepository docentRepository,
-    UserRepository userRepository
+    UserRepository userRepository,
+    InstrumentRepository instrumentRepository
   ) {
     this.eventRepository = eventRepository;
     this.lessonRepository = lessonRepository;
     this.companyRepository = companyRepository;
     this.docentRepository = docentRepository;
     this.userRepository = userRepository;
+    this.instrumentRepository = instrumentRepository;
   }
 
   @GetMapping("/")
   public String home(
-    @RequestParam(name = "titel", required = false) String titel,
-    @RequestParam(name = "type", required = false) String type,
+    @RequestParam(name = "name", required = false) String name,
+    @RequestParam(name = "types", required = false) String types,
+    @RequestParam(name = "instruments", required = false) String instruments,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
     List<Lesson> lessons = lessonRepository.findAll();
 
-    if (titel != null && !titel.isBlank()) {
+    // Parse types filter (comma-separated)
+    final Set<String> selectedTypes = new HashSet<>();
+    if (types != null && !types.isBlank()) {
+      selectedTypes.addAll(Arrays.asList(types.split(",")));
+    }
+
+    // Parse instruments filter (comma-separated)
+    final Set<String> selectedInstruments = new HashSet<>();
+    if (instruments != null && !instruments.isBlank()) {
+      selectedInstruments.addAll(Arrays.asList(instruments.split(",")));
+    }
+
+    // Filter by name search
+    if (name != null && !name.isBlank()) {
+      String searchTerm = name.toLowerCase();
       events = events
         .stream()
-        .filter(event ->
-          event.getTitle().toLowerCase().contains(titel.toLowerCase())
-        )
+        .filter(event -> event.getTitle().toLowerCase().contains(searchTerm))
         .collect(Collectors.toList());
 
       lessons = lessons
@@ -63,32 +83,52 @@ public class HomeController {
                 .getInstrument()
                 .getNaam()
                 .toLowerCase()
-                .contains(titel.toLowerCase())) ||
+                .contains(searchTerm)) ||
             (lesson.getDescription() != null &&
-              lesson
-                .getDescription()
-                .toLowerCase()
-                .contains(titel.toLowerCase()))
+              lesson.getDescription().toLowerCase().contains(searchTerm)) ||
+            (lesson.getDocent() != null &&
+              lesson.getDocent().getNaam().toLowerCase().contains(searchTerm))
         )
         .collect(Collectors.toList());
     }
 
-    if (type != null && !type.isBlank()) {
+    // Filter by type (Lesson, Event, Jam)
+    if (!selectedTypes.isEmpty()) {
+      final boolean includeLesson = selectedTypes.contains("Lesson");
+      final boolean includeEvent = selectedTypes.contains("Event");
+      final boolean includeJam = selectedTypes.contains("Jam");
+
       events = events
         .stream()
-        .filter(event ->
-          event.getType().toLowerCase().contains(type.toLowerCase())
-        )
+        .filter(event -> {
+          String eventType = event.getType().toLowerCase();
+          return (
+            (includeEvent && eventType.contains("event")) ||
+            (includeJam && eventType.contains("jam"))
+          );
+        })
         .collect(Collectors.toList());
 
-      // Filter lessons only if type is "Les"
-      if (!type.equalsIgnoreCase("les")) {
+      if (!includeLesson) {
         lessons = List.of();
       }
     }
 
+    // Filter by instruments
+    if (!selectedInstruments.isEmpty()) {
+      lessons = lessons
+        .stream()
+        .filter(
+          lesson ->
+            lesson.getInstrument() != null &&
+            selectedInstruments.contains(lesson.getInstrument().getNaam())
+        )
+        .collect(Collectors.toList());
+    }
+
     model.addAttribute("events", events);
     model.addAttribute("lessons", lessons);
+    model.addAttribute("instruments", instrumentRepository.findAll());
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
@@ -114,6 +154,7 @@ public class HomeController {
 
     model.addAttribute("events", events);
     model.addAttribute("lessons", lessons);
+    model.addAttribute("instruments", instrumentRepository.findAll());
     model.addAttribute(
       "username",
       (username != null && !username.isBlank()) ? username : "Gast"

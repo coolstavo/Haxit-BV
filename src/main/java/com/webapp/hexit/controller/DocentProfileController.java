@@ -3,10 +3,15 @@ package com.webapp.hexit.controller;
 import com.webapp.hexit.model.Docent;
 import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Lesson;
+import com.webapp.hexit.model.LessonBooking;
+import com.webapp.hexit.model.LessonStatus;
 import com.webapp.hexit.repository.DocentRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.LessonBookingRepository;
 import com.webapp.hexit.repository.LessonRepository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -19,15 +24,63 @@ public class DocentProfileController {
   private final DocentRepository docentRepository;
   private final LessonRepository lessonRepository;
   private final InstrumentRepository instrumentRepository;
+  private final LessonBookingRepository lessonBookingRepository;
 
   public DocentProfileController(
     DocentRepository docentRepository,
     LessonRepository lessonRepository,
-    InstrumentRepository instrumentRepository
+    InstrumentRepository instrumentRepository,
+    LessonBookingRepository lessonBookingRepository
   ) {
     this.docentRepository = docentRepository;
     this.lessonRepository = lessonRepository;
     this.instrumentRepository = instrumentRepository;
+    this.lessonBookingRepository = lessonBookingRepository;
+  }
+
+  /**
+   * Helper method to calculate lesson statistics for a given lesson
+   * @param lessonId the ID of the lesson
+   * @return a map with "planned" and "pending" counts
+   */
+  private Map<String, Long> getLessonStatistics(Long lessonId) {
+    Map<String, Long> stats = new HashMap<>();
+
+    List<LessonBooking> bookings = lessonBookingRepository.findByLessonId(
+      lessonId
+    );
+
+    long plannedCount = bookings
+      .stream()
+      .filter(b -> b.getStatus() == LessonStatus.GEACCEPTEERD)
+      .count();
+
+    long pendingCount = bookings
+      .stream()
+      .filter(b -> b.getStatus() == LessonStatus.AANGEVRAAGD)
+      .count();
+
+    stats.put("planned", plannedCount);
+    stats.put("pending", pendingCount);
+
+    return stats;
+  }
+
+  /**
+   * Helper method to prepare lesson statistics for all lessons
+   * @param lessons the list of lessons
+   * @return a map of lessonId -> statistics map
+   */
+  private Map<Long, Map<String, Long>> getAllLessonStatistics(
+    List<Lesson> lessons
+  ) {
+    Map<Long, Map<String, Long>> allStats = new HashMap<>();
+
+    for (Lesson lesson : lessons) {
+      allStats.put(lesson.getId(), getLessonStatistics(lesson.getId()));
+    }
+
+    return allStats;
   }
 
   @GetMapping("/profile/docent/{docentnaam}")
@@ -40,8 +93,10 @@ public class DocentProfileController {
       );
       model.addAttribute("docent", docent.get());
       model.addAttribute("lessons", lessons);
+      model.addAttribute("lessonStats", getAllLessonStatistics(lessons));
     } else {
       model.addAttribute("lessons", List.of());
+      model.addAttribute("lessonStats", new HashMap<>());
     }
 
     model.addAttribute("docentName", docentnaam);
@@ -64,8 +119,10 @@ public class DocentProfileController {
       );
       model.addAttribute("docent", docent.get());
       model.addAttribute("lessons", lessons);
+      model.addAttribute("lessonStats", getAllLessonStatistics(lessons));
     } else {
       model.addAttribute("lessons", List.of());
+      model.addAttribute("lessonStats", new HashMap<>());
     }
 
     model.addAttribute("docentName", docentnaam);
