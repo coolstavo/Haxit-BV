@@ -6,11 +6,13 @@ import com.webapp.hexit.model.Muzikant;
 import com.webapp.hexit.model.MuzikantInstrument;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
+import com.webapp.hexit.model.Profile_File;
 import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
+import com.webapp.hexit.repository.ProfileFileRepository;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -34,19 +36,22 @@ public class ProfileController {
     private final MuzikantInstrumentRepository muzikantInstrumentRepository;
     private final InstrumentRepository instrumentRepository;
     private final GenreRepository genreRepository;
+    private final ProfileFileRepository profileFileRepository;
 
     public ProfileController(
         UserRepository userRepository,
         MuzikantRepository muzikantRepository,
         MuzikantInstrumentRepository muzikantInstrumentRepository,
         InstrumentRepository instrumentRepository,
-        GenreRepository genreRepository
+        GenreRepository genreRepository,
+        ProfileFileRepository profileFileRepository
     ) {
         this.userRepository = userRepository;
         this.muzikantRepository = muzikantRepository;
         this.muzikantInstrumentRepository = muzikantInstrumentRepository;
         this.instrumentRepository = instrumentRepository;
         this.genreRepository = genreRepository;
+        this.profileFileRepository = profileFileRepository;
     }
 
     @GetMapping("/profile/{username}")
@@ -79,6 +84,11 @@ public class ProfileController {
                 model.addAttribute("allInstruments", allInstruments);
                 List<Genre> allGenres = genreRepository.findAll();
                 model.addAttribute("allGenres", allGenres);
+
+                // Content ophalen van gebruiker
+                List<Profile_File> userContent = profileFileRepository.findByUser_UsernameOrderByUploadDateDesc(username);
+                model.addAttribute("mediaBestanden", userContent);
+
                 return "profile-muzikant";
             }
         }
