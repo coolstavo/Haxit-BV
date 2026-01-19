@@ -1,0 +1,68 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Media Uploaden</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" th:href="@{/css/style.css}" />
+    </head>
+    <body class="bg">
+        <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Media Uploaden</h3>
+                <a th:href="@{/profile/{username}(username=${username})}" class="btn btn-secondary">
+                    Terug naar profiel
+                </a>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                <strong th:text="${errorMessage}"></strong>
+            </div> 
+            <div th:if="${warningMessage}" class="alert alert-warning" role="alert">
+                <strong th:text="${warningMessage}"></strong>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted">
+                        Upload een audio/video bestand of een YouTube/SoundCloud link.
+                    </p>
+
+                    <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+                        
+                        <input type="hidden" name="username" th:value="${username}" />
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Titel / Beschrijving *</label>
+                            <input type="text" class="form-control" id="description" name="description" required placeholder="Bijv: Mijn nieuwe song">
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="link" class="form-label">Optie 1: YouTube / SoundCloud Link</label>
+                                <input type="text" class="form-control" id="link" name="link" placeholder="https://www.youtube.com/watch?v=...">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="file" class="form-label">Optie 2: Bestand (Audio/Video)</label>
+                                <input type="file" class="form-control" id="file" name="file" accept="audio/*,video/*">
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">Uploaden</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
