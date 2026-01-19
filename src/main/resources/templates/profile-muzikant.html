@@ -1,0 +1,201 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Profiel</title>
+
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" th:href="@{/css/style.css}" />
+    </head>
+
+    <body class="bg">
+        <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 th:text="'Profiel van ' + ${muzikant.user.username}">Profiel</h2>
+                <div>
+                    <a  th:href="@{/profile/upload/{username}(username=${muzikant.user.username})}" 
+                        class="btn btn-success me-1"> + Media uploaden
+                    </a>
+
+                    <a
+                        th:href="@{/profile/edit/{username}(username=${muzikant.user.username})}"
+                        class="btn btn-primary"
+                    >
+                        Profiel bewerken
+                    </a>
+                </div>
+            </div>
+
+            <div class="row mt-4 align-items-stretch">
+
+                <!-- Linker profiel kaart -->
+                <div class="col-md-4 d-flex">
+                    <div class="card mb-3 w-100">
+                        <div class="card-body text-center d-flex flex-column">
+                            <div th:if="${muzikantImage}">
+                                <img th:src="|data:image/jpeg;base64,${muzikantImage}|"
+                                         alt="Profielfoto"
+                                         style="width: 200px; height: 200px; object-fit: cover; border-radius: 50%;" />
+                                </div>
+
+                                <div th:unless="${muzikantImage}">
+                                    <img src="/images/default-placeholder.png"
+                                         alt="Geen foto"
+                                         style="width: 200px; height: 200px; border-radius: 50%;" />
+                                </div>
+
+                            <h5 th:text="${muzikant.naam}">Naam</h5>
+                            <!--<p th:text="${profile.instrument}">Instrument</p>-->
+
+                            <!-- spacer -->
+                            <div class="mt-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rechter details kaart -->
+                <div class="col-md-8 d-flex">
+                    <div class="card mb-3 w-100">
+                        <div class="card-body">
+                            <p><strong>Leeftijd:</strong> <span th:text="${muzikant.leeftijd}">0</span></p>
+                            <p>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Genre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                <trtr th:each="genre : ${muzikant.genres}">
+                                    <td th:text="${genre.name}"></td>
+                                </trtr>
+                                    </tbody>
+                                </table>
+                            </p>
+                            <p>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Instrument</th>
+                                            <th>Niveau</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            th:each="muzikantInstrument : ${muzikantInstruments}"
+                                        >
+                                            <td
+                                                th:text="${muzikantInstrument.instrument.naam}"
+                                            ></td>
+                                            <td th:text="${muzikantInstrument.level}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+                <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                    <strong th:text="${successMessage}"></strong>
+                </div> 
+                <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                    <strong th:text="${errorMessage}"></strong>
+                </div>
+
+                <div class="row mt-4 align-items-start">
+                    <div class="col-md-6">
+                        <div class="card mb-3 w-100">  
+                            <div class="card-body" th:with="audioLijst=${mediaBestanden.?[isAudio() or isSoundCloud()]}">
+                                <h5 class="card-title border-bottom pb-2">Audio || SoundCloud</h5>
+                                
+                                <div th:each="item : ${audioLijst}">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong th:text="${item.beschrijving}">Titel</strong>
+                                            <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy')}"></small>
+                                        </div>
+                                        
+                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post" 
+                                              th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
+                                              onsubmit="return confirm(this.getAttribute('confirm-msg'));">
+                                            
+                                            <input type="hidden" name="username" th:value="${muzikant.user.username}" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Verwijderen">
+                                                Verwijder </button>
+                                                
+                                        </form>
+                                    </div>
+                                    <div th:if="${item.isAudio()}" class="mb-4">
+                                        <audio controls class="w-100">
+                                            <source th:src="${item.profileAudio.audioBestandPath}" type="audio/mpeg">
+                                            Je browser ondersteunt geen audio.
+                                        </audio>
+                                    </div>
+
+                                    <div th:if="${item.isSoundCloud()}" class="mb-4">
+                                        <div class="mt-2">
+                                            <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+                                                    th:src="${item.getEmbedUrl()}">
+                                            </iframe>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <p th:if="${audioLijst.isEmpty()}" class="text-muted"> Nog geen audio uploads. </p>
+                            </div>   
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card mb-3 w-100">
+                            <div class="card-body" th:with="videoLijst=${mediaBestanden.?[isVideo() or isYoutube()]}">
+                                <h5 class="card-title border-bottom pb-2">Video || YouTube</h5>
+                                
+                                <div th:each="item : ${videoLijst}">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong th:text="${item.beschrijving}">Titel</strong>
+                                            <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy')}"></small>
+                                        </div>
+                                        
+                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post" 
+                                              th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
+                                              onsubmit="return confirm(this.getAttribute('confirm-msg'));">
+                                            
+                                            <input type="hidden" name="username" th:value="${muzikant.user.username}" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Verwijderen">
+                                                Verwijder </button>
+                                                
+                                        </form>
+                                    </div>
+                                    <div th:if="${item.isYoutube()}" class="mb-4">
+                                        <div class="ratio ratio-16x9 mt-2">
+                                            <iframe th:src="${item.getEmbedUrl()}" allowfullscreen></iframe>
+                                        </div>
+                                    </div>
+
+                                    <div th:if="${item.isVideo()}" class="mb-4">
+                                        <video controls class="w-100 mt-2">
+                                            <source th:src="${item.profileVideo.videoBestandPath}" type="video/mp4">
+                                            Je browser ondersteunt geen video.
+                                        </video>
+                                    </div>
+                                    
+                                </div>
+                                <p th:if="${videoLijst.isEmpty()}" class="text-muted"> Nog geen video uploads. </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </body>
+</html>

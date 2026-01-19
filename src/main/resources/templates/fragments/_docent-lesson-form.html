@@ -1,0 +1,155 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div
+      th:fragment="docentLessonForm(docentName, instruments, levels, lessonForms, rateTypes)"
+    >
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Nieuwe Les Aanbieden</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" action="/profile/docent/save-lesson">
+            <input type="hidden" name="docentName" th:value="${docentName}" />
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Instrument *</label>
+                <select name="instrumentId" class="form-select" required>
+                  <option value="">-- Selecteer instrument --</option>
+                  <option
+                    th:each="inst : ${instruments}"
+                    th:value="${inst.id}"
+                    th:text="${inst.naam}"
+                  ></option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Lesvorm *</label>
+                <select name="lessonForm" class="form-select" required>
+                  <option value="">-- Selecteer lesvorm --</option>
+                  <option
+                    th:each="form : ${lessonForms}"
+                    th:value="${form}"
+                    th:text="${form}"
+                  ></option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Niveaus</label>
+                <div class="border rounded p-3">
+                  <div th:each="level : ${levels}" class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="levels"
+                      th:value="${level}"
+                      th:id="${'level-' + level}"
+                    />
+                    <label
+                      class="form-check-label"
+                      th:for="${'level-' + level}"
+                      th:text="${level}"
+                    ></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Tarief *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="rate"
+                  class="form-control"
+                  placeholder="Bijv. 25.00"
+                  required
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Tarief Type *</label>
+                <select name="rateType" class="form-select" required>
+                  <option value="">-- Selecteer --</option>
+                  <option
+                    th:each="type : ${rateTypes}"
+                    th:value="${type}"
+                    th:text="${type}"
+                  ></option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Beschrijving (optioneel)</label>
+                <textarea
+                  name="description"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Beschrijf je les verder..."
+                ></textarea>
+              </div>
+
+              <!-- Location with map -->
+              <div class="col-12">
+                <label class="form-label">Locatie *</label>
+                <small class="text-muted d-block mb-2"
+                  >Klik op de kaart om de locatie te selecteren</small
+                >
+                <div id="lessonMap"></div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Locatie beschrijving</label>
+                <input
+                  type="text"
+                  name="location"
+                  id="locationName"
+                  class="form-control"
+                  placeholder="Bijv. Muziekschool Amsterdam, Hoofdstraat 1"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Latitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  name="lat"
+                  id="lessonLat"
+                  class="form-control"
+                  placeholder="Bijv. 52.3676"
+                  required
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Longitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  name="lng"
+                  id="lessonLng"
+                  class="form-control"
+                  placeholder="Bijv. 4.9041"
+                  required
+                  readonly
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">
+              Les Aanbieden
+            </button>
+            <a
+              th:href="@{'/profile/docent/' + ${docentName}}"
+              class="btn btn-secondary mt-3"
+              >Annuleren</a
+            >
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

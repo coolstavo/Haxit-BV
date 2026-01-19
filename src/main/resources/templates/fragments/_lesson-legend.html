@@ -1,0 +1,42 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="lessonLegend">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Legenda</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p>
+                <span class="badge bg-warning">AANGEVRAAGD</span> - Les is
+                aangevraagd, wacht op goedkeuring
+              </p>
+              <p>
+                <span class="badge bg-success">GEACCEPTEERD</span> - Beide
+                partijen hebben goedgekeurd
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p>
+                <span class="badge bg-danger">AFGEWEZEN</span> - De docent kon
+                geen datum accepteren
+              </p>
+              <p>
+                <span class="badge bg-secondary">GEANNULEERD</span> - De
+                aanvraag is geannuleerd
+              </p>
+            </div>
+          </div>
+          <hr />
+          <p class="mb-0 text-muted">
+            <strong>Hoe werkt het?</strong> De student stelt datums voor, de
+            docent kiest een datum en accepteert. Bij afwijzing kan de student
+            nieuwe datums voorstellen.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

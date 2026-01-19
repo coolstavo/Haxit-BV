@@ -1,0 +1,48 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="docentProfileView(docent, docentName)">
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div th:if="${docent != null}">
+            <div class="row">
+              <div class="col-md-8">
+                <p th:if="${docent.specialisatie}">
+                  <strong>Specialisatie:</strong>
+                  <span th:text="${docent.specialisatie}">-</span>
+                </p>
+                <p th:if="${docent.ervaringsjaren}">
+                  <strong>Jaren ervaring:</strong>
+                  <span th:text="${docent.ervaringsjaren}">-</span>
+                </p>
+              </div>
+            </div>
+
+            <div th:if="${docent.biografie}" class="mt-3">
+              <h5>Biografie</h5>
+              <p style="white-space: pre-line" th:text="${docent.biografie}">
+                -
+              </p>
+            </div>
+
+            <div th:if="${docent.kwalificaties}" class="mt-3">
+              <h5>Kwalificaties</h5>
+              <p
+                style="white-space: pre-line"
+                th:text="${docent.kwalificaties}"
+              >
+                -
+              </p>
+            </div>
+          </div>
+
+          <a
+            th:href="@{'/profile/docent/' + ${docentName} + '/edit'}"
+            class="btn btn-primary mt-3"
+            >Profiel bewerken</a
+          >
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

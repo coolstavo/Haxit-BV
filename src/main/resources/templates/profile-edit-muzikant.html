@@ -1,0 +1,244 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Profiel Bewerken</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" th:href="@{/css/style.css}" />
+        <link rel="stylesheet" th:href="@{/css/validation.css}" />
+    </head>
+    <body class="bg">
+        <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+        <div class="container">
+            <h3 class="mb-3">
+                Profiel van
+                <span th:text="${muzikant.user.username}">Gebruiker</span>
+            </h3>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form th:action="@{/profile/change-profile-pic}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="id" th:value="${muzikant.id}" />
+
+                        <div class="form-group">
+                            <label for="imageFile">Wijzig Profielfoto:</label>
+                            <input type="file" id="imageFile" name="imageFile" accept="image/*" class="form-control-file">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-2">Foto Uploaden</button>
+                    </form>
+
+                    <hr>
+                    <form
+                        th:action="@{/profile/save-muzikant}"
+                        th:object="${muzikant}"
+                        method="post"
+                    >
+                        <input type="hidden" th:field="*{id}" name="id" />
+                        <input
+                            type="hidden"
+                            th:field="*{user.id}"
+                            name="user.id"
+                        />
+
+                        <div class="mb-3">
+                            <label class="form-label">Naam</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                th:field="*{naam}"
+                                th:classappend="${#fields.hasErrors('naam')} ? 'is-invalid' : ''"
+                            />
+                            <div
+                                class="invalid-feedback"
+                                th:if="${#fields.hasErrors('naam')}"
+                                th:errors="*{naam}"
+                            ></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Leeftijd</label>
+                            <input
+                                type="number"
+                                class="form-control"
+                                th:field="*{leeftijd}"
+                                th:classappend="${#fields.hasErrors('leeftijd')} ? 'is-invalid' : ''"
+                            />
+                            <div
+                                class="invalid-feedback"
+                                th:if="${#fields.hasErrors('leeftijd')}"
+                                th:errors="*{leeftijd}"
+                            ></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Opslaan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Table to display instruments with levels -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Instrumenten</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Instrument</th>
+                                <th>Niveau</th>
+                                <th>Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                th:each="muzikantInstrument : ${muzikantInstruments}"
+                            >
+                                <td
+                                    th:text="${muzikantInstrument.instrument.naam}"
+                                ></td>
+                                <td th:text="${muzikantInstrument.level}"></td>
+                                <td>
+                                    <form
+                                        th:action="@{/profile/remove-instrument}"
+                                        method="post"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="muzikantInstrumentId"
+                                            th:value="${muzikantInstrument.id}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Verwijderen
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Form to add a new instrument with level -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Voeg een instrument toe</h4>
+                    <form th:action="@{/profile/add-instrument}" method="post">
+                        <input
+                            type="hidden"
+                            name="muzikantId"
+                            th:value="${muzikant.id}"
+                        />
+                        <div class="mb-3">
+                            <label for="instrument">Instrument</label>
+                            <select
+                                class="form-select"
+                                name="instrumentId"
+                                id="instrument"
+                            >
+                                <option
+                                    th:each="instrument : ${allInstruments}"
+                                    th:value="${instrument.id}"
+                                    th:text="${instrument.naam}"
+                                ></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="level">Niveau</label>
+                            <select class="form-select" name="level" id="level">
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">
+                                    Intermediate
+                                </option>
+                                <option value="Advanced">Advanced</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Toevoegen
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Genres</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Genre</th>
+                                <th>Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="genre : ${muzikant.genres}">
+                                <td th:text="${genre.name}"></td>
+                                <td>
+                                    <form
+                                        th:action="@{/profiel/remove-genre}"
+                                        method="post"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="muzikantId"
+                                            th:value="${muzikant.id}"
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="genreId"
+                                            th:value="${genre.id}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Verwijderen
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h4>Genres</h4>
+                    <form th:action="@{/profiel/add-genre}" method="post">
+                        <input
+                            type="hidden"
+                            name="muzikantId"
+                            th:value="${muzikant.id}"
+                        />
+                        <div class="mb-3">
+                            <label for="genre">Voeg een genre toe</label>
+                            <select
+                                class="form-select"
+                                name="genreId"
+                                id="genre"
+                            >
+                                <option
+                                    th:each="genre : ${allGenres}"
+                                    th:value="${genre.id}"
+                                    th:text="${genre.name}"
+                                ></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Toevoegen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

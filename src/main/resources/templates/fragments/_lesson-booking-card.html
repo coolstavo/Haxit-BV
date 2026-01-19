@@ -1,0 +1,255 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div
+      th:fragment="bookingCard(booking, bookingIndex, lesson, username, isTeacher, isStudent)"
+    >
+      <div
+        class="card mb-4"
+        th:classappend="${booking.status.name() == 'GEACCEPTEERD'} ? 'border-success' : (${booking.status.name() == 'AFGEWEZEN'} ? 'border-danger' : '')"
+      >
+        <div
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          <span>
+            <strong th:if="${isTeacher}">Student: </strong>
+            <strong th:if="${isStudent}">Aanvraag #</strong>
+            <span th:if="${isTeacher}" th:text="${booking.student.naam}"
+              >Student</span
+            >
+            <span th:if="${isStudent}" th:text="${bookingIndex + 1}">1</span>
+          </span>
+          <span
+            th:class="${booking.status.name() == 'AANGEVRAAGD'} ? 'badge bg-warning' :
+                   (${booking.status.name() == 'GEACCEPTEERD'} ? 'badge bg-success' :
+                   (${booking.status.name() == 'AFGEWEZEN'} ? 'badge bg-danger' : 'badge bg-secondary'))"
+            th:text="${booking.status}"
+          ></span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Proposed times -->
+            <div class="col-md-6">
+              <h6>Voorgestelde Tijden:</h6>
+              <ul
+                th:if="${booking.lessonProposals != null && !booking.lessonProposals.isEmpty()}"
+                class="list-unstyled"
+              >
+                <li
+                  th:each="proposal, stat : ${booking.lessonProposals}"
+                  class="mb-1"
+                >
+                  <span
+                    class="badge bg-light text-dark me-2"
+                    th:text="${stat.index + 1}"
+                    >1</span
+                  >
+                  <span
+                    th:text="${#temporals.format(proposal, 'EEEE dd MMMM yyyy - HH:mm')}"
+                    >Datum</span
+                  >
+                </li>
+              </ul>
+              <p
+                th:if="${booking.lessonProposals == null || booking.lessonProposals.isEmpty()}"
+                class="text-muted"
+              >
+                Geen voorstellen
+              </p>
+            </div>
+
+            <!-- Confirmed time & status -->
+            <div class="col-md-6">
+              <div
+                th:if="${booking.confirmedTime != null}"
+                class="alert alert-success py-2"
+              >
+                <strong>✅ Gekozen datum:</strong><br />
+                <span
+                  th:text="${#temporals.format(booking.confirmedTime, 'EEEE dd MMMM yyyy - HH:mm')}"
+                  >Datum</span
+                >
+              </div>
+
+              <div class="d-flex gap-2 mb-2 flex-wrap">
+                <span
+                  th:if="${booking.acceptedByStudent}"
+                  class="badge bg-success"
+                  >✓ Student akkoord</span
+                >
+                <span
+                  th:if="${!booking.acceptedByStudent}"
+                  class="badge bg-secondary"
+                  >✗ Student wachtend</span
+                >
+                <span
+                  th:if="${booking.acceptedByDocent}"
+                  class="badge bg-success"
+                  >✓ Docent akkoord</span
+                >
+                <span
+                  th:if="${!booking.acceptedByDocent}"
+                  class="badge bg-secondary"
+                  >✗ Docent wachtend</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- TEACHER ACTIONS -->
+          <div
+            th:if="${isTeacher && booking.status.name() == 'AANGEVRAAGD'}"
+            class="mt-3 pt-3 border-top"
+          >
+            <h6>Kies een datum om te accepteren:</h6>
+            <form
+              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/accept'}"
+              method="post"
+              class="mb-3"
+            >
+              <input type="hidden" name="bookingId" th:value="${booking.id}" />
+              <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                  <label class="form-label">Selecteer datum *</label>
+                  <select name="chosenTime" class="form-select" required>
+                    <option value="">-- Kies een voorgestelde datum --</option>
+                    <option
+                      th:each="proposal : ${booking.lessonProposals}"
+                      th:value="${proposal}"
+                      th:text="${#temporals.format(proposal, 'EEEE dd MMMM yyyy - HH:mm')}"
+                    ></option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <button type="submit" class="btn btn-success">
+                    ✓ Accepteren met gekozen datum
+                  </button>
+                </div>
+              </div>
+            </form>
+            <form
+              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/reject'}"
+              method="post"
+              class="d-inline"
+            >
+              <input type="hidden" name="bookingId" th:value="${booking.id}" />
+              <button
+                type="submit"
+                class="btn btn-outline-danger"
+                onclick="
+                  return confirm(
+                    'Weet je zeker dat je deze aanvraag wilt afwijzen?',
+                  );
+                "
+              >
+                ✗ Afwijzen (geen datum past)
+              </button>
+            </form>
+          </div>
+
+          <!-- STUDENT: Update proposals if rejected -->
+          <div
+            th:if="${isStudent && booking.status.name() == 'AFGEWEZEN'}"
+            class="mt-3 pt-3 border-top"
+          >
+            <div class="alert alert-warning">
+              <strong>⚠️ Afgewezen:</strong> De docent kon geen van je
+              voorgestelde datums accepteren. Je kunt nieuwe datums voorstellen.
+            </div>
+            <h6>Nieuwe datums voorstellen:</h6>
+            <form
+              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-proposals'}"
+              method="post"
+            >
+              <input type="hidden" name="bookingId" th:value="${booking.id}" />
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Voorkeur 1 *</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    name="proposal1"
+                    required
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Voorkeur 2</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    name="proposal2"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Voorkeur 3</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    name="proposal3"
+                  />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary mt-3">
+                📩 Nieuwe voorstellen versturen
+              </button>
+            </form>
+          </div>
+
+          <!-- Cancel option -->
+          <div
+            th:if="${booking.status.name() == 'AANGEVRAAGD' || booking.status.name() == 'AFGEWEZEN'}"
+            class="mt-3 pt-3 border-top"
+          >
+            <form
+              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/cancel-booking'}"
+              method="post"
+              class="d-inline"
+            >
+              <input type="hidden" name="bookingId" th:value="${booking.id}" />
+              <button
+                type="submit"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="
+                  return confirm(
+                    'Weet je zeker dat je deze boeking wilt annuleren?',
+                  );
+                "
+              >
+                🗑️ Aanvraag annuleren
+              </button>
+            </form>
+          </div>
+
+          <!-- Accepted status -->
+          <div
+            th:if="${booking.status.name() == 'GEACCEPTEERD'}"
+            class="mt-3 pt-3 border-top"
+          >
+            <div class="alert alert-success mb-0">
+              <strong>✅ Bevestigd!</strong> Deze les is gepland op
+              <span
+                th:text="${#temporals.format(booking.confirmedTime, 'EEEE dd MMMM yyyy')}"
+                >datum</span
+              >
+              om
+              <span
+                th:text="${#temporals.format(booking.confirmedTime, 'HH:mm')}"
+                >tijd</span
+              >.
+            </div>
+          </div>
+
+          <!-- Cancelled status -->
+          <div
+            th:if="${booking.status.name() == 'GEANNULEERD'}"
+            class="mt-3 pt-3 border-top"
+          >
+            <div class="alert alert-secondary mb-0">
+              <strong>Geannuleerd:</strong> Deze aanvraag is geannuleerd.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

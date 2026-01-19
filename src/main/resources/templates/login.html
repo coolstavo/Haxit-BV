@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inloggen - Listen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            max-width: 500px;
+            width: 100%;
+        }
+        .nav-tabs .nav-link {
+            color: #666;
+            border: none;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: transparent;
+            color: var(--hexit-brown);
+            border-bottom: 3px solid var(--hexit-brown);
+        }
+        .nav-tabs {
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body class="bg">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <img src="/assets/new-logo.svg" alt="Listen logo" style="height: 40px;" class="mb-2">
+                        <h3 class="mb-1">Welkom bij Listen</h3>
+                        <p class="text-muted">Kies je type account en ga naar je profiel</p>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs mb-4" id="loginTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="muzikant-tab" data-bs-toggle="tab" data-bs-target="#muzikant" type="button" role="tab">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m.078-10a.498.498 0 0 0-.5.5c0 .5.5 2 3 2s3-1.5 3-2a.5.5 0 1 0-1 0c0 .5-.5 1-2 1s-2-.5-2-1a.498.498 0 0 0-.5-.5M3 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1z"/>
+                                </svg>
+                                Muzikant
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="bedrijf-tab" data-bs-toggle="tab" data-bs-target="#bedrijf" type="button" role="tab">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-building" viewBox="0 0 16 16">
+                                    <path d="M4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m-9 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m-9 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1m3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1M4 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1"/>
+                                </svg>
+                                Bedrijf
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="docent-tab" data-bs-toggle="tab" data-bs-target="#docent" type="button" role="tab">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-mortarboard" viewBox="0 0 16 16">
+                                    <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0l7.5-3a.5.5 0 0 0 .025-.917l-7.5-3.5zM0 14.338a.5.5 0 0 0 .75.384l1.87-.935v4.113a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-4.112l1.87.934a.5.5 0 0 0 .75-.384c0-.414-.313-.798-.88-.952L8 10.5l-6.88 2.864c-.567.154-.88.538-.88.952z"/>
+                                </svg>
+                                Docent
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="loginTabContent">
+                        <!-- Muzikant Tab -->
+                        <div class="tab-pane fade show active" id="muzikant" role="tabpanel">
+                            <form action="/login" method="get">
+                                <input type="hidden" name="type" value="muzikant">
+                                <div class="mb-3">
+                                    <label for="muzikantName" class="form-label">Gebruikersnaam</label>
+                                    <input type="text" class="form-control" id="muzikantName" name="username" placeholder="Bijv. john_doe" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Ga naar profiel</button>
+                            </form>
+                        </div>
+
+                        <!-- Bedrijf Tab -->
+                        <div class="tab-pane fade" id="bedrijf" role="tabpanel">
+                            <form action="/login" method="get">
+                                <input type="hidden" name="type" value="bedrijf">
+                                <div class="mb-3">
+                                    <label for="bedrijfName" class="form-label">Bedrijfsnaam</label>
+                                    <input type="text" class="form-control" id="bedrijfName" name="username" placeholder="Bijv. Acme Corp" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Ga naar profiel</button>
+                            </form>
+                        </div>
+
+                        <!-- Docent Tab -->
+                        <div class="tab-pane fade" id="docent" role="tabpanel">
+                            <form action="/login" method="get">
+                                <input type="hidden" name="type" value="docent">
+                                <div class="mb-3">
+                                    <label for="docentName" class="form-label">Gebruikersnaam</label>
+                                    <input type="text" class="form-control" id="docentName" name="username" placeholder="Bijv. mr_smith" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Ga naar profiel</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <p class="text-center text-muted small">
+                        <a href="/" class="text-decoration-none">Terug naar home</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

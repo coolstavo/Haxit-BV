@@ -1,23 +1,144 @@
 <div th:fragment="searchbox">
   <form class="mb-3" method="get" action="/">
-    <div class="input-group mb-2">
+    <!-- Name Search Field -->
+    <div class="mb-2">
       <input
         type="text"
         name="name"
         class="form-control"
-        placeholder="Zoek op naam"
+        placeholder="Zoek op naam, instrument of docent"
         th:value="${param.name}"
       />
     </div>
-    <div class="input-group mb-2">
-      <input
-        type="text"
-        name="type"
-        class="form-control"
-        placeholder="Zoek op type"
-        th:value="${param.type}"
-      />
+
+    <!-- Type Filter Section -->
+    <div class="card mb-3">
+      <div class="card-header bg-light p-2">
+        <button
+          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#filterTypes"
+          aria-expanded="false"
+        >
+          <strong>Type Filter</strong>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-chevron-down"
+            viewBox="0 0 16 16"
+            style="display: inline-block; float: right"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="collapse" id="filterTypes">
+        <div class="card-body p-2">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="types"
+              value="Lesson"
+              id="filterLesson"
+              th:checked="${param.types != null && #strings.contains(param.types, 'Lesson')}"
+            />
+            <label class="form-check-label" for="filterLesson"> Lessen </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="types"
+              value="Event"
+              id="filterEvent"
+              th:checked="${param.types != null && #strings.contains(param.types, 'Event')}"
+            />
+            <label class="form-check-label" for="filterEvent"> Events </label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="types"
+              value="Jam"
+              id="filterJam"
+              th:checked="${param.types != null && #strings.contains(param.types, 'Jam')}"
+            />
+            <label class="form-check-label" for="filterJam"> Jams </label>
+          </div>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-outline-secondary" type="submit">Zoeken</button>
+
+    <!-- Instruments Filter Section -->
+    <div
+      class="card mb-3"
+      th:if="${instruments != null && instruments.size() > 0}"
+    >
+      <div class="card-header bg-light p-2">
+        <button
+          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#filterInstruments"
+          aria-expanded="false"
+        >
+          <strong>Instrumenten</strong>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-chevron-down"
+            viewBox="0 0 16 16"
+            style="display: inline-block; float: right"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="collapse"
+        id="filterInstruments"
+        style="max-height: 300px; overflow-y: auto"
+      >
+        <div class="card-body p-2">
+          <div
+            class="form-check"
+            th:each="instrument : ${instruments}"
+            th:id="'instrument-' + ${instrument.id}"
+          >
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="instruments"
+              th:value="${instrument.naam}"
+              th:id="'filterInstrument-' + ${instrument.id}"
+              th:checked="${param.instruments != null && #strings.contains(param.instruments, instrument.naam)}"
+            />
+            <label
+              class="form-check-label"
+              th:for="'filterInstrument-' + ${instrument.id}"
+              th:text="${instrument.naam}"
+            >
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-outline-secondary w-100" type="submit">
+      Zoeken
+    </button>
   </form>
 </div>
