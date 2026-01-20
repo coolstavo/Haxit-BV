@@ -75,9 +75,7 @@ if (Array.isArray(events) && events.length > 0) {
       "" +
       event.description +
       "<br>" +
-      "<span class='badge rounded-pill navbar-brown'>" +
-      event.type +
-      "</span>";
+      "<span class='badge rounded-pill navbar-brown'> event </span>";
     marker.bindPopup(popupText);
 
     markers["event-" + index] = marker;

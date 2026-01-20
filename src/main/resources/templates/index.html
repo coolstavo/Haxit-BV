@@ -78,10 +78,8 @@
               "
             >
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
-                <span
-                  class="badge rounded-pill navbar-brown"
-                  th:text="${event.type}"
+                <h5 class="mb-1 text-dark" th:text="event">Titel</h5>
+                <span class="badge rounded-pill navbar-brown" th:text="event"
                   >Type</span
                 >
               </div>
@@ -143,7 +141,6 @@
       th:data-id="${event.id}"
       th:data-title="${event.title}"
       th:data-description="${event.description}"
-      th:data-type="${event.type}"
       th:data-lat="${event.lat}"
       th:data-lng="${event.lng}"
       style="display: none"

@@ -36,9 +36,9 @@ public class LoginController {
 
   @GetMapping("/login")
   public String login(
-          @RequestParam String username,
-          @RequestParam(required = false) String type,
-          HttpSession session
+    @RequestParam String username,
+    @RequestParam(required = false) String type,
+    HttpSession session
   ) {
     if (username == null || username.isBlank()) {
       return "redirect:/login-page";
@@ -71,7 +71,7 @@ public class LoginController {
         Company company = new Company(user);
         companyRepository.save(company);
       }
-      return "redirect:/profile/bedrijf/" + username;
+      return "redirect:/profile/" + username;
     }
 
     // default muzikant

@@ -93,11 +93,7 @@ public class HomeController {
       events = events
         .stream()
         .filter(event -> {
-          String eventType = event.getType().toLowerCase();
-          return (
-            (includeEvent && eventType.contains("event")) ||
-            (includeJam && eventType.contains("jam"))
-          );
+          return (includeEvent);
         })
         .collect(Collectors.toList());
 
