@@ -16,9 +16,6 @@ public class Docent {
   @JsonIgnore
   private User user;
 
-  @Column(nullable = false, unique = true)
-  private String naam;
-
   private String specialisatie; // Bijv. "Klassieke muziek", "Jazz"
 
   @Column(columnDefinition = "TEXT")
@@ -39,9 +36,8 @@ public class Docent {
 
   public Docent() {}
 
-  public Docent(User user, String naam) {
+  public Docent(User user) {
     this.user = user;
-    this.naam = naam;
   }
 
   // Getters and Setters
@@ -58,11 +54,7 @@ public class Docent {
   }
 
   public String getNaam() {
-    return naam;
-  }
-
-  public void setNaam(String naam) {
-    this.naam = naam;
+    return user != null ? user.getUsername() : null;
   }
 
   public String getSpecialisatie() {
