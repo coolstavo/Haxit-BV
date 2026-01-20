@@ -1,0 +1,17 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <title>Messages</title>
+</head>
+<body>
+<h1>Messages works</h1>
+
+<p>Logged in as: <span th:text="${username}">user</span></p>
+
+<h3>Partners</h3>
+<ul>
+    <li th:each="p : ${partners}" th:text="${p}">partner</li>
+</ul>
+</body>
+</html>
