@@ -113,8 +113,8 @@
                 <span class="badge rounded-pill bg-success">Les</span>
               </div>
               <p class="mb-1">
-                <strong th:text="${lesson.docent.naam}">Docent</strong> - €<span
-                  th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+                <strong th:text="${lesson.docent.user.username}">Docent</strong>
+                - €<span th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
                   >0.00</span
                 >
                 <span th:text="${lesson.rateType}">per uur</span>
@@ -159,7 +159,7 @@
       th:data-location="${lesson.location}"
       th:data-lat="${lesson.lat}"
       th:data-lng="${lesson.lng}"
-      th:data-docentnaam="${lesson.docent.naam}"
+      th:data-docentnaam="${lesson.docent.user.username}"
       style="display: none"
     ></div>
 

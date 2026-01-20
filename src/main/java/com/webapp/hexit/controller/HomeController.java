@@ -3,8 +3,6 @@ package com.webapp.hexit.controller;
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.model.Role;
-import com.webapp.hexit.repository.CompanyRepository;
-import com.webapp.hexit.repository.DocentRepository;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.LessonRepository;
@@ -23,23 +21,17 @@ public class HomeController {
 
   private final EventRepository eventRepository;
   private final LessonRepository lessonRepository;
-  private final CompanyRepository companyRepository;
-  private final DocentRepository docentRepository;
   private final UserRepository userRepository;
   private final InstrumentRepository instrumentRepository;
 
   public HomeController(
     EventRepository eventRepository,
     LessonRepository lessonRepository,
-    CompanyRepository companyRepository,
-    DocentRepository docentRepository,
     UserRepository userRepository,
     InstrumentRepository instrumentRepository
   ) {
     this.eventRepository = eventRepository;
     this.lessonRepository = lessonRepository;
-    this.companyRepository = companyRepository;
-    this.docentRepository = docentRepository;
     this.userRepository = userRepository;
     this.instrumentRepository = instrumentRepository;
   }
@@ -160,7 +152,7 @@ public class HomeController {
       (username != null && !username.isBlank()) ? username : "Gast"
     );
 
-    // Bepaal userRole op basis van User role of repository checks
+    // Bepaal userRole op basis van User role
     String userRole = "MUZIKANT"; // default
     var user = userRepository.findByUsername(username);
     if (user.isPresent()) {
@@ -171,10 +163,6 @@ public class HomeController {
       } else {
         userRole = "MUZIKANT";
       }
-    } else if (companyRepository.findByCompanyName(username).isPresent()) {
-      userRole = "BEDRIJF";
-    } else if (docentRepository.findByNaam(username).isPresent()) {
-      userRole = "DOCENT";
     }
 
     model.addAttribute("userRole", userRole);
