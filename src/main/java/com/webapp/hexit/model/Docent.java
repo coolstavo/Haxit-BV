@@ -1,5 +1,6 @@
 package com.webapp.hexit.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -12,6 +13,7 @@ public class Docent {
 
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonIgnore
   private User user;
 
   @Column(nullable = false, unique = true)
@@ -27,7 +29,12 @@ public class Docent {
   @Column(columnDefinition = "TEXT")
   private String kwalificaties; // Diploma's, certificaten, etc.
 
-  @OneToMany(mappedBy = "docent", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(
+    mappedBy = "docent",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+  )
+  @JsonIgnore
   private List<Lesson> lessons;
 
   public Docent() {}

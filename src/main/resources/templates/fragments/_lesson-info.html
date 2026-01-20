@@ -1,0 +1,59 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="lessonInfo(lesson)">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Les Informatie</h5>
+        </div>
+        <div class="card-body">
+          <p>
+            <strong>Instrument:</strong>
+            <span th:text="${lesson.instrument?.naam}">-</span>
+          </p>
+          <p>
+            <strong>Niveaus:</strong>
+            <span
+              th:text="${lesson.levels != null && !lesson.levels.isEmpty()} ? ${lesson.levels} : 'Niet gespecificeerd'"
+              >-</span
+            >
+          </p>
+          <p>
+            <strong>Lesvorm:</strong>
+            <span th:text="${lesson.lessonForm}">-</span>
+          </p>
+          <p>
+            <strong>Tarief:</strong>
+            €<span th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+              >0.00</span
+            >
+            <span th:text="${lesson.rateType}">per uur</span>
+          </p>
+          <p>
+            <strong>Docent:</strong>
+            <a
+              th:href="@{'/profile/docent/' + ${lesson.docent.naam}}"
+              th:text="${lesson.docent.naam}"
+              >Docent</a
+            >
+          </p>
+          <p th:if="${lesson.docent.specialisatie}">
+            <strong>Specialisatie:</strong>
+            <span th:text="${lesson.docent.specialisatie}">-</span>
+          </p>
+
+          <div th:if="${lesson.description}" class="mt-3">
+            <h6>Beschrijving</h6>
+            <p
+              class="text-muted"
+              style="white-space: pre-line"
+              th:text="${lesson.description}"
+            >
+              Geen beschrijving
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

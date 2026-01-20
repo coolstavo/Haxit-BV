@@ -1,0 +1,61 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="lessonRequestForm(lesson, username)">
+      <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">📅 Les Aanvragen</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">
+            Stel maximaal 3 voorkeurstijden voor wanneer je les wilt volgen.
+          </p>
+          <form
+            th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/request'}"
+            method="post"
+          >
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 1 *</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  name="proposal1"
+                  required
+                />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 2</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  name="proposal2"
+                />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Voorkeur 3</label>
+                <input
+                  type="datetime-local"
+                  class="form-control"
+                  name="proposal3"
+                />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Bericht aan docent (optioneel)</label>
+                <textarea
+                  class="form-control"
+                  name="message"
+                  rows="2"
+                  placeholder="Bijv. specifieke wensen of vragen..."
+                ></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              <span>📩 Lesaanvraag Versturen</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

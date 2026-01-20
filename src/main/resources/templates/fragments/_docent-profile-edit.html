@@ -1,0 +1,77 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="docentProfileEdit(docent, docentName)">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Profiel Bewerken</h5>
+        </div>
+        <div class="card-body">
+          <form method="post" action="/profile/docent/save-profile">
+            <input type="hidden" name="naam" th:value="${docentName}" />
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Naam</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  th:value="${docentName}"
+                  disabled
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Specialisatie</label>
+                <input
+                  type="text"
+                  name="specialisatie"
+                  class="form-control"
+                  th:value="${docent?.specialisatie}"
+                  placeholder="Bijv. Klassieke muziek"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Jaren Ervaring</label>
+                <input
+                  type="number"
+                  name="ervaringsjaren"
+                  class="form-control"
+                  th:value="${docent?.ervaringsjaren}"
+                  placeholder="Bijv. 10"
+                />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Biografie</label>
+                <textarea
+                  name="biografie"
+                  class="form-control"
+                  rows="4"
+                  placeholder="Vertel over jezelf..."
+                  th:text="${docent?.biografie}"
+                ></textarea>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Kwalificaties &amp; Diploma's</label>
+                <textarea
+                  name="kwalificaties"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Bijv. Bachelor Muziektheorie, Conservatorium..."
+                  th:text="${docent?.kwalificaties}"
+                ></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">
+              Profiel opslaan
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

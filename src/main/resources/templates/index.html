@@ -60,6 +60,7 @@
             </button>
           </div>
           <div class="list-group overflow-auto" style="max-height: 85vh">
+            <!-- Events -->
             <a
               href="#"
               class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
@@ -67,7 +68,14 @@
               th:data-lat="${event.lat}"
               th:data-lng="${event.lng}"
               th:data-index="${iterStat.index}"
-              th:onclick="'focusOnMap(this.dataset.lat, this.dataset.lng, this.dataset.index)'"
+              th:data-type="event"
+              onclick="
+                focusOnMap(
+                  this.dataset.lat,
+                  this.dataset.lng,
+                  this.dataset.type + '-' + this.dataset.index,
+                )
+              "
             >
               <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
@@ -79,10 +87,81 @@
               </div>
               <p class="mb-1" th:text="${event.description}">Beschrijving</p>
             </a>
+
+            <!-- Lessons -->
+            <a
+              th:href="@{'/lesson/' + ${lesson.id} + '/' + ${username}}"
+              class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
+              th:each="lesson, iterStat : ${lessons}"
+              th:data-lat="${lesson.lat}"
+              th:data-lng="${lesson.lng}"
+              th:data-index="${iterStat.index}"
+              th:data-type="lesson"
+              onclick="
+                focusOnMap(
+                  this.dataset.lat,
+                  this.dataset.lng,
+                  this.dataset.type + '-' + this.dataset.index,
+                )
+              "
+            >
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1 text-dark">
+                  <span th:text="${lesson.instrument?.naam}">Instrument</span>
+                  Les
+                </h5>
+                <span class="badge rounded-pill bg-success">Les</span>
+              </div>
+              <p class="mb-1">
+                <strong th:text="${lesson.docent.naam}">Docent</strong> - €<span
+                  th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+                  >0.00</span
+                >
+                <span th:text="${lesson.rateType}">per uur</span>
+              </p>
+              <small
+                class="text-muted"
+                th:if="${lesson.location}"
+                th:text="${lesson.location}"
+                >Locatie</small
+              >
+              <small
+                class="text-muted d-block"
+                th:if="${lesson.levels}"
+                th:text="'Niveaus: ' + ${lesson.levels}"
+              ></small>
+            </a>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Hidden data containers for JavaScript -->
+    <div
+      id="eventsData"
+      th:each="event : ${events}"
+      th:data-id="${event.id}"
+      th:data-title="${event.title}"
+      th:data-description="${event.description}"
+      th:data-type="${event.type}"
+      th:data-lat="${event.lat}"
+      th:data-lng="${event.lng}"
+      style="display: none"
+    ></div>
+
+    <div
+      id="lessonsData"
+      th:each="lesson : ${lessons}"
+      th:data-id="${lesson.id}"
+      th:data-instrument="${lesson.instrument?.naam}"
+      th:data-rate="${lesson.rate}"
+      th:data-ratetype="${lesson.rateType}"
+      th:data-location="${lesson.location}"
+      th:data-lat="${lesson.lat}"
+      th:data-lng="${lesson.lng}"
+      th:data-docentnaam="${lesson.docent.naam}"
+      style="display: none"
+    ></div>
 
     <!-- Add Event Modal -->
     <div th:insert="~{fragments/_addEventModal :: addEventModal}"></div>
@@ -91,8 +170,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script th:inline="javascript">
-      var initialEvents = /*[[${events}]]*/ [];
-      var pinIconUrl = /*[[@{/assets/pin-red.png}]]*/ [];
+      var pinIconUrl = /*[[@{/assets/pin-red.png}]]*/ "/assets/pin-red.png";
     </script>
     <script th:src="@{/js/map.js}"></script>
   </body>

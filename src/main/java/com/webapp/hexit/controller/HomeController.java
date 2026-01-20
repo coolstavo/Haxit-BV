@@ -1,12 +1,18 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
+import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.model.Role;
-import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.CompanyRepository;
 import com.webapp.hexit.repository.DocentRepository;
+import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,71 +22,144 @@ import org.springframework.web.bind.annotation.*;
 public class HomeController {
 
   private final EventRepository eventRepository;
+  private final LessonRepository lessonRepository;
   private final CompanyRepository companyRepository;
   private final DocentRepository docentRepository;
   private final UserRepository userRepository;
+  private final InstrumentRepository instrumentRepository;
 
   public HomeController(
     EventRepository eventRepository,
+    LessonRepository lessonRepository,
     CompanyRepository companyRepository,
     DocentRepository docentRepository,
-    UserRepository userRepository
+    UserRepository userRepository,
+    InstrumentRepository instrumentRepository
   ) {
     this.eventRepository = eventRepository;
+    this.lessonRepository = lessonRepository;
     this.companyRepository = companyRepository;
     this.docentRepository = docentRepository;
     this.userRepository = userRepository;
+    this.instrumentRepository = instrumentRepository;
   }
 
-    @GetMapping("/")
-    public String home(
-        @RequestParam(name = "titel", required = false) String titel,
-        @RequestParam(name = "type", required = false) String type,
-        Model model
-    ) {
-        List<Event> events = eventRepository.findAll();
+  @GetMapping("/")
+  public String home(
+    @RequestParam(name = "name", required = false) String name,
+    @RequestParam(name = "types", required = false) String types,
+    @RequestParam(name = "instruments", required = false) String instruments,
+    Model model
+  ) {
+    List<Event> events = eventRepository.findAll();
+    List<Lesson> lessons = lessonRepository.findAll();
 
-        if (titel != null && !titel.isBlank()) {
-            events = events
-                .stream()
-                .filter(event ->
-                    event.getTitle().toLowerCase().contains(titel.toLowerCase())
-                )
-                .collect(Collectors.toList());
-        }
+    // Parse types filter (comma-separated)
+    final Set<String> selectedTypes = new HashSet<>();
+    if (types != null && !types.isBlank()) {
+      selectedTypes.addAll(Arrays.asList(types.split(",")));
+    }
 
-        if (type != null && !type.isBlank()) {
-            events = events
-                .stream()
-                .filter(event ->
-                    event.getType().toLowerCase().contains(type.toLowerCase())
-                )
-                .collect(Collectors.toList());
-        }
+    // Parse instruments filter (comma-separated)
+    final Set<String> selectedInstruments = new HashSet<>();
+    if (instruments != null && !instruments.isBlank()) {
+      selectedInstruments.addAll(Arrays.asList(instruments.split(",")));
+    }
+
+    // Filter by name search
+    if (name != null && !name.isBlank()) {
+      String searchTerm = name.toLowerCase();
+      events = events
+        .stream()
+        .filter(event -> event.getTitle().toLowerCase().contains(searchTerm))
+        .collect(Collectors.toList());
+
+      lessons = lessons
+        .stream()
+        .filter(
+          lesson ->
+            (lesson.getInstrument() != null &&
+              lesson
+                .getInstrument()
+                .getNaam()
+                .toLowerCase()
+                .contains(searchTerm)) ||
+            (lesson.getDescription() != null &&
+              lesson.getDescription().toLowerCase().contains(searchTerm)) ||
+            (lesson.getDocent() != null &&
+              lesson.getDocent().getNaam().toLowerCase().contains(searchTerm))
+        )
+        .collect(Collectors.toList());
+    }
+
+    // Filter by type (Lesson, Event, Jam)
+    if (!selectedTypes.isEmpty()) {
+      final boolean includeLesson = selectedTypes.contains("Lesson");
+      final boolean includeEvent = selectedTypes.contains("Event");
+      final boolean includeJam = selectedTypes.contains("Jam");
+
+      events = events
+        .stream()
+        .filter(event -> {
+          String eventType = event.getType().toLowerCase();
+          return (
+            (includeEvent && eventType.contains("event")) ||
+            (includeJam && eventType.contains("jam"))
+          );
+        })
+        .collect(Collectors.toList());
+
+      if (!includeLesson) {
+        lessons = List.of();
+      }
+    }
+
+    // Filter by instruments
+    if (!selectedInstruments.isEmpty()) {
+      lessons = lessons
+        .stream()
+        .filter(
+          lesson ->
+            lesson.getInstrument() != null &&
+            selectedInstruments.contains(lesson.getInstrument().getNaam())
+        )
+        .collect(Collectors.toList());
+    }
 
     model.addAttribute("events", events);
+    model.addAttribute("lessons", lessons);
+    model.addAttribute("instruments", instrumentRepository.findAll());
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
     return "index";
   }
 
-    @GetMapping("/admin")
-    public String adminDashboard() {
-        // Return the admin dashboard template
-        return "admin";
-    }
+  @GetMapping("/admin")
+  public String adminDashboard() {
+    return "admin";
+  }
 
   @GetMapping("/{username}")
   public String homeWithUsername(
     @PathVariable String username,
-    @RequestParam(name = "loginRequired", required = false) Boolean loginRequired,
+    @RequestParam(
+      name = "loginRequired",
+      required = false
+    ) Boolean loginRequired,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
+    List<Lesson> lessons = lessonRepository.findAll();
+
     model.addAttribute("events", events);
-    model.addAttribute("username", (username != null && !username.isBlank()) ? username : "Gast");
-    
+    model.addAttribute("lessons", lessons);
+    model.addAttribute("instruments", instrumentRepository.findAll());
+    model.addAttribute(
+      "username",
+      (username != null && !username.isBlank()) ? username : "Gast"
+    );
+
     // Bepaal userRole op basis van User role of repository checks
     String userRole = "MUZIKANT"; // default
     var user = userRepository.findByUsername(username);
@@ -97,19 +176,19 @@ public class HomeController {
     } else if (docentRepository.findByNaam(username).isPresent()) {
       userRole = "DOCENT";
     }
-    
+
     model.addAttribute("userRole", userRole);
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";
   }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleError(Model model, Exception ex) {
-        model.addAttribute(
-            "errorMessage",
-            "Er is een fout opgetreden! Probeer het later opnieuw."
-        );
-        return "error";
-    }
+  @ExceptionHandler(Exception.class)
+  @ResponseStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+  public String handleError(Model model, Exception ex) {
+    model.addAttribute(
+      "errorMessage",
+      "Er is een fout opgetreden! Probeer het later opnieuw."
+    );
+    return "error";
+  }
 }
