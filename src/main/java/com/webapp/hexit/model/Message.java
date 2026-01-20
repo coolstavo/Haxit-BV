@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_message_sender_time", columnList = "sender_id,sent_at"),
+        @Index(name = "idx_message_receiver_time", columnList = "receiver_id,sent_at")
+})
 public class Message {
 
   @Id
@@ -23,6 +27,9 @@ public class Message {
 
   @Column(nullable = false)
   private LocalDateTime sentAt;
+
+  @Column(nullable = true)
+  private LocalDateTime readAt;
 
   public Message() {}
 
@@ -74,4 +81,8 @@ public class Message {
   public void setSentAt(LocalDateTime sentAt) {
     this.sentAt = sentAt;
   }
+
+  public LocalDateTime getReadAt() { return readAt; }
+
+  public void setReadAt(LocalDateTime readAt) { this.readAt = readAt; }
 }

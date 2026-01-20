@@ -13,7 +13,6 @@
 
 <div class="container">
     <div class="row g-3">
-        <!-- LEFT: Inbox -->
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -33,12 +32,15 @@
                     <hr />
 
                     <div class="list-group" th:if="${#lists.size(partners) > 0}">
-                        <a class="list-group-item list-group-item-action"
+                        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                            th:each="p : ${partners}"
                            th:href="@{'/messages/' + ${p}}"
-                           th:classappend="${selectedPartner == p} ? ' active' : ''"
-                           th:text="${p}">
-                            partner
+                           th:classappend="${selectedPartner == p} ? ' active' : ''">
+                            <span th:text="${p}">partner</span>
+
+                            <span th:if="${unreadByPartner != null and unreadByPartner[p] != null and unreadByPartner[p] > 0}"
+                                  class="badge rounded-pill bg-danger"
+                                  th:text="${unreadByPartner[p]}">0</span>
                         </a>
                     </div>
 
@@ -49,7 +51,6 @@
             </div>
         </div>
 
-        <!-- RIGHT: Conversation -->
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -83,9 +84,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- OPTIONAL: polling to refresh thread every 2s when a chat is open -->
 <script th:inline="javascript">
-    const selectedPartner = /*[[${selectedPartner}]]*/ null;
+    const selectedPartner = /*[[${selectedPartner == null ? null : selectedPartner}]]*/ null;
 
     async function refreshThread() {
         if (!selectedPartner) return;
@@ -104,6 +104,31 @@
         refreshThread();
         setInterval(refreshThread, 2000);
     }
+</script>
+<script>
+    async function refreshUnreadBadge() {
+        try {
+            const res = await fetch('/messages/unread-count', { headers: { "X-Requested-With": "XMLHttpRequest" }});
+            if (!res.ok) return;
+
+            const txt = await res.text();
+            const count = parseInt(txt, 10) || 0;
+
+            const badge = document.getElementById('unreadBadge');
+            const badgeValue = document.getElementById('unreadBadgeValue');
+            if (!badge || !badgeValue) return;
+
+            if (count > 0) {
+                badgeValue.textContent = count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {}
+    }
+
+    refreshUnreadBadge();
+    setInterval(refreshUnreadBadge, 2000);
 </script>
 </body>
 </html>
