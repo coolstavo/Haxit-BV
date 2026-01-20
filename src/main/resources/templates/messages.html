@@ -1,0 +1,110 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Berichten - Listen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+
+<body class="bg">
+<div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+<div class="container">
+    <div class="row g-3">
+        <!-- LEFT: Inbox -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Chats</h5>
+                        <span class="small text-muted" th:text="'Ingelogd: ' + ${username}">Ingelogd</span>
+                    </div>
+
+                    <form class="mt-3" th:action="@{/messages/start}" method="post">
+                        <div class="input-group">
+                            <input class="form-control" name="other" placeholder="Start chat met username..." />
+                            <button class="btn btn-outline-primary" type="submit">Open</button>
+                        </div>
+                        <div class="form-text">Type exact de username.</div>
+                    </form>
+
+                    <hr />
+
+                    <div class="list-group" th:if="${#lists.size(partners) > 0}">
+                        <a class="list-group-item list-group-item-action"
+                           th:each="p : ${partners}"
+                           th:href="@{'/messages/' + ${p}}"
+                           th:classappend="${selectedPartner == p} ? ' active' : ''"
+                           th:text="${p}">
+                            partner
+                        </a>
+                    </div>
+
+                    <div class="text-muted" th:if="${#lists.size(partners) == 0}">
+                        Nog geen chats. Start er eentje hierboven.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Conversation -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"
+                            th:text="${selectedPartner != null ? 'Chat met ' + selectedPartner : 'Selecteer een chat'}">
+                            Chat
+                        </h5>
+                    </div>
+
+                    <div id="threadContainer">
+                        <div th:replace="~{fragments/_messageThread :: thread}"></div>
+                    </div>
+
+                    <form th:if="${selectedPartner != null}"
+                          th:action="@{'/messages/' + ${selectedPartner}}"
+                          method="post"
+                          class="d-flex gap-2 mt-3">
+                        <input class="form-control" name="content" placeholder="Typ een bericht..." autocomplete="off" />
+                        <button class="btn btn-primary" type="submit">Verstuur</button>
+                    </form>
+
+                    <div th:if="${selectedPartner == null}" class="text-muted mt-2">
+                        Kies links een gesprek of start een nieuwe chat.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- OPTIONAL: polling to refresh thread every 2s when a chat is open -->
+<script th:inline="javascript">
+    const selectedPartner = /*[[${selectedPartner}]]*/ null;
+
+    async function refreshThread() {
+        if (!selectedPartner) return;
+        try {
+            const res = await fetch(`/messages/${selectedPartner}/partial`, { headers: { "X-Requested-With": "XMLHttpRequest" }});
+            if (!res.ok) return;
+            const html = await res.text();
+            document.getElementById("threadContainer").innerHTML = html;
+            // auto-scroll
+            const box = document.getElementById("threadBox");
+            if (box) box.scrollTop = box.scrollHeight;
+        } catch (e) {}
+    }
+
+    if (selectedPartner) {
+        refreshThread();
+        setInterval(refreshThread, 2000);
+    }
+</script>
+</body>
+</html>
+
