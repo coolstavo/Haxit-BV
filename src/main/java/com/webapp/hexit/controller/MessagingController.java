@@ -36,6 +36,18 @@ public class MessagingController
         return "messages";
     }
 
+    @PostMapping("/messages/start")
+    public String start(@RequestParam String other, HttpSession session) {
+        String me = currentUser(session);
+        if (me == null) return "redirect:/login-page";
+
+        String cleaned = other == null ? "" : other.trim();
+        if (cleaned.isEmpty() || cleaned.equalsIgnoreCase(me)) return "redirect:/messages";
+
+        // We don't create anything yet; just open the conversation route.
+        return "redirect:/messages/" + cleaned;
+    }
+
     @GetMapping("/messages/{other}")
     public String conversation(@PathVariable String other, HttpSession session, Model model)
     {
@@ -67,15 +79,19 @@ public class MessagingController
         return "redirect:/messages/" + other;
     }
 
-    @GetMapping("/messages/test/{other}")
-    public String test(@PathVariable String other, HttpSession session) {
+    @GetMapping("/messages/{other}/partial")
+    public String conversationPartial(@PathVariable String other, HttpSession session, Model model) {
         String me = currentUser(session);
         if (me == null) return "redirect:/login-page";
-        messagingService.send(me, other, "Testbericht!");
-        return "redirect:/messages/" + other;
+        if (other == null || other.isBlank() || other.equalsIgnoreCase(me)) return "redirect:/messages";
+
+        model.addAttribute("me", me);
+        model.addAttribute("selectedPartner", other);
+        model.addAttribute("messages", messagingService.getConversation(me, other));
+        return "fragments/_messageThread :: thread";
     }
 
-    @GetMapping("/messages/debug-session")
+    @GetMapping("/messages/debug")
     @ResponseBody
     public String debugSession(HttpSession session) {
         return "currentUsername=" + session.getAttribute("currentUsername")
@@ -83,4 +99,6 @@ public class MessagingController
                 + " | username=" + session.getAttribute("username")
                 + " | userRole=" + session.getAttribute("userRole");
     }
+
+
 }
