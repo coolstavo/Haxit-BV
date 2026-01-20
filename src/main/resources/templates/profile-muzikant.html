@@ -19,7 +19,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 th:text="'Profiel van ' + ${muzikant.user.username}">Profiel</h2>
                 <div>
-                    <a  th:href="@{/profile/upload/{username}(username=${muzikant.user.username})}" 
+                    <a  th:href="@{/profile/upload/{username}(username=${muzikant.user.username})}"
                         class="btn btn-success me-1"> + Media uploaden
                     </a>
 
@@ -50,8 +50,7 @@
                                          style="width: 200px; height: 200px; border-radius: 50%;" />
                                 </div>
 
-                            <h5 th:text="${muzikant.naam}">Naam</h5>
-                            <!--<p th:text="${profile.instrument}">Instrument</p>-->
+                                <h5 th:text="${muzikant.user.username}">Naam</h5><!--<p th:text="${profile.instrument}">Instrument</p>-->
 
                             <!-- spacer -->
                             <div class="mt-auto"></div>
@@ -106,32 +105,32 @@
             </div>
                 <div th:if="${successMessage}" class="alert alert-success" role="alert">
                     <strong th:text="${successMessage}"></strong>
-                </div> 
+                </div>
                 <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
                     <strong th:text="${errorMessage}"></strong>
                 </div>
 
                 <div class="row mt-4 align-items-start">
                     <div class="col-md-6">
-                        <div class="card mb-3 w-100">  
+                        <div class="card mb-3 w-100">
                             <div class="card-body" th:with="audioLijst=${mediaBestanden.?[isAudio() or isSoundCloud()]}">
                                 <h5 class="card-title border-bottom pb-2">Audio || SoundCloud</h5>
-                                
+
                                 <div th:each="item : ${audioLijst}">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <strong th:text="${item.beschrijving}">Titel</strong>
                                             <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy')}"></small>
                                         </div>
-                                        
-                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post" 
+
+                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post"
                                               th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
                                               onsubmit="return confirm(this.getAttribute('confirm-msg'));">
-                                            
+
                                             <input type="hidden" name="username" th:value="${muzikant.user.username}" />
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Verwijderen">
                                                 Verwijder </button>
-                                                
+
                                         </form>
                                     </div>
                                     <div th:if="${item.isAudio()}" class="mb-4">
@@ -151,7 +150,7 @@
 
                                 </div>
                                 <p th:if="${audioLijst.isEmpty()}" class="text-muted"> Nog geen audio uploads. </p>
-                            </div>   
+                            </div>
                         </div>
                     </div>
 
@@ -159,22 +158,22 @@
                         <div class="card mb-3 w-100">
                             <div class="card-body" th:with="videoLijst=${mediaBestanden.?[isVideo() or isYoutube()]}">
                                 <h5 class="card-title border-bottom pb-2">Video || YouTube</h5>
-                                
+
                                 <div th:each="item : ${videoLijst}">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
                                             <strong th:text="${item.beschrijving}">Titel</strong>
                                             <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy')}"></small>
                                         </div>
-                                        
-                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post" 
+
+                                        <form th:action="@{/profile/delete/{id}(id=${item.id})}" method="post"
                                               th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
                                               onsubmit="return confirm(this.getAttribute('confirm-msg'));">
-                                            
+
                                             <input type="hidden" name="username" th:value="${muzikant.user.username}" />
                                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Verwijderen">
                                                 Verwijder </button>
-                                                
+
                                         </form>
                                     </div>
                                     <div th:if="${item.isYoutube()}" class="mb-4">
@@ -189,7 +188,7 @@
                                             Je browser ondersteunt geen video.
                                         </video>
                                     </div>
-                                    
+
                                 </div>
                                 <p th:if="${videoLijst.isEmpty()}" class="text-muted"> Nog geen video uploads. </p>
                             </div>

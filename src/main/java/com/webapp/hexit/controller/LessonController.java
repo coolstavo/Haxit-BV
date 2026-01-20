@@ -19,20 +19,17 @@ public class LessonController {
   private final LessonBookingRepository lessonBookingRepository;
   private final UserRepository userRepository;
   private final MuzikantRepository muzikantRepository;
-  private final DocentRepository docentRepository;
 
   public LessonController(
     LessonRepository lessonRepository,
     LessonBookingRepository lessonBookingRepository,
     UserRepository userRepository,
-    MuzikantRepository muzikantRepository,
-    DocentRepository docentRepository
+    MuzikantRepository muzikantRepository
   ) {
     this.lessonRepository = lessonRepository;
     this.lessonBookingRepository = lessonBookingRepository;
     this.userRepository = userRepository;
     this.muzikantRepository = muzikantRepository;
-    this.docentRepository = docentRepository;
   }
 
   @GetMapping("/lesson/{lessonId}/{username}")

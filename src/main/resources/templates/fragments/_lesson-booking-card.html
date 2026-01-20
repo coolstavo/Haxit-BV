@@ -14,7 +14,9 @@
           <span>
             <strong th:if="${isTeacher}">Student: </strong>
             <strong th:if="${isStudent}">Aanvraag #</strong>
-            <span th:if="${isTeacher}" th:text="${booking.student.naam}"
+            <span
+              th:if="${isTeacher}"
+              th:text="${booking.student.user.username}"
               >Student</span
             >
             <span th:if="${isStudent}" th:text="${bookingIndex + 1}">1</span>

@@ -1,0 +1,29 @@
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="thread">
+
+    <div id="threadBox"
+         class="border rounded p-3 overflow-auto"
+         style="height: 50vh; background: rgba(255,255,255,0.6);">
+
+        <div th:if="${selectedPartner == null}" class="text-muted">
+            Kies links een gesprek.
+        </div>
+
+        <div th:if="${selectedPartner != null && #lists.size(messages) == 0}" class="text-muted">
+            Nog geen berichten. Zeg hallo 👋
+        </div>
+
+        <div th:each="m : ${messages}" class="mb-2">
+            <div class="small text-muted"
+                 th:text="${#temporals.format(m.sentAt, 'dd-MM-yyyy HH:mm')}">time</div>
+
+            <div class="p-2 rounded"
+                 th:classappend="${m.sender.username} == ${me} ? ' bg-primary text-white ms-auto' : ' bg-light'"
+                 style="max-width: 75%;">
+                <div class="fw-bold small" th:text="${m.sender.username}">from</div>
+                <div th:text="${m.content}">text</div>
+            </div>
+        </div>
+
+    </div>
+</div>

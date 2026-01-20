@@ -9,8 +9,9 @@ public class Company {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true, nullable = false)
-  private String companyName;
+  @OneToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
   private String location;
   private String websiteUrl;
@@ -32,8 +33,8 @@ public class Company {
 
   public Company() {}
 
-  public Company(String companyName) {
-    this.companyName = companyName;
+  public Company(User user) {
+    this.user = user;
   }
 
   // Getters and Setters
@@ -41,12 +42,16 @@ public class Company {
     return id;
   }
 
-  public String getCompanyName() {
-    return companyName;
+  public User getUser() {
+    return user;
   }
 
-  public void setCompanyName(String companyName) {
-    this.companyName = companyName;
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public String getCompanyName() {
+    return user != null ? user.getUsername() : null;
   }
 
   public String getLocation() {
