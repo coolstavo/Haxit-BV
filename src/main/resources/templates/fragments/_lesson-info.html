@@ -32,8 +32,8 @@
           <p>
             <strong>Docent:</strong>
             <a
-              th:href="@{'/profile/docent/' + ${lesson.docent.naam}}"
-              th:text="${lesson.docent.naam}"
+              th:href="@{'/profile/' + ${lesson.docent.user.username}}"
+              th:text="${lesson.docent.user.username}"
               >Docent</a
             >
           </p>
