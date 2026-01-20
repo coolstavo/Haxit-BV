@@ -36,7 +36,7 @@
                         <a class="list-group-item list-group-item-action"
                            th:each="p : ${partners}"
                            th:href="@{'/messages/' + ${p}}"
-                           th:classappend="${selectedPartner} == ${p} ? ' active' : ''"
+                           th:classappend="${selectedPartner == p} ? ' active' : ''"
                            th:text="${p}">
                             partner
                         </a>
