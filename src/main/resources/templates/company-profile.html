@@ -36,7 +36,7 @@
           <div th:if="${!hasData}">
             <p class="text-muted">Nog geen gegevens ingevuld</p>
             <a
-              th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}"
+              th:href="@{'/profile/' + ${companyName} + '/edit'}"
               class="btn btn-primary"
               >Profiel Invullen</a
             >
@@ -251,7 +251,86 @@
       th:if="${hasData != null && hasData == true && edit != null && edit == false}"
       class="container mt-4"
     >
-      <div class="card shadow-sm">
+      <!-- Events Table -->
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${companyEvents != null && #lists.size(companyEvents) > 0}"
+      >
+        <div class="card-header bg-light">
+          <h5 class="mb-0">📋 Jouw Events</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Titel</th>
+                  <th>Beschrijving</th>
+                  <th>Locatie</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="event : ${companyEvents}">
+                  <td>
+                    <a
+                      th:href="@{'/event/' + ${event.id}}"
+                      th:text="${event.title}"
+                      class="text-decoration-none"
+                      >Event Title</a
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:text="${#strings.abbreviate(event.description, 50)}"
+                      class="text-muted"
+                      >Description</span
+                    >
+                  </td>
+                  <td>
+                    <small class="badge bg-info">
+                      <span
+                        th:text="${#numbers.formatDecimal(event.lat, 1, 4)}"
+                      ></span
+                      >,
+                      <span
+                        th:text="${#numbers.formatDecimal(event.lng, 1, 4)}"
+                      ></span>
+                    </small>
+                  </td>
+                  <td>
+                    <form
+                      method="post"
+                      th:action="@{'/event/' + ${event.id} + '/' + ${username} + '/delete'}"
+                      style="display: inline"
+                      onsubmit="
+                        return confirm(
+                          'Weet je zeker dat je dit event wilt verwijderen?',
+                        );
+                      "
+                    >
+                      <button type="submit" class="btn btn-sm btn-danger">
+                        🗑️ Verwijderen
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${companyEvents == null || #lists.size(companyEvents) == 0}"
+      >
+        <div class="card-body text-center py-4">
+          <p class="text-muted mb-0">Je hebt nog geen events aangemaakt.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-4">
         <div class="card-body">
           <h5 class="mb-3">Nieuw Event Aanmaken</h5>
           <form id="companyEventForm">
@@ -259,14 +338,6 @@
               <div class="col-md-6">
                 <label class="form-label">Titel *</label>
                 <input type="text" class="form-control" name="title" required />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Type *</label>
-                <select class="form-select" name="type" required>
-                  <option value="Bedrijf" selected>Bedrijf</option>
-                  <option value="Opdracht">Opdracht</option>
-                  <option value="Les">Les</option>
-                </select>
               </div>
               <div class="col-12">
                 <label class="form-label">Beschrijving *</label>
@@ -325,7 +396,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
+    <script th:inline="javascript">
+      const currentCompanyUserId = /*[[${company.user.id}]]*/ null;
+
       // Initialize mini map for event location
       let eventMap = null;
       let eventMarker = null;
@@ -389,9 +462,11 @@
           const data = {
             title: formData.get("title"),
             description: formData.get("description"),
-            type: formData.get("type"),
             lat: parseFloat(formData.get("lat")),
             lng: parseFloat(formData.get("lng")),
+            companyUser: {
+              id: currentCompanyUserId,
+            },
           };
 
           try {
@@ -413,13 +488,13 @@
             }
 
             msg.textContent =
-              "Event succesvol opgeslagen! Het verschijnt nu op de kaart.";
+              "Event succesvol opgeslagen! Vernieuw de pagina om het in je tabel te zien.";
             msg.className = "mt-2 alert alert-success";
             msg.style.display = "block";
 
             setTimeout(() => {
-              msg.style.display = "none";
-            }, 5000);
+              location.reload();
+            }, 2000);
           } catch (error) {
             console.error("Error:", error);
             msg.textContent = "Fout bij opslaan. Probeer opnieuw.";

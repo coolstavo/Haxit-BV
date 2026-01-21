@@ -3,7 +3,7 @@ package com.webapp.hexit.model;
 import jakarta.persistence.*;
 
 @Entity
-public class Event {
+public class Jam {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,34 +15,34 @@ public class Event {
   private double lng;
 
   @ManyToOne
-  @JoinColumn(name = "company_user_id")
-  private User companyUser;
+  @JoinColumn(name = "muzikant_user_id")
+  private User muzikantUser;
 
   // Backwards compatibility with old userId column
   @Column(name = "user_id")
   private Long userId;
 
-  public Event() {} // default constructor required by JPA
+  public Jam() {} // default constructor required by JPA
 
-  public Event(
+  public Jam(
     String title,
     String description,
     double lat,
     double lng,
-    User companyUser
+    User muzikantUser
   ) {
     this.title = title;
     this.description = description;
     this.lat = lat;
     this.lng = lng;
-    this.companyUser = companyUser;
-    if (companyUser != null) {
-      this.userId = companyUser.getId();
+    this.muzikantUser = muzikantUser;
+    if (muzikantUser != null) {
+      this.userId = muzikantUser.getId();
     }
   }
 
   // Constructor for backwards compatibility
-  public Event(
+  public Jam(
     String title,
     String description,
     double lat,
@@ -93,14 +93,14 @@ public class Event {
     this.lng = lng;
   }
 
-  public User getCompanyUser() {
-    return companyUser;
+  public User getMuzikantUser() {
+    return muzikantUser;
   }
 
-  public void setCompanyUser(User companyUser) {
-    this.companyUser = companyUser;
-    if (companyUser != null) {
-      this.userId = companyUser.getId();
+  public void setMuzikantUser(User muzikantUser) {
+    this.muzikantUser = muzikantUser;
+    if (muzikantUser != null) {
+      this.userId = muzikantUser.getId();
     }
   }
 
