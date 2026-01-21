@@ -1,0 +1,18 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <div th:fragment="actionButtons" class="action-buttons-section mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <a
+        th:href="@{/profile/upload/{username}(username=${muzikant.user.username})}"
+        class="btn btn-success"
+      >
+        <i class="bi bi-cloud-upload"></i> Media uploaden
+      </a>
+      <a
+        th:href="@{/profile/edit/{username}(username=${muzikant.user.username})}"
+        class="btn btn-primary"
+      >
+        <i class="bi bi-pencil"></i> Profiel bewerken
+      </a>
+    </div>
+  </div>
+</html>

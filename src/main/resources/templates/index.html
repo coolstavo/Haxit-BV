@@ -38,26 +38,6 @@
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="mb-0">Actuele Opdrachten & Lessen</h4>
-            <button
-              class="btn btn-primary btn-sm"
-              data-bs-toggle="modal"
-              data-bs-target="#addEventModal"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                class="bi bi-plus-lg"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"
-                />
-              </svg>
-              Toevoegen
-            </button>
           </div>
           <div class="list-group overflow-auto" style="max-height: 85vh">
             <!-- Events -->
@@ -65,20 +45,22 @@
               href="#"
               class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
               th:each="event, iterStat : ${events}"
+              th:data-id="${event.id}"
               th:data-lat="${event.lat}"
               th:data-lng="${event.lng}"
               th:data-index="${iterStat.index}"
               th:data-type="event"
               onclick="
+                event.preventDefault();
                 focusOnMap(
                   this.dataset.lat,
                   this.dataset.lng,
                   this.dataset.type + '-' + this.dataset.index,
-                )
+                );
               "
             >
               <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-dark" th:text="event">Titel</h5>
+                <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
                 <span class="badge rounded-pill navbar-brown" th:text="event"
                   >Type</span
                 >
@@ -86,21 +68,49 @@
               <p class="mb-1" th:text="${event.description}">Beschrijving</p>
             </a>
 
+            <!-- Jams -->
+            <a
+              href="#"
+              class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
+              th:each="jam, iterStat : ${jams}"
+              th:data-id="${jam.id}"
+              th:data-lat="${jam.lat}"
+              th:data-lng="${jam.lng}"
+              th:data-index="${iterStat.index}"
+              th:data-type="jam"
+              onclick="
+                event.preventDefault();
+                focusOnMap(
+                  this.dataset.lat,
+                  this.dataset.lng,
+                  this.dataset.type + '-' + this.dataset.index,
+                );
+              "
+            >
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1 text-dark" th:text="${jam.title}">Titel</h5>
+                <span class="badge rounded-pill bg-warning text-dark">Jam</span>
+              </div>
+              <p class="mb-1" th:text="${jam.description}">Beschrijving</p>
+            </a>
+
             <!-- Lessons -->
             <a
-              th:href="@{'/lesson/' + ${lesson.id} + '/' + ${username}}"
+              href="#"
               class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
               th:each="lesson, iterStat : ${lessons}"
+              th:data-id="${lesson.id}"
               th:data-lat="${lesson.lat}"
               th:data-lng="${lesson.lng}"
               th:data-index="${iterStat.index}"
               th:data-type="lesson"
               onclick="
+                event.preventDefault();
                 focusOnMap(
                   this.dataset.lat,
                   this.dataset.lng,
                   this.dataset.type + '-' + this.dataset.index,
-                )
+                );
               "
             >
               <div class="d-flex w-100 justify-content-between">
@@ -160,14 +170,23 @@
       style="display: none"
     ></div>
 
-    <!-- Add Event Modal -->
-    <div th:insert="~{fragments/_addEventModal :: addEventModal}"></div>
+    <div
+      id="jamsData"
+      th:each="jam : ${jams}"
+      th:data-id="${jam.id}"
+      th:data-title="${jam.title}"
+      th:data-description="${jam.description}"
+      th:data-lat="${jam.lat}"
+      th:data-lng="${jam.lng}"
+      style="display: none"
+    ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script th:inline="javascript">
       var pinIconUrl = /*[[@{/assets/pin-red.png}]]*/ "/assets/pin-red.png";
+      var username = /*[[${username}]]*/ "";
     </script>
     <script th:src="@{/js/map.js}"></script>
   </body>

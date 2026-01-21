@@ -57,7 +57,7 @@ public class LoginController {
         Docent docent = new Docent(user);
         docentRepository.save(docent);
       }
-      return "redirect:/profile/docent/" + username;
+      return "redirect:/profile/" + username;
     }
 
     if ("bedrijf".equals(type)) {

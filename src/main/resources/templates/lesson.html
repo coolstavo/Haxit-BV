@@ -137,6 +137,11 @@
         </div>
       </div>
 
+      <!-- Likes and Comments Section -->
+      <div
+        th:insert="~{fragments/_likes-comments :: likesComments('lesson', ${lesson.id}, ${username}, ${likeCount}, ${userHasLiked}, ${comments})}"
+      ></div>
+
       <!-- Legend -->
       <div th:insert="~{fragments/_lesson-legend :: lessonLegend}"></div>
 

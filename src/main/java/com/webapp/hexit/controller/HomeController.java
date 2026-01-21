@@ -1,10 +1,12 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Event;
+import com.webapp.hexit.model.Jam;
 import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.JamRepository;
 import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.util.Arrays;
@@ -21,17 +23,20 @@ public class HomeController {
 
   private final EventRepository eventRepository;
   private final LessonRepository lessonRepository;
+  private final JamRepository jamRepository;
   private final UserRepository userRepository;
   private final InstrumentRepository instrumentRepository;
 
   public HomeController(
     EventRepository eventRepository,
     LessonRepository lessonRepository,
+    JamRepository jamRepository,
     UserRepository userRepository,
     InstrumentRepository instrumentRepository
   ) {
     this.eventRepository = eventRepository;
     this.lessonRepository = lessonRepository;
+    this.jamRepository = jamRepository;
     this.userRepository = userRepository;
     this.instrumentRepository = instrumentRepository;
   }
@@ -45,6 +50,7 @@ public class HomeController {
   ) {
     List<Event> events = eventRepository.findAll();
     List<Lesson> lessons = lessonRepository.findAll();
+    List<Jam> jams = jamRepository.findAll();
 
     // Parse types filter (comma-separated)
     final Set<String> selectedTypes = new HashSet<>();
@@ -116,6 +122,7 @@ public class HomeController {
 
     model.addAttribute("events", events);
     model.addAttribute("lessons", lessons);
+    model.addAttribute("jams", jams);
     model.addAttribute("instruments", instrumentRepository.findAll());
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
@@ -139,9 +146,11 @@ public class HomeController {
   ) {
     List<Event> events = eventRepository.findAll();
     List<Lesson> lessons = lessonRepository.findAll();
+    List<Jam> jams = jamRepository.findAll();
 
     model.addAttribute("events", events);
     model.addAttribute("lessons", lessons);
+    model.addAttribute("jams", jams);
     model.addAttribute("instruments", instrumentRepository.findAll());
     model.addAttribute(
       "username",

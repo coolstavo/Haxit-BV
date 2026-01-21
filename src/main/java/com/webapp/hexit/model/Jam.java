@@ -1,0 +1,114 @@
+package com.webapp.hexit.model;
+
+import jakarta.persistence.*;
+
+@Entity
+public class Jam {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  private String title;
+  private String description;
+  private double lat;
+  private double lng;
+
+  @ManyToOne
+  @JoinColumn(name = "muzikant_user_id")
+  private User muzikantUser;
+
+  // Backwards compatibility with old userId column
+  @Column(name = "user_id")
+  private Long userId;
+
+  public Jam() {} // default constructor required by JPA
+
+  public Jam(
+    String title,
+    String description,
+    double lat,
+    double lng,
+    User muzikantUser
+  ) {
+    this.title = title;
+    this.description = description;
+    this.lat = lat;
+    this.lng = lng;
+    this.muzikantUser = muzikantUser;
+    if (muzikantUser != null) {
+      this.userId = muzikantUser.getId();
+    }
+  }
+
+  // Constructor for backwards compatibility
+  public Jam(
+    String title,
+    String description,
+    double lat,
+    double lng,
+    Long userId
+  ) {
+    this.title = title;
+    this.description = description;
+    this.lat = lat;
+    this.lng = lng;
+    this.userId = userId;
+  }
+
+  // Getters and Setters
+  public Long getId() {
+    return id;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public double getLat() {
+    return lat;
+  }
+
+  public void setLat(double lat) {
+    this.lat = lat;
+  }
+
+  public double getLng() {
+    return lng;
+  }
+
+  public void setLng(double lng) {
+    this.lng = lng;
+  }
+
+  public User getMuzikantUser() {
+    return muzikantUser;
+  }
+
+  public void setMuzikantUser(User muzikantUser) {
+    this.muzikantUser = muzikantUser;
+    if (muzikantUser != null) {
+      this.userId = muzikantUser.getId();
+    }
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+}

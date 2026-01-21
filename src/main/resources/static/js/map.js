@@ -1,6 +1,7 @@
 // Parse data from hidden DOM elements
 var initialEvents = [];
 var initialLessons = [];
+var initialJams = [];
 
 document.querySelectorAll("#eventsData").forEach(function (el) {
   if (el.dataset.id) {
@@ -30,8 +31,21 @@ document.querySelectorAll("#lessonsData").forEach(function (el) {
   }
 });
 
+document.querySelectorAll("#jamsData").forEach(function (el) {
+  if (el.dataset.id) {
+    initialJams.push({
+      id: parseInt(el.dataset.id),
+      title: el.dataset.title || "",
+      description: el.dataset.description || "",
+      lat: parseFloat(el.dataset.lat),
+      lng: parseFloat(el.dataset.lng),
+    });
+  }
+});
+
 var events = initialEvents;
 var lessons = initialLessons;
+var jams = initialJams;
 var markers = {};
 var eventIndex = events.length;
 
@@ -68,10 +82,17 @@ if (Array.isArray(events) && events.length > 0) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var eventUrl =
+      "/event/" +
+      event.id +
+      "/" +
+      (typeof username !== "undefined" ? username : "");
     var popupText =
-      "<b>" +
+      "<b><a href='" +
+      eventUrl +
+      "' style='color: inherit; text-decoration: none;'>" +
       event.title +
-      "</b><br>" +
+      "</a></b><br>" +
       "" +
       event.description +
       "<br>" +
@@ -90,10 +111,17 @@ if (Array.isArray(lessons) && lessons.length > 0) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var lessonUrl =
+      "/lesson/" +
+      lesson.id +
+      "/" +
+      (typeof username !== "undefined" ? username : "");
     var popupText =
-      "<b>" +
+      "<b><a href='" +
+      lessonUrl +
+      "' style='color: inherit; text-decoration: none;'>" +
       lesson.instrument +
-      " Les</b><br>" +
+      " Les</a></b><br>" +
       "Docent: " +
       lesson.docentNaam +
       "<br>" +
@@ -107,6 +135,35 @@ if (Array.isArray(lessons) && lessons.length > 0) {
     marker.bindPopup(popupText);
 
     markers["lesson-" + index] = marker;
+  });
+}
+
+// Jams op de kaart
+if (Array.isArray(jams) && jams.length > 0) {
+  jams.forEach(function (jam, index) {
+    var lat = Number(jam.lat);
+    var lng = Number(jam.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var jamUrl =
+      "/jam/" +
+      jam.id +
+      "/" +
+      (typeof username !== "undefined" ? username : "");
+    var popupText =
+      "<b><a href='" +
+      jamUrl +
+      "' style='color: inherit; text-decoration: none;'>" +
+      jam.title +
+      "</a></b><br>" +
+      "" +
+      jam.description +
+      "<br>" +
+      "<span class='badge rounded-pill bg-warning text-dark'>Jam</span>";
+    marker.bindPopup(popupText);
+
+    markers["jam-" + index] = marker;
   });
 }
 

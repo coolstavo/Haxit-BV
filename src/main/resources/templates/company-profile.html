@@ -251,72 +251,9 @@
       th:if="${hasData != null && hasData == true && edit != null && edit == false}"
       class="container mt-4"
     >
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="mb-3">Nieuw Event Aanmaken</h5>
-          <form id="companyEventForm">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Titel *</label>
-                <input type="text" class="form-control" name="title" required />
-              </div>
-              <div class="col-12">
-                <label class="form-label">Beschrijving *</label>
-                <textarea
-                  class="form-control"
-                  name="description"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <!-- Mini Map -->
-              <div class="col-12">
-                <label class="form-label">Locatie *</label>
-                <small class="text-muted d-block mb-2"
-                  >Klik op de kaart om de locatie te selecteren</small
-                >
-                <div id="eventMap"></div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Latitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="eventLat"
-                  name="lat"
-                  required
-                  placeholder="53.2194"
-                  readonly
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Longitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="eventLng"
-                  name="lng"
-                  required
-                  placeholder="6.5665"
-                  readonly
-                />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">
-              Event Opslaan
-            </button>
-            <div id="companyEventMsg" class="mt-2" style="display: none"></div>
-          </form>
-        </div>
-      </div>
-
       <!-- Events Table -->
       <div
-        class="card shadow-sm"
+        class="card shadow-sm mb-4"
         th:if="${companyEvents != null && #lists.size(companyEvents) > 0}"
       >
         <div class="card-header bg-light">
@@ -390,11 +327,74 @@
       </div>
 
       <div
-        class="card shadow-sm"
+        class="card shadow-sm mb-4"
         th:if="${companyEvents == null || #lists.size(companyEvents) == 0}"
       >
         <div class="card-body text-center py-4">
           <p class="text-muted mb-0">Je hebt nog geen events aangemaakt.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3">Nieuw Event Aanmaken</h5>
+          <form id="companyEventForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Titel *</label>
+                <input type="text" class="form-control" name="title" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Beschrijving *</label>
+                <textarea
+                  class="form-control"
+                  name="description"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <!-- Mini Map -->
+              <div class="col-12">
+                <label class="form-label">Locatie *</label>
+                <small class="text-muted d-block mb-2"
+                  >Klik op de kaart om de locatie te selecteren</small
+                >
+                <div id="eventMap"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Latitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLat"
+                  name="lat"
+                  required
+                  placeholder="53.2194"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Longitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLng"
+                  name="lng"
+                  required
+                  placeholder="6.5665"
+                  readonly
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              Event Opslaan
+            </button>
+            <div id="companyEventMsg" class="mt-2" style="display: none"></div>
+          </form>
         </div>
       </div>
     </div>
