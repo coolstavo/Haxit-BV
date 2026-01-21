@@ -19,12 +19,12 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 th:text="'Profiel van ' + ${muzikant.user.username}">Profiel</h2>
                 <div>
-                    <a  th:href="@{/profile/upload/{username}(username=${muzikant.user.username})}"
+                    <a  th:href="|/profile/${muzikant.user.username}/upload|"
                         class="btn btn-success me-1"> + Media uploaden
                     </a>
 
                     <a
-                        th:href="@{/profile/edit/{username}(username=${muzikant.user.username})}"
+                        th:href="|/profile/${muzikant.user.username}/edit|"
                         class="btn btn-primary"
                     >
                         Profiel bewerken
@@ -38,19 +38,14 @@
                 <div class="col-md-4 d-flex">
                     <div class="card mb-3 w-100">
                         <div class="card-body text-center d-flex flex-column">
-                            <div th:if="${muzikantImage}">
-                                <img th:src="|data:image/jpeg;base64,${muzikantImage}|"
-                                         alt="Profielfoto"
-                                         style="width: 200px; height: 200px; object-fit: cover; border-radius: 50%;" />
-                                </div>
+                            <div>
+                                <img th:src="${muzikant.profilePic != null ? muzikant.profilePic : '/images/default-placeholder.png'}"
+                                    alt="Profielfoto"
+                                    class="rounded-circle border"
+                                    style="width: 200px; height: 200px; object-fit: cover;" />
+                            </div>
 
-                                <div th:unless="${muzikantImage}">
-                                    <img src="/images/default-placeholder.png"
-                                         alt="Geen foto"
-                                         style="width: 200px; height: 200px; border-radius: 50%;" />
-                                </div>
-
-                                <h5 th:text="${muzikant.user.username}">Naam</h5><!--<p th:text="${profile.instrument}">Instrument</p>-->
+                            <h5 th:text="${muzikant.user.username}">Naam</h5><!--<p th:text="${profile.instrument}">Instrument</p>-->
 
                             <!-- spacer -->
                             <div class="mt-auto"></div>
@@ -71,9 +66,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                <trtr th:each="genre : ${muzikant.genres}">
+                                <tr th:each="genre : ${muzikant.genres}">
                                     <td th:text="${genre.name}"></td>
-                                </trtr>
+                                </tr>
                                     </tbody>
                                 </table>
                             </p>

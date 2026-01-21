@@ -13,8 +13,12 @@ import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.ProfileFileRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.io.IOException;
-import java.util.Base64;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +38,9 @@ public class MuzikantProfileController {
   private final InstrumentRepository instrumentRepository;
   private final GenreRepository genreRepository;
   private final ProfileFileRepository profileFileRepository;
+
+  // Pad waar profielfoto's worden opgeslagen
+  private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profilepics/";
 
   public MuzikantProfileController(
     UserRepository userRepository,
@@ -58,13 +65,7 @@ public class MuzikantProfileController {
 
     Muzikant muzikant = muzikantRepository.findByUser(profile).orElse(null);
     if (muzikant != null) {
-      // CONVERT BLOB TO BASE64
-      if (muzikant.getProfilePic() != null) {
-        String base64Image = Base64.getEncoder().encodeToString(
-          muzikant.getProfilePic()
-        );
-        model.addAttribute("muzikantImage", base64Image);
-      }
+
       List<MuzikantInstrument> muzikantInstruments =
         muzikantInstrumentRepository.findByMuzikantId(muzikant.getId());
       List<Instrument> allInstruments = instrumentRepository.findAll();
@@ -113,14 +114,34 @@ public class MuzikantProfileController {
     @ModelAttribute Muzikant muzikant,
     @RequestParam("imageFile") MultipartFile file
   ) throws IOException {
+
     Muzikant existingMuzikant = muzikantRepository
       .findById(muzikant.getId())
       .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
 
     if (!file.isEmpty()) {
-      existingMuzikant.setProfilePic(file.getBytes());
-    }
+      Path uploadPath = Path.of(UPLOAD_DIR);
+      if (!Files.exists(uploadPath)) {
+        Files.createDirectories(uploadPath);
+      }
 
+      // Achterhaal bestandsextensie 
+      String originalName = file.getOriginalFilename();
+      String extension = "";
+      if (originalName != null && originalName.contains(".")) {
+          extension = originalName.substring(originalName.lastIndexOf("."));
+      }
+
+      // Maak bestandsnaam uniek
+      String uniqueName = existingMuzikant.getUser().getUsername() + "_" + UUID.randomUUID().toString() + extension;
+
+      // Sla fysieke bestand op
+      Path path = Paths.get(UPLOAD_DIR + uniqueName);
+      Files.write(path, file.getBytes());
+
+      // Sla path op in database
+      existingMuzikant.setProfilePic("/uploads/profilepics/" + uniqueName);
+    }
     muzikantRepository.save(existingMuzikant);
 
     return "redirect:/profile/" + existingMuzikant.getUser().getUsername();

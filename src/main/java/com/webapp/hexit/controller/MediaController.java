@@ -27,7 +27,7 @@ public class MediaController {
 
     private static String UPLOAD_DIR = "uploads/";
 
-    @GetMapping("/profile/upload/{username}")
+    @GetMapping("/profile/{username}/upload")
     public String showUploadPage(@PathVariable String username, Model model) {
         model.addAttribute("username", username);
         return "profile-upload-muzikant";
