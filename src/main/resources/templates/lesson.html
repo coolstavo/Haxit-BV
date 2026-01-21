@@ -61,16 +61,44 @@
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>
           <span th:text="${lesson.instrument?.naam}">Instrument</span> Les
-          <small
-            class="text-muted"
-            th:text="'door ' + ${lesson.docent.user.username}"
-            >door Docent</small
-          >
+          <small class="text-muted">
+            door
+            <a
+              th:href="@{'/profile/' + ${lesson.docent.user.username}}"
+              th:text="${lesson.docent.user.username}"
+              class="text-decoration-none"
+              >Docent</a
+            >
+          </small>
         </h3>
-        <span class="badge bg-info" th:if="${isTeacher}">Docent Weergave</span>
-        <span class="badge bg-primary" th:if="${isStudent}"
-          >Student Weergave</span
-        >
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-info" th:if="${isTeacher}"
+            >Docent Weergave</span
+          >
+          <span class="badge bg-primary" th:if="${isStudent}"
+            >Student Weergave</span
+          >
+          <!-- Like Button -->
+          <form
+            method="post"
+            th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/like'}"
+            class="m-0"
+          >
+            <button
+              type="submit"
+              class="btn btn-sm"
+              th:classappend="${userHasLiked} ? 'btn-danger' : 'btn-outline-danger'"
+              style="min-width: 80px"
+            >
+              <span th:if="${userHasLiked}"
+                >❤️ <span th:text="${likeCount}">0</span></span
+              >
+              <span th:if="${!userHasLiked}"
+                >🤍 <span th:text="${likeCount}">0</span></span
+              >
+            </button>
+          </form>
+        </div>
       </div>
 
       <div class="row">
@@ -137,10 +165,101 @@
         </div>
       </div>
 
-      <!-- Likes and Comments Section -->
-      <div
-        th:insert="~{fragments/_likes-comments :: likesComments('lesson', ${lesson.id}, ${username}, ${likeCount}, ${userHasLiked}, ${comments})}"
-      ></div>
+      <!-- Comments Section -->
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">💬 Opmerkingen</h5>
+          <span
+            class="badge bg-secondary"
+            th:text="${#lists.size(comments)} + ' opmerkingen'"
+            >0 opmerkingen</span
+          >
+        </div>
+        <div class="card-body">
+          <!-- Add Comment Form -->
+          <form
+            method="post"
+            th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/comment'}"
+            class="mb-4"
+          >
+            <div class="mb-3">
+              <label for="commentContent" class="form-label"
+                >Plaats een opmerking</label
+              >
+              <textarea
+                class="form-control"
+                id="commentContent"
+                name="content"
+                rows="3"
+                placeholder="Schrijf je opmerking hier..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              📝 Opmerking plaatsen
+            </button>
+          </form>
+
+          <!-- Comments List -->
+          <div th:if="${#lists.isEmpty(comments)}" class="text-center py-4">
+            <p class="text-muted mb-0">
+              Nog geen opmerkingen. Wees de eerste om een opmerking te plaatsen!
+            </p>
+          </div>
+
+          <div th:if="${!#lists.isEmpty(comments)}">
+            <hr class="my-3" />
+            <div th:each="comment, commentStat : ${comments}" class="mb-3">
+              <div class="card">
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-2"
+                  >
+                    <div>
+                      <strong th:text="${comment.user.username}"
+                        >Gebruiker</strong
+                      >
+                      <small
+                        class="text-muted ms-2"
+                        th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"
+                        >01-01-2024 12:00</small
+                      >
+                    </div>
+                    <!-- Delete button - only show to comment author -->
+                    <form
+                      th:if="${comment.user.username == username}"
+                      method="post"
+                      th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/comment/' + ${comment.id} + '/delete'}"
+                      onsubmit="
+                        return confirm(
+                          'Weet je zeker dat je deze opmerking wilt verwijderen?',
+                        );
+                      "
+                      class="d-inline"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                      >
+                        🗑️ Verwijderen
+                      </button>
+                    </form>
+                  </div>
+                  <p
+                    class="mb-0"
+                    style="white-space: pre-line"
+                    th:text="${comment.content}"
+                  >
+                    Opmerking inhoud
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Legend -->
       <div th:insert="~{fragments/_lesson-legend :: lessonLegend}"></div>

@@ -274,7 +274,7 @@
                 <tr th:each="event : ${companyEvents}">
                   <td>
                     <a
-                      th:href="@{'/event/' + ${event.id} + '/' + ${username}}"
+                      th:href="@{'/event/' + ${event.id}}"
                       th:text="${event.title}"
                       class="text-decoration-none"
                       >Event Title</a
@@ -299,11 +299,6 @@
                     </small>
                   </td>
                   <td>
-                    <a
-                      th:href="@{'/event/' + ${event.id} + '/' + ${username}}"
-                      class="btn btn-sm btn-info"
-                      >👁️ Bekijken</a
-                    >
                     <form
                       method="post"
                       th:action="@{'/event/' + ${event.id} + '/' + ${username} + '/delete'}"

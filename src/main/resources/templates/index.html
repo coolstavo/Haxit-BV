@@ -41,104 +41,207 @@
           </div>
           <div class="list-group overflow-auto" style="max-height: 85vh">
             <!-- Events -->
-            <a
-              href="#"
-              class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
+            <div
+              class="list-group-item event-card border-0 shadow-sm mb-2 rounded position-relative"
               th:each="event, iterStat : ${events}"
-              th:data-id="${event.id}"
-              th:data-lat="${event.lat}"
-              th:data-lng="${event.lng}"
-              th:data-index="${iterStat.index}"
-              th:data-type="event"
-              onclick="
-                event.preventDefault();
-                focusOnMap(
-                  this.dataset.lat,
-                  this.dataset.lng,
-                  this.dataset.type + '-' + this.dataset.index,
-                );
-              "
+              style="cursor: pointer"
             >
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-dark" th:text="${event.title}">Titel</h5>
-                <span class="badge rounded-pill navbar-brown" th:text="event"
-                  >Type</span
+              <div
+                th:data-id="${event.id}"
+                th:data-lat="${event.lat}"
+                th:data-lng="${event.lng}"
+                th:data-index="${iterStat.index}"
+                th:data-type="event"
+                onclick="
+                  focusOnMap(
+                    this.dataset.lat,
+                    this.dataset.lng,
+                    this.dataset.type + '-' + this.dataset.index,
+                  )
+                "
+              >
+                <div
+                  class="d-flex w-100 justify-content-between align-items-start"
                 >
+                  <div class="flex-grow-1">
+                    <h5 class="mb-1 text-dark" th:text="${event.title}">
+                      Titel
+                    </h5>
+                    <span
+                      class="badge rounded-pill navbar-brown"
+                      th:text="event"
+                      >Type</span
+                    >
+                  </div>
+                  <form
+                    method="post"
+                    th:action="@{'/event/' + ${event.id} + '/' + ${username} + '/like?redirect=home'}"
+                    class="m-0"
+                    onclick="event.stopPropagation()"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-sm"
+                      th:classappend="${eventUserLikes.contains(event.id)} ? 'btn-danger' : 'btn-outline-danger'"
+                      style="min-width: 60px"
+                    >
+                      <span th:if="${eventUserLikes.contains(event.id)}"
+                        >❤️
+                        <span th:text="${eventLikeCounts[event.id]}"
+                          >0</span
+                        ></span
+                      >
+                      <span th:if="${!eventUserLikes.contains(event.id)}"
+                        >🤍
+                        <span th:text="${eventLikeCounts[event.id]}"
+                          >0</span
+                        ></span
+                      >
+                    </button>
+                  </form>
+                </div>
+                <p class="mb-1" th:text="${event.description}">Beschrijving</p>
               </div>
-              <p class="mb-1" th:text="${event.description}">Beschrijving</p>
-            </a>
+            </div>
 
             <!-- Jams -->
-            <a
-              href="#"
-              class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
+            <div
+              class="list-group-item event-card border-0 shadow-sm mb-2 rounded position-relative"
               th:each="jam, iterStat : ${jams}"
-              th:data-id="${jam.id}"
-              th:data-lat="${jam.lat}"
-              th:data-lng="${jam.lng}"
-              th:data-index="${iterStat.index}"
-              th:data-type="jam"
-              onclick="
-                event.preventDefault();
-                focusOnMap(
-                  this.dataset.lat,
-                  this.dataset.lng,
-                  this.dataset.type + '-' + this.dataset.index,
-                );
-              "
+              style="cursor: pointer"
             >
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-dark" th:text="${jam.title}">Titel</h5>
-                <span class="badge rounded-pill bg-warning text-dark">Jam</span>
+              <div
+                th:data-id="${jam.id}"
+                th:data-lat="${jam.lat}"
+                th:data-lng="${jam.lng}"
+                th:data-index="${iterStat.index}"
+                th:data-type="jam"
+                onclick="
+                  focusOnMap(
+                    this.dataset.lat,
+                    this.dataset.lng,
+                    this.dataset.type + '-' + this.dataset.index,
+                  )
+                "
+              >
+                <div
+                  class="d-flex w-100 justify-content-between align-items-start"
+                >
+                  <div class="flex-grow-1">
+                    <h5 class="mb-1 text-dark" th:text="${jam.title}">Titel</h5>
+                    <span class="badge rounded-pill bg-warning text-dark"
+                      >Jam</span
+                    >
+                  </div>
+                  <form
+                    method="post"
+                    th:action="@{'/jam/' + ${jam.id} + '/' + ${username} + '/like?redirect=home'}"
+                    class="m-0"
+                    onclick="event.stopPropagation()"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-sm"
+                      th:classappend="${jamUserLikes.contains(jam.id)} ? 'btn-danger' : 'btn-outline-danger'"
+                      style="min-width: 60px"
+                    >
+                      <span th:if="${jamUserLikes.contains(jam.id)}"
+                        >❤️
+                        <span th:text="${jamLikeCounts[jam.id]}">0</span></span
+                      >
+                      <span th:if="${!jamUserLikes.contains(jam.id)}"
+                        >🤍
+                        <span th:text="${jamLikeCounts[jam.id]}">0</span></span
+                      >
+                    </button>
+                  </form>
+                </div>
+                <p class="mb-1" th:text="${jam.description}">Beschrijving</p>
               </div>
-              <p class="mb-1" th:text="${jam.description}">Beschrijving</p>
-            </a>
+            </div>
 
             <!-- Lessons -->
-            <a
-              href="#"
-              class="list-group-item list-group-item-action event-card border-0 shadow-sm mb-2 rounded"
+            <div
+              class="list-group-item event-card border-0 shadow-sm mb-2 rounded position-relative"
               th:each="lesson, iterStat : ${lessons}"
-              th:data-id="${lesson.id}"
-              th:data-lat="${lesson.lat}"
-              th:data-lng="${lesson.lng}"
-              th:data-index="${iterStat.index}"
-              th:data-type="lesson"
-              onclick="
-                event.preventDefault();
-                focusOnMap(
-                  this.dataset.lat,
-                  this.dataset.lng,
-                  this.dataset.type + '-' + this.dataset.index,
-                );
-              "
+              style="cursor: pointer"
             >
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-dark">
-                  <span th:text="${lesson.instrument?.naam}">Instrument</span>
-                  Les
-                </h5>
-                <span class="badge rounded-pill bg-success">Les</span>
-              </div>
-              <p class="mb-1">
-                <strong th:text="${lesson.docent.user.username}">Docent</strong>
-                - €<span th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
-                  >0.00</span
-                >
-                <span th:text="${lesson.rateType}">per uur</span>
-              </p>
-              <small
-                class="text-muted"
-                th:if="${lesson.location}"
-                th:text="${lesson.location}"
-                >Locatie</small
+              <div
+                th:data-id="${lesson.id}"
+                th:data-lat="${lesson.lat}"
+                th:data-lng="${lesson.lng}"
+                th:data-index="${iterStat.index}"
+                th:data-type="lesson"
+                onclick="
+                  focusOnMap(
+                    this.dataset.lat,
+                    this.dataset.lng,
+                    this.dataset.type + '-' + this.dataset.index,
+                  )
+                "
               >
-              <small
-                class="text-muted d-block"
-                th:if="${lesson.levels}"
-                th:text="'Niveaus: ' + ${lesson.levels}"
-              ></small>
-            </a>
+                <div
+                  class="d-flex w-100 justify-content-between align-items-start"
+                >
+                  <div class="flex-grow-1">
+                    <h5 class="mb-1 text-dark">
+                      <span th:text="${lesson.instrument?.naam}"
+                        >Instrument</span
+                      >
+                      Les
+                    </h5>
+                    <span class="badge rounded-pill bg-success">Les</span>
+                  </div>
+                  <form
+                    method="post"
+                    th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/like?redirect=home'}"
+                    class="m-0"
+                    onclick="event.stopPropagation()"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-sm"
+                      th:classappend="${lessonUserLikes.contains(lesson.id)} ? 'btn-danger' : 'btn-outline-danger'"
+                      style="min-width: 60px"
+                    >
+                      <span th:if="${lessonUserLikes.contains(lesson.id)}"
+                        >❤️
+                        <span th:text="${lessonLikeCounts[lesson.id]}"
+                          >0</span
+                        ></span
+                      >
+                      <span th:if="${!lessonUserLikes.contains(lesson.id)}"
+                        >🤍
+                        <span th:text="${lessonLikeCounts[lesson.id]}"
+                          >0</span
+                        ></span
+                      >
+                    </button>
+                  </form>
+                </div>
+                <p class="mb-1">
+                  <strong th:text="${lesson.docent.user.username}"
+                    >Docent</strong
+                  >
+                  - €<span
+                    th:text="${#numbers.formatDecimal(lesson.rate, 1, 2)}"
+                    >0.00</span
+                  >
+                  <span th:text="${lesson.rateType}">per uur</span>
+                </p>
+                <small
+                  class="text-muted"
+                  th:if="${lesson.location}"
+                  th:text="${lesson.location}"
+                  >Locatie</small
+                >
+                <small
+                  class="text-muted d-block"
+                  th:if="${lesson.levels}"
+                  th:text="'Niveaus: ' + ${lesson.levels}"
+                ></small>
+              </div>
+            </div>
           </div>
         </div>
       </div>

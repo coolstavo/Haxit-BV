@@ -82,11 +82,7 @@ if (Array.isArray(events) && events.length > 0) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-    var eventUrl =
-      "/event/" +
-      event.id +
-      "/" +
-      (typeof username !== "undefined" ? username : "");
+    var eventUrl = "/event/" + event.id;
     var popupText =
       "<b><a href='" +
       eventUrl +
@@ -111,11 +107,7 @@ if (Array.isArray(lessons) && lessons.length > 0) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-    var lessonUrl =
-      "/lesson/" +
-      lesson.id +
-      "/" +
-      (typeof username !== "undefined" ? username : "");
+    var lessonUrl = "/lesson/" + lesson.id;
     var popupText =
       "<b><a href='" +
       lessonUrl +
@@ -146,11 +138,7 @@ if (Array.isArray(jams) && jams.length > 0) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
     var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-    var jamUrl =
-      "/jam/" +
-      jam.id +
-      "/" +
-      (typeof username !== "undefined" ? username : "");
+    var jamUrl = "/jam/" + jam.id;
     var popupText =
       "<b><a href='" +
       jamUrl +

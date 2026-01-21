@@ -8,6 +8,7 @@ import com.webapp.hexit.repository.JamCommentRepository;
 import com.webapp.hexit.repository.JamLikeRepository;
 import com.webapp.hexit.repository.JamRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,12 +38,19 @@ public class JamController {
     this.jamCommentRepository = jamCommentRepository;
   }
 
-  @GetMapping("/{jamId}/{username}")
+  @GetMapping("/{jamId}")
   public String getJamPage(
     @PathVariable Long jamId,
-    @PathVariable String username,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Jam> jamOpt = jamRepository.findById(jamId);
     if (jamOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Jam niet gevonden");
@@ -60,7 +68,6 @@ public class JamController {
 
     User user = userOpt.get();
     model.addAttribute("user", user);
-    model.addAttribute("username", username);
 
     // Check if user is the jam owner (muzikant)
     boolean isOwner =
@@ -81,12 +88,21 @@ public class JamController {
     return "jam";
   }
 
-  @PostMapping("/{jamId}/{username}/like")
+  @PostMapping("/{jamId}/like")
+  @Transactional
   public String toggleLike(
     @PathVariable Long jamId,
-    @PathVariable String username,
+    @RequestParam(required = false) String redirect,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Jam> jamOpt = jamRepository.findById(jamId);
     if (jamOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Jam niet gevonden");
@@ -111,18 +127,29 @@ public class JamController {
       jamLikeRepository.save(like);
     }
 
-    return "redirect:/jam/" + jamId + "/" + username;
+    // Redirect back to home page if requested, otherwise go to jam detail page
+    if ("home".equals(redirect)) {
+      return "redirect:/home";
+    }
+    return "redirect:/jam/" + jamId;
   }
 
-  @PostMapping("/{jamId}/{username}/comment")
+  @PostMapping("/{jamId}/comment")
   public String addComment(
     @PathVariable Long jamId,
-    @PathVariable String username,
     @RequestParam String content,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     if (content == null || content.trim().isEmpty()) {
-      return "redirect:/jam/" + jamId + "/" + username;
+      return "redirect:/jam/" + jamId;
     }
 
     Optional<Jam> jamOpt = jamRepository.findById(jamId);
@@ -149,20 +176,27 @@ public class JamController {
     );
     jamCommentRepository.save(comment);
 
-    return "redirect:/jam/" + jamId + "/" + username;
+    return "redirect:/jam/" + jamId;
   }
 
   @Transactional
-  @PostMapping("/{jamId}/{username}/comment/{commentId}/delete")
+  @PostMapping("/{jamId}/comment/{commentId}/delete")
   public String deleteComment(
     @PathVariable Long jamId,
-    @PathVariable String username,
     @PathVariable Long commentId,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Jam_Comment> commentOpt = jamCommentRepository.findById(commentId);
     if (commentOpt.isEmpty()) {
-      return "redirect:/jam/" + jamId + "/" + username;
+      return "redirect:/jam/" + jamId;
     }
 
     Jam_Comment comment = commentOpt.get();
@@ -186,15 +220,22 @@ public class JamController {
 
     jamCommentRepository.delete(comment);
 
-    return "redirect:/jam/" + jamId + "/" + username;
+    return "redirect:/jam/" + jamId;
   }
 
-  @PostMapping("/{jamId}/{username}/delete")
+  @PostMapping("/{jamId}/delete")
   public String deleteJam(
     @PathVariable Long jamId,
-    @PathVariable String username,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Jam> jamOpt = jamRepository.findById(jamId);
     if (jamOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Jam niet gevonden");

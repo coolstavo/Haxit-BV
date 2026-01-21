@@ -8,6 +8,7 @@ import com.webapp.hexit.repository.EventCommentRepository;
 import com.webapp.hexit.repository.EventLikeRepository;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,12 +40,18 @@ public class EventController {
     this.eventCommentRepository = eventCommentRepository;
   }
 
-  @GetMapping("/{eventId}/{username}")
+  @GetMapping("/{eventId}")
   public String getEventPage(
     @PathVariable Long eventId,
-    @PathVariable String username,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
     Optional<Event> eventOpt = eventRepository.findById(eventId);
     if (eventOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Event niet gevonden");
@@ -62,7 +69,6 @@ public class EventController {
 
     User user = userOpt.get();
     model.addAttribute("user", user);
-    model.addAttribute("username", username);
 
     // Check if user is the event owner (company)
     boolean isOwner =
@@ -86,12 +92,20 @@ public class EventController {
     return "event";
   }
 
-  @PostMapping("/{eventId}/{username}/like")
+  @PostMapping("/{eventId}/like")
+  @Transactional
   public String toggleLike(
     @PathVariable Long eventId,
-    @PathVariable String username,
+    @RequestParam(required = false) String redirect,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
     Optional<Event> eventOpt = eventRepository.findById(eventId);
     if (eventOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Event niet gevonden");
@@ -116,18 +130,29 @@ public class EventController {
       eventLikeRepository.save(like);
     }
 
-    return "redirect:/event/" + eventId + "/" + username;
+    // Redirect back to home page if requested, otherwise go to event detail page
+    if ("home".equals(redirect)) {
+      return "redirect:/home";
+    }
+    return "redirect:/event/" + eventId;
   }
 
-  @PostMapping("/{eventId}/{username}/comment")
+  @PostMapping("/{eventId}/comment")
   public String addComment(
     @PathVariable Long eventId,
-    @PathVariable String username,
     @RequestParam String content,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     if (content == null || content.trim().isEmpty()) {
-      return "redirect:/event/" + eventId + "/" + username;
+      return "redirect:/event/" + eventId;
     }
 
     Optional<Event> eventOpt = eventRepository.findById(eventId);
@@ -154,22 +179,28 @@ public class EventController {
     );
     eventCommentRepository.save(comment);
 
-    return "redirect:/event/" + eventId + "/" + username;
+    return "redirect:/event/" + eventId;
   }
 
   @Transactional
-  @PostMapping("/{eventId}/{username}/comment/{commentId}/delete")
+  @PostMapping("/{eventId}/comment/{commentId}/delete")
   public String deleteComment(
     @PathVariable Long eventId,
-    @PathVariable String username,
     @PathVariable Long commentId,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
     Optional<Event_Comment> commentOpt = eventCommentRepository.findById(
       commentId
     );
     if (commentOpt.isEmpty()) {
-      return "redirect:/event/" + eventId + "/" + username;
+      return "redirect:/event/" + eventId;
     }
 
     Event_Comment comment = commentOpt.get();
@@ -193,15 +224,21 @@ public class EventController {
 
     eventCommentRepository.delete(comment);
 
-    return "redirect:/event/" + eventId + "/" + username;
+    return "redirect:/event/" + eventId;
   }
 
-  @PostMapping("/{eventId}/{username}/delete")
+  @PostMapping("/{eventId}/delete")
   public String deleteEvent(
     @PathVariable Long eventId,
-    @PathVariable String username,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
     Optional<Event> eventOpt = eventRepository.findById(eventId);
     if (eventOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Event niet gevonden");

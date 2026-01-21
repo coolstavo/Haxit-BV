@@ -24,7 +24,7 @@
                 <tr th:each="jam : ${jams}">
                   <td>
                     <a
-                      th:href="@{'/jam/' + ${jam.id} + '/' + ${muzikant.user.username}}"
+                      th:href="@{'/jam/' + ${jam.id}}"
                       th:text="${jam.title}"
                       class="text-decoration-none"
                       >Jam Titel</a
@@ -49,11 +49,6 @@
                     </small>
                   </td>
                   <td>
-                    <a
-                      th:href="@{'/jam/' + ${jam.id} + '/' + ${muzikant.user.username}}"
-                      class="btn btn-sm btn-info"
-                      >👁️ Bekijken</a
-                    >
                     <form
                       method="post"
                       th:action="@{'/jam/' + ${jam.id} + '/' + ${muzikant.user.username} + '/delete'}"
