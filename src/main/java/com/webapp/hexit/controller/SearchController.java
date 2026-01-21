@@ -21,11 +21,6 @@ public class SearchController {
     return searchService.searchByTitle(title);
   }
 
-  @GetMapping("/search/type")
-  public List<Event> searchByType(@RequestParam String type) {
-    return searchService.searchByType(type);
-  }
-
   @GetMapping("/search/location")
   public List<Event> searchByLocation(
     @RequestParam double latStart,

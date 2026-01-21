@@ -18,10 +18,6 @@ public class SearchService {
     return eventRepository.findByTitleContainingIgnoreCase(title);
   }
 
-  public List<Event> searchByType(String type) {
-    return eventRepository.findByType(type);
-  }
-
   public List<Event> searchByLocation(
     double latStart,
     double latEnd,

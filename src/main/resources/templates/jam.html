@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Les Details</title>
+    <title>Jam Details</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" th:href="@{/css/style.css}" />
     <style>
-      #lessonLocationMap {
+      #jamLocationMap {
         height: 300px;
         width: 100%;
         border-radius: 8px;
@@ -25,63 +25,28 @@
     <div th:insert="~{fragments/_navbar :: navbar}"></div>
 
     <div class="container mt-4">
-      <!-- Success Message -->
-      <div
-        th:if="${param.success}"
-        class="alert alert-success alert-dismissible fade show"
-        role="alert"
-      >
-        <strong>Gelukt!</strong> Je lesaanvraag is succesvol verstuurd. De
-        docent zal deze beoordelen.
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-
-      <!-- Resubmitted Message -->
-      <div
-        th:if="${param.resubmitted}"
-        class="alert alert-info alert-dismissible fade show"
-        role="alert"
-      >
-        <strong>Opnieuw ingediend!</strong> Je nieuwe voorstellen zijn verstuurd
-        naar de docent.
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-
       <!-- Header -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>
-          <span th:text="${lesson.instrument?.naam}">Instrument</span> Les
-          <small class="text-muted">
+          <span th:text="${jam.title}">Jam Titel</span>
+          <small class="text-muted" th:if="${jam.muzikantUser}">
             door
             <a
-              th:href="@{'/profile/' + ${lesson.docent.user.username}}"
-              th:text="${lesson.docent.user.username}"
+              th:href="@{'/profile/' + ${jam.muzikantUser.username}}"
+              th:text="${jam.muzikantUser.username}"
               class="text-decoration-none"
-              >Docent</a
+              >Muzikant</a
             >
           </small>
         </h3>
         <div class="d-flex align-items-center gap-2">
-          <span class="badge bg-info" th:if="${isTeacher}"
-            >Docent Weergave</span
-          >
-          <span class="badge bg-primary" th:if="${isStudent}"
-            >Student Weergave</span
+          <span class="badge bg-warning text-dark" th:if="${isOwner}"
+            >Jouw Jam</span
           >
           <!-- Like Button -->
           <form
             method="post"
-            th:action="@{'/lesson/' + ${lesson.id} + '/like'}"
+            th:action="@{'/jam/' + ${jam.id} + '/like'}"
             class="m-0"
           >
             <button
@@ -102,64 +67,52 @@
       </div>
 
       <div class="row">
-        <!-- Left column: Lesson Details -->
+        <!-- Left column: Jam Details -->
         <div class="col-md-6">
-          <div
-            th:insert="~{fragments/_lesson-info :: lessonInfo(${lesson})}"
-          ></div>
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">🎵 Jam Details</h5>
+            </div>
+            <div class="card-body">
+              <p>
+                <strong>Titel:</strong>
+                <span th:text="${jam.title}">-</span>
+              </p>
+              <p th:if="${jam.muzikantUser}">
+                <strong>Muzikant:</strong>
+                <a
+                  th:href="@{'/profile/' + ${jam.muzikantUser.username}}"
+                  th:text="${jam.muzikantUser.username}"
+                  class="text-decoration-none"
+                  >-</a
+                >
+              </p>
+              <p>
+                <strong>Beschrijving:</strong>
+              </p>
+              <p
+                style="white-space: pre-line; margin-bottom: 0"
+                th:text="${jam.description}"
+              >
+                -
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Right column: Location -->
         <div class="col-md-6">
-          <div
-            th:insert="~{fragments/_lesson-location :: lessonLocation(${lesson})}"
-          ></div>
-        </div>
-      </div>
-
-      <!-- Request Lesson Form (only for students) -->
-      <div th:if="${isStudent}">
-        <div
-          th:insert="~{fragments/_lesson-request-form :: lessonRequestForm(${lesson}, ${username})}"
-        ></div>
-      </div>
-
-      <!-- Bookings Overview -->
-      <div class="card shadow-sm mb-4">
-        <div
-          class="card-header bg-light d-flex justify-content-between align-items-center"
-        >
-          <h5 class="mb-0">
-            <span th:if="${isTeacher}">📋 Inkomende Lesaanvragen</span>
-            <span th:if="${isStudent}">📋 Mijn Lesaanvragen</span>
-            <span th:if="${!isTeacher && !isStudent}">📋 Lesaanvragen</span>
-          </h5>
-          <span
-            th:if="${hasBookings}"
-            class="badge bg-primary"
-            th:text="${#lists.size(bookings)} + ' aanvragen'"
-          ></span>
-        </div>
-        <div class="card-body">
-          <div th:if="${!hasBookings}" class="text-center py-4">
-            <p class="text-muted mb-0">
-              <span th:if="${isTeacher}"
-                >Er zijn nog geen lesaanvragen voor deze les.</span
-              >
-              <span th:if="${isStudent}"
-                >Je hebt nog geen aanvragen gedaan voor deze les.</span
-              >
-              <span th:if="${!isTeacher && !isStudent}"
-                >Geen lesaanvragen beschikbaar.</span
-              >
-            </p>
-          </div>
-
-          <div th:if="${hasBookings}">
-            <div th:each="booking, bookingStat : ${bookings}">
-              <div
-                th:insert="~{fragments/_lesson-booking-card :: bookingCard(${booking}, ${bookingStat.index}, ${lesson}, ${username}, ${isTeacher}, ${isStudent})}"
-              ></div>
+          <div class="card shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">📍 Locatie</h5>
+            </div>
+            <div class="card-body">
+              <div id="jamLocationMap"></div>
+              <p class="mt-3 mb-0">
+                <strong>Coördinaten:</strong><br />
+                Latitude: <span th:text="${jam.lat}">-</span><br />
+                Longitude: <span th:text="${jam.lng}">-</span>
+              </p>
             </div>
           </div>
         </div>
@@ -181,7 +134,7 @@
           <!-- Add Comment Form -->
           <form
             method="post"
-            th:action="@{'/lesson/' + ${lesson.id} + '/comment'}"
+            th:action="@{'/jam/' + ${jam.id} + '/comment'}"
             class="mb-4"
           >
             <div class="mb-3">
@@ -231,7 +184,7 @@
                     <form
                       th:if="${comment.user.username == username}"
                       method="post"
-                      th:action="@{'/lesson/' + ${lesson.id} + '/comment/' + ${comment.id} + '/delete'}"
+                      th:action="@{'/jam/' + ${jam.id} + '/comment/' + ${comment.id} + '/delete'}"
                       onsubmit="
                         return confirm(
                           'Weet je zeker dat je deze opmerking wilt verwijderen?',
@@ -261,11 +214,8 @@
         </div>
       </div>
 
-      <!-- Legend -->
-      <div th:insert="~{fragments/_lesson-legend :: lessonLegend}"></div>
-
       <!-- Back Button -->
-      <div class="mb-4">
+      <div class="mb-4 mt-4">
         <a href="javascript:history.back()" class="btn btn-secondary"
           >← Terug</a
         >
@@ -274,6 +224,44 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script th:src="@{/js/lesson-map.js}"></script>
+    <script>
+      // Initialize map for jam location
+      const maxBounds = L.latLngBounds(
+        L.latLng(52.9, 6.0),
+        L.latLng(53.6, 7.3),
+      );
+
+      const jamMap = L.map("jamLocationMap", {
+        maxBounds: maxBounds,
+        maxBoundsViscosity: 1.0,
+      }).setView([/*[[${jam.lat}]]*/ 53.2194, /*[[${jam.lng}]]*/ 6.5665], 15);
+
+      jamMap.setMaxBounds(maxBounds);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap-bijdragers",
+      }).addTo(jamMap);
+
+      const pinIcon = L.icon({
+        iconUrl: "/assets/pin-red.png",
+        iconSize: [15, 40],
+        iconAnchor: [15, 40],
+        popupAnchor: [-6, -40],
+      });
+
+      const marker = L.marker(
+        [/*[[${jam.lat}]]*/ 53.2194, /*[[${jam.lng}]]*/ 6.5665],
+        { icon: pinIcon },
+      ).addTo(jamMap);
+
+      marker.bindPopup(
+        "<b>" +
+          /*[[${jam.title}]]*/ "" +
+          "</b><br>" +
+          /*[[${jam.description}]]*/ "",
+      );
+      marker.openPopup();
+    </script>
   </body>
 </html>
