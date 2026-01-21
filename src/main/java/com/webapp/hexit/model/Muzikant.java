@@ -11,9 +11,7 @@ public class Muzikant {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Lob
-  @Column(columnDefinition = "LONGBLOB")
-  private byte[] profilePic;
+  private String profilePic;
 
   @OneToOne
   @JoinColumn(name = "user_id", nullable = false)
@@ -63,11 +61,11 @@ public class Muzikant {
     this.id = id;
   }
 
-  public byte[] getProfilePic() {
+  public String getProfilePic() {
     return profilePic;
   }
 
-  public void setProfilePic(byte[] profilePic) {
+  public void setProfilePic(String profilePic) {
     this.profilePic = profilePic;
   }
 
