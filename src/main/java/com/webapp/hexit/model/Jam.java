@@ -1,6 +1,8 @@
 package com.webapp.hexit.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Jam {
@@ -21,6 +23,12 @@ public class Jam {
   // Backwards compatibility with old userId column
   @Column(name = "user_id")
   private Long userId;
+
+  @OneToMany(mappedBy = "jam", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Jam_Like> likes = new ArrayList<>();
+
+  @OneToMany(mappedBy = "jam", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Jam_Comment> comments = new ArrayList<>();
 
   public Jam() {} // default constructor required by JPA
 
@@ -110,5 +118,21 @@ public class Jam {
 
   public void setUserId(Long userId) {
     this.userId = userId;
+  }
+
+  public List<Jam_Like> getLikes() {
+    return likes;
+  }
+
+  public void setLikes(List<Jam_Like> likes) {
+    this.likes = likes;
+  }
+
+  public List<Jam_Comment> getComments() {
+    return comments;
+  }
+
+  public void setComments(List<Jam_Comment> comments) {
+    this.comments = comments;
   }
 }

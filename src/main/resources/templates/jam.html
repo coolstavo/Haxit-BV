@@ -46,7 +46,7 @@
           <!-- Like Button -->
           <form
             method="post"
-            th:action="@{'/jam/' + ${jam.id} + '/' + ${username} + '/like'}"
+            th:action="@{'/jam/' + ${jam.id} + '/like'}"
             class="m-0"
           >
             <button
@@ -134,7 +134,7 @@
           <!-- Add Comment Form -->
           <form
             method="post"
-            th:action="@{'/jam/' + ${jam.id} + '/' + ${username} + '/comment'}"
+            th:action="@{'/jam/' + ${jam.id} + '/comment'}"
             class="mb-4"
           >
             <div class="mb-3">
@@ -184,7 +184,7 @@
                     <form
                       th:if="${comment.user.username == username}"
                       method="post"
-                      th:action="@{'/jam/' + ${jam.id} + '/' + ${username} + '/comment/' + ${comment.id} + '/delete'}"
+                      th:action="@{'/jam/' + ${jam.id} + '/comment/' + ${comment.id} + '/delete'}"
                       onsubmit="
                         return confirm(
                           'Weet je zeker dat je deze opmerking wilt verwijderen?',

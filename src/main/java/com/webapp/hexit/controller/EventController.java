@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -227,6 +226,7 @@ public class EventController {
     return "redirect:/event/" + eventId;
   }
 
+  @Transactional
   @PostMapping("/{eventId}/delete")
   public String deleteEvent(
     @PathVariable Long eventId,
@@ -267,6 +267,18 @@ public class EventController {
       return "error";
     }
 
+    // Delete all related entities first to avoid foreign key constraint violations
+    // Delete all likes for this event
+    eventLikeRepository
+      .findByEventId(eventId)
+      .forEach(like -> eventLikeRepository.delete(like));
+
+    // Delete all comments for this event
+    eventCommentRepository
+      .findByEventIdOrderByCreatedAtDesc(eventId)
+      .forEach(comment -> eventCommentRepository.delete(comment));
+
+    // Now delete the event itself
     eventRepository.delete(event);
     return "redirect:/profile/" + username;
   }
@@ -278,13 +290,19 @@ class EventApiController {
 
   private final EventRepository eventRepository;
   private final UserRepository userRepository;
+  private final EventLikeRepository eventLikeRepository;
+  private final EventCommentRepository eventCommentRepository;
 
   EventApiController(
     EventRepository eventRepository,
-    UserRepository userRepository
+    UserRepository userRepository,
+    EventLikeRepository eventLikeRepository,
+    EventCommentRepository eventCommentRepository
   ) {
     this.eventRepository = eventRepository;
     this.userRepository = userRepository;
+    this.eventLikeRepository = eventLikeRepository;
+    this.eventCommentRepository = eventCommentRepository;
   }
 
   @GetMapping("/all")
@@ -313,6 +331,7 @@ class EventApiController {
     return eventRepository.findByCompanyUserId(companyUserId);
   }
 
+  @Transactional
   @DeleteMapping("/{eventId}")
   public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId) {
     Optional<Event> eventOpt = eventRepository.findById(eventId);
@@ -320,7 +339,18 @@ class EventApiController {
       return ResponseEntity.notFound().build();
     }
 
-    eventRepository.delete(eventOpt.get());
+    Event event = eventOpt.get();
+
+    // Delete all related entities first to avoid foreign key constraint violations
+    eventLikeRepository
+      .findByEventId(eventId)
+      .forEach(like -> eventLikeRepository.delete(like));
+
+    eventCommentRepository
+      .findByEventIdOrderByCreatedAtDesc(eventId)
+      .forEach(comment -> eventCommentRepository.delete(comment));
+
+    eventRepository.delete(event);
     return ResponseEntity.ok().build();
   }
 }
