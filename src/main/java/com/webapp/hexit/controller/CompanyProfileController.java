@@ -1,11 +1,14 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Company;
+import com.webapp.hexit.model.Event;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.CompanyRepository;
+import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ public class CompanyProfileController {
 
   private final CompanyRepository companyRepository;
   private final UserRepository userRepository;
+  private final EventRepository eventRepository;
   private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   private static final String[] ALLOWED_MIME_TYPES = {
     "image/jpeg",
@@ -29,10 +33,12 @@ public class CompanyProfileController {
 
   public CompanyProfileController(
     CompanyRepository companyRepository,
-    UserRepository userRepository
+    UserRepository userRepository,
+    EventRepository eventRepository
   ) {
     this.companyRepository = companyRepository;
     this.userRepository = userRepository;
+    this.eventRepository = eventRepository;
   }
 
   /**
@@ -55,6 +61,10 @@ public class CompanyProfileController {
       model.addAttribute("company", newCompany);
       model.addAttribute("hasData", false);
     }
+
+    // Load company events
+    List<Event> companyEvents = eventRepository.findByCompanyUser(user);
+    model.addAttribute("companyEvents", companyEvents);
 
     model.addAttribute("companyName", username);
     model.addAttribute("username", username);
@@ -83,6 +93,10 @@ public class CompanyProfileController {
       model.addAttribute("company", newCompany);
       model.addAttribute("hasData", false);
     }
+
+    // Load company events
+    List<Event> companyEvents = eventRepository.findByCompanyUser(user);
+    model.addAttribute("companyEvents", companyEvents);
 
     model.addAttribute("companyName", username);
     model.addAttribute("username", username);
@@ -130,6 +144,10 @@ public class CompanyProfileController {
       model.addAttribute("company", newCompany);
       model.addAttribute("hasData", false);
     }
+
+    // Load company events
+    List<Event> companyEvents = eventRepository.findByCompanyUser(user);
+    model.addAttribute("companyEvents", companyEvents);
 
     model.addAttribute("companyName", bedrijfnaam);
     model.addAttribute("username", bedrijfnaam);

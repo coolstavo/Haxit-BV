@@ -2,16 +2,19 @@ package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Genre;
 import com.webapp.hexit.model.Instrument;
+import com.webapp.hexit.model.Jam;
 import com.webapp.hexit.model.Muzikant;
 import com.webapp.hexit.model.MuzikantInstrument;
 import com.webapp.hexit.model.Profile_File;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
+import com.webapp.hexit.repository.JamRepository;
 import com.webapp.hexit.repository.MuzikantInstrumentRepository;
 import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.ProfileFileRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -19,10 +22,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -34,6 +41,7 @@ public class MuzikantProfileController {
   private final InstrumentRepository instrumentRepository;
   private final GenreRepository genreRepository;
   private final ProfileFileRepository profileFileRepository;
+  private final JamRepository jamRepository;
 
   public MuzikantProfileController(
     UserRepository userRepository,
@@ -41,7 +49,8 @@ public class MuzikantProfileController {
     MuzikantInstrumentRepository muzikantInstrumentRepository,
     InstrumentRepository instrumentRepository,
     GenreRepository genreRepository,
-    ProfileFileRepository profileFileRepository
+    ProfileFileRepository profileFileRepository,
+    JamRepository jamRepository
   ) {
     this.userRepository = userRepository;
     this.muzikantRepository = muzikantRepository;
@@ -49,6 +58,7 @@ public class MuzikantProfileController {
     this.instrumentRepository = instrumentRepository;
     this.genreRepository = genreRepository;
     this.profileFileRepository = profileFileRepository;
+    this.jamRepository = jamRepository;
   }
 
   public String getProfile(String username, Model model) {
@@ -82,6 +92,10 @@ public class MuzikantProfileController {
         );
       model.addAttribute("mediaBestanden", userContent);
 
+      // Get jams created by this muzikant
+      List<Jam> jams = jamRepository.findByMuzikantUser(profile);
+      model.addAttribute("jams", jams);
+
       return "profile-muzikant";
     }
     return handleError(model);
@@ -106,6 +120,17 @@ public class MuzikantProfileController {
     List<Genre> allGenres = genreRepository.findAll();
     model.addAttribute("allGenres", allGenres);
     return "profile-edit-muzikant";
+  }
+
+  @GetMapping("/profile/edit")
+  public String getProfileEditSession(HttpSession session, Model model) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+    return getProfileEdit(username, model);
   }
 
   @PostMapping("/profile/change-profile-pic")
@@ -164,7 +189,7 @@ public class MuzikantProfileController {
 
     muzikantInstrumentRepository.save(muzikantInstrument);
 
-    return "redirect:/profile/" + muzikant.getUser().getUsername() + "/edit";
+    return ("redirect:/profile/" + muzikant.getUser().getUsername() + "/edit");
   }
 
   @PostMapping("/profile/remove-instrument")
@@ -177,7 +202,7 @@ public class MuzikantProfileController {
       .getMuzikant();
 
     muzikantInstrumentRepository.deleteById(muzikantInstrumentId);
-    return "redirect:/profile/" + muzikant.getUser().getUsername() + "/edit";
+    return ("redirect:/profile/" + muzikant.getUser().getUsername() + "/edit");
   }
 
   @PostMapping("/profile/add-genre")
@@ -196,7 +221,7 @@ public class MuzikantProfileController {
     muzikant.getGenres().add(genre);
     muzikantRepository.save(muzikant);
 
-    return "redirect:/profile/" + muzikant.getUser().getUsername() + "/edit";
+    return ("redirect:/profile/" + muzikant.getUser().getUsername() + "/edit");
   }
 
   @PostMapping("/profile/remove-genre")
@@ -211,7 +236,7 @@ public class MuzikantProfileController {
     muzikant.getGenres().removeIf(genre -> genre.getId().equals(genreId));
     muzikantRepository.save(muzikant);
 
-    return "redirect:/profile/" + muzikant.getUser().getUsername() + "/edit";
+    return ("redirect:/profile/" + muzikant.getUser().getUsername() + "/edit");
   }
 
   @ExceptionHandler(Exception.class)

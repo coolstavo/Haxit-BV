@@ -105,7 +105,7 @@
           >
             <h6>Kies een datum om te accepteren:</h6>
             <form
-              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/accept'}"
+              th:action="@{'/lesson/' + ${lesson.id} + '/accept'}"
               method="post"
               class="mb-3"
             >
@@ -130,7 +130,7 @@
               </div>
             </form>
             <form
-              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/reject'}"
+              th:action="@{'/lesson/' + ${lesson.id} + '/reject'}"
               method="post"
               class="d-inline"
             >
@@ -160,7 +160,7 @@
             </div>
             <h6>Nieuwe datums voorstellen:</h6>
             <form
-              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/update-proposals'}"
+              th:action="@{'/lesson/' + ${lesson.id} + '/update-proposals'}"
               method="post"
             >
               <input type="hidden" name="bookingId" th:value="${booking.id}" />
@@ -203,7 +203,7 @@
             class="mt-3 pt-3 border-top"
           >
             <form
-              th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/cancel-booking'}"
+              th:action="@{'/lesson/' + ${lesson.id} + '/cancel-booking'}"
               method="post"
               class="d-inline"
             >

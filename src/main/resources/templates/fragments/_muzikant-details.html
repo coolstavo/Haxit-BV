@@ -1,0 +1,62 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="detailsSection" class="details-section">
+    <div class="row">
+        <!-- Instruments Details -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-music"></i> Mijn Instrumenten
+                </div>
+                <div class="card-body">
+                    <div th:if="${!muzikantInstruments.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Instrument</th>
+                                        <th>Niveau</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="muzikantInstrument : ${muzikantInstruments}">
+                                        <td th:text="${muzikantInstrument.instrument.naam}"></td>
+                                        <td>
+                                            <span class="badge bg-primary" th:text="${muzikantInstrument.level}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div th:if="${muzikantInstruments.isEmpty()}" class="empty-state">
+                        <div class="empty-state-icon">🎹</div>
+                        <p class="text-muted mb-0">Geen instrumenten toegevoegd. Bewerk je profiel om instrumenten toe te voegen.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Genres Details -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <i class="bi bi-music"></i> Mijn Genres
+                </div>
+                <div class="card-body">
+                    <div th:if="${!muzikant.genres.isEmpty()}">
+                        <div class="genres-detail-container">
+                            <span th:each="genre : ${muzikant.genres}"
+                                  class="genre-badge-large"
+                                  th:text="${genre.name}"></span>
+                        </div>
+                    </div>
+                    <div th:if="${muzikant.genres.isEmpty()}" class="empty-state">
+                        <div class="empty-state-icon">🎵</div>
+                        <p class="text-muted mb-0">Geen genres toegevoegd. Bewerk je profiel om genres toe te voegen.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

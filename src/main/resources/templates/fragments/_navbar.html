@@ -1,10 +1,14 @@
-<nav xmlns:th="http://www.thymeleaf.org"
+<nav
+  xmlns:th="http://www.thymeleaf.org"
   th:fragment="navbar"
-  class="navbar navbar-expand-lg navbar-dark navbar-brown mb-4">
+  class="navbar navbar-expand-lg navbar-dark navbar-brown mb-4"
+>
   <div class="container">
-    <a class="navbar-brand fw-bold d-flex align-items-center"
-       th:if="${username} == 'Gast'"
-       th:href="@{/}">
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center"
+      th:if="${username} == 'Gast'"
+      th:href="@{/}"
+    >
       <img
         src="/assets/new-logo.svg"
         alt="Listen logo"
@@ -27,8 +31,18 @@
       <ul class="navbar-nav ms-auto">
 
         <li class="nav-item">
-          <a class="nav-link active" th:if="${username} != 'Gast'" th:href="@{/{u}(u=${username})}">Home</a>
-          <a class="nav-link active" th:if="${username} == 'Gast'" th:href="@{/}">Home</a>
+          <a
+            class="nav-link active"
+            th:if="${username} != 'Gast'"
+            th:href="@{/home}"
+            >Home</a
+          >
+          <a
+            class="nav-link active"
+            th:if="${username} == 'Gast'"
+            th:href="@{/}"
+            >Home</a
+          >
         </li>
 
         <li class="nav-item" th:if="${username} != 'Gast'">

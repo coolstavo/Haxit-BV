@@ -9,6 +9,8 @@ import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.DocentRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.LessonBookingRepository;
+import com.webapp.hexit.repository.LessonCommentRepository;
+import com.webapp.hexit.repository.LessonLikeRepository;
 import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +35,8 @@ public class DocentProfileController {
   private final LessonRepository lessonRepository;
   private final InstrumentRepository instrumentRepository;
   private final LessonBookingRepository lessonBookingRepository;
+  private final LessonLikeRepository lessonLikeRepository;
+  private final LessonCommentRepository lessonCommentRepository;
   private final UserRepository userRepository;
 
   public DocentProfileController(
@@ -39,12 +44,16 @@ public class DocentProfileController {
     LessonRepository lessonRepository,
     InstrumentRepository instrumentRepository,
     LessonBookingRepository lessonBookingRepository,
+    LessonLikeRepository lessonLikeRepository,
+    LessonCommentRepository lessonCommentRepository,
     UserRepository userRepository
   ) {
     this.docentRepository = docentRepository;
     this.lessonRepository = lessonRepository;
     this.instrumentRepository = instrumentRepository;
     this.lessonBookingRepository = lessonBookingRepository;
+    this.lessonLikeRepository = lessonLikeRepository;
+    this.lessonCommentRepository = lessonCommentRepository;
     this.userRepository = userRepository;
   }
 
@@ -331,11 +340,29 @@ public class DocentProfileController {
     }
   }
 
+  @Transactional
   @GetMapping("/profile/docent/delete-lesson/{id}")
   public String deleteLesson(
     @PathVariable Long id,
     @RequestParam String docentName
   ) {
+    // Delete all related entities first to avoid foreign key constraint violations
+    // Delete all bookings for this lesson
+    lessonBookingRepository
+      .findByLessonId(id)
+      .forEach(booking -> lessonBookingRepository.delete(booking));
+
+    // Delete all likes for this lesson
+    lessonLikeRepository
+      .findByLessonId(id)
+      .forEach(like -> lessonLikeRepository.delete(like));
+
+    // Delete all comments for this lesson
+    lessonCommentRepository
+      .findByLessonIdOrderByCreatedAtDesc(id)
+      .forEach(comment -> lessonCommentRepository.delete(comment));
+
+    // Now delete the lesson itself
     lessonRepository.deleteById(id);
     return "redirect:/profile/" + docentName + "/edit";
   }

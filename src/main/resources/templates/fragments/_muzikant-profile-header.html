@@ -1,0 +1,66 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <div
+    th:fragment="profileHeader"
+    class="profile-header"
+    th:attr="data-user-id=${muzikant.user.id}"
+  >
+    <div class="container">
+      <div class="row align-items-center">
+        <!-- Profile Picture -->
+        <div class="col-md-2 text-center">
+          <div th:if="${muzikantImage}">
+            <img
+              th:src="|data:image/jpeg;base64,${muzikantImage}|"
+              alt="Profielfoto"
+              class="profile-pic"
+            />
+          </div>
+          <div th:unless="${muzikantImage}">
+            <img
+              src="/images/default-placeholder.png"
+              alt="Geen foto"
+              class="profile-pic"
+            />
+          </div>
+        </div>
+
+        <!-- Profile Info -->
+        <div class="col-md-10">
+          <h1 th:text="${muzikant.user.username}" class="profile-name mb-2">
+            Muzikant Naam
+          </h1>
+
+          <!-- Age -->
+          <p class="profile-age mb-3">
+            <strong>Leeftijd:</strong>
+            <span th:text="${muzikant.leeftijd}">0</span> jaar
+          </p>
+
+          <!-- Genres -->
+          <div class="mb</strong>-3" th:if="${!muzikant.genres.isEmpty()}">
+            <strong class="profile-section-label">Genres:</strong>
+            <div class="genres-container">
+              <span
+                th:each="genre : ${muzikant.genres}"
+                class="genre-badge"
+                th:text="${genre.name}"
+              ></span>
+            </div>
+          </div>
+
+          <!-- Instruments -->
+          <div th:if="${!muzikantInstruments.isEmpty()}">
+            <strong class="profile-section-label">Instrumenten:</strong>
+            <div class="instruments-container">
+              <span
+                th:each="muzikantInstrument : ${muzikantInstruments}"
+                class="instrument-badge"
+                th:text="${muzikantInstrument.instrument.naam} + ' (' + ${muzikantInstrument.level} + ')'"
+              ></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</html>
