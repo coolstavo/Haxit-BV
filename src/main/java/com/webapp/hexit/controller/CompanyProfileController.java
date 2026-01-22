@@ -11,6 +11,7 @@ import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,11 @@ public class CompanyProfileController {
   /**
    * Public method for unified profile routing
    */
-  public String getCompanyProfile(String username, Model model) {
+  public String getCompanyProfile(
+    String username,
+    Model model,
+    HttpSession session
+  ) {
     User user = userRepository.findByUsername(username).orElse(null);
 
     if (user == null) {
@@ -81,6 +86,13 @@ public class CompanyProfileController {
     List<Genre> allGenres = genreRepository.findAll();
     model.addAttribute("allInstruments", allInstruments);
     model.addAttribute("allGenres", allGenres);
+
+    // Check if current user is viewing their own profile
+    Object currentUsernameObj = session.getAttribute("currentUsername");
+    boolean isOwner =
+      currentUsernameObj != null &&
+      currentUsernameObj.toString().equals(username);
+    model.addAttribute("isOwner", isOwner);
 
     model.addAttribute("companyName", username);
     model.addAttribute("username", username);
