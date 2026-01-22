@@ -84,6 +84,18 @@
               ></div>
             </div>
 
+            <div class="mb-3">
+                <label for="stad" class="form-label">Locatie / Stad</label>
+                <select class="form-select" id="stad" th:field="*{stad}">
+                    <option value="" disabled selected>Kies je stad...</option>
+                    
+                    <option th:each="stadOptie : ${alleSteden}" 
+                            th:value="${stadOptie}" 
+                            th:text="${stadOptie}">
+                    </option>
+                </select>
+            </div>
+
             <button type="submit" class="btn btn-primary">Opslaan</button>
           </form>
         </div>

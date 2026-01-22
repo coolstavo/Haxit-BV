@@ -19,6 +19,8 @@ public class Muzikant {
 
   private int leeftijd;
 
+  private String stad;
+
   @ManyToMany
   @JoinTable(
     name = "musician_genre",
@@ -29,9 +31,10 @@ public class Muzikant {
 
   public Muzikant() {}
 
-  public Muzikant(User user, int leeftijd) {
+  public Muzikant(User user, int leeftijd, String stad) {
     this.user = user;
     this.leeftijd = leeftijd;
+    this.stad = stad;
   }
 
   @ManyToMany
@@ -79,6 +82,14 @@ public class Muzikant {
 
   public int getLeeftijd() {
     return leeftijd;
+  }
+
+  public String getStad() {
+    return stad;
+  }
+
+  public void setStad(String stad) {
+    this.stad = stad;
   }
 
   public List<Genre> getGenres() {
