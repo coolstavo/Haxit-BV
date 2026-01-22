@@ -27,30 +27,6 @@
             <strong>Leeftijd:</strong>
             <span th:text="${muzikant.leeftijd}">0</span> jaar
           </p>
-
-          <!-- Genres -->
-          <div class="mb</strong>-3" th:if="${!muzikant.genres.isEmpty()}">
-            <strong class="profile-section-label">Genres:</strong>
-            <div class="genres-container">
-              <span
-                th:each="genre : ${muzikant.genres}"
-                class="genre-badge"
-                th:text="${genre.name}"
-              ></span>
-            </div>
-          </div>
-
-          <!-- Instruments -->
-          <div th:if="${!muzikantInstruments.isEmpty()}">
-            <strong class="profile-section-label">Instrumenten:</strong>
-            <div class="instruments-container">
-              <span
-                th:each="muzikantInstrument : ${muzikantInstruments}"
-                class="instrument-badge"
-                th:text="${muzikantInstrument.instrument.naam} + ' (' + ${muzikantInstrument.level} + ')'"
-              ></span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

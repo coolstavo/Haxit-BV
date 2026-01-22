@@ -40,16 +40,29 @@
         <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-header">
-                    <i class="bi bi-music"></i> Mijn Genres
+                    <i class="bi bi-music-note-list"></i> Mijn Genres
                 </div>
                 <div class="card-body">
                     <div th:if="${!muzikant.genres.isEmpty()}">
-                        <div class="genres-detail-container">
-                            <span th:each="genre : ${muzikant.genres}"
-                                  class="genre-badge-large"
-                                  th:text="${genre.name}"></span>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Genre</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="genre : ${muzikant.genres}">
+                                        <td th:text="${genre.name}"></td>
+                                        
+                                        </tr>
+                                </tbody>
+                            </table>
                         </div>
+
                     </div>
+                    
                     <div th:if="${muzikant.genres.isEmpty()}" class="empty-state">
                         <div class="empty-state-icon">🎵</div>
                         <p class="text-muted mb-0">Geen genres toegevoegd. Bewerk je profiel om genres toe te voegen.</p>
