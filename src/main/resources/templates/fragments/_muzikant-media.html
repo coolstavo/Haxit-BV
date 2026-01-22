@@ -2,14 +2,14 @@
 <div th:fragment="mediaSection" class="row mb-4">
     <!-- Audio Section -->
     <div class="col-md-6">
-        <div class="card h-100">
+        <div class="card">
             <div class="card-header">
                 <i class="bi bi-music"></i> Audio & SoundCloud
             </div>
             <div class="card-body" th:with="audioLijst=${mediaBestanden.?[isAudio() or isSoundCloud()]}">
                 <div th:if="${!audioLijst.isEmpty()}">
-                    <div th:each="item : ${audioLijst}" class="media-item">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div th:each="item : ${audioLijst}" class="media-item mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="flex-grow-1">
                                 <h6 class="media-title" th:text="${item.beschrijving}">Titel</h6>
                                 <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"></small>
@@ -17,11 +17,12 @@
                             <form th:action="@{/profile/delete/{id}(id=${item.id})}"
                                   method="post"
                                   class="ms-2"
-                                  onsubmit="return confirm('Weet je zeker dat je dit item wilt verwijderen?');">
+                                  th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
+                                  onsubmit="return confirm(this.getAttribute('confirm-msg'));">
                                 <input type="hidden" name="username" th:value="${muzikant.user.username}" />
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
                                     <i class="bi bi-trash"></i>
-                                </button>
+                                Verwijder </button>
                             </form>
                         </div>
 
@@ -44,6 +45,7 @@
                                     th:src="${item.getEmbedUrl()}">
                             </iframe>
                         </div>
+                        <hr class="mt-4 text-muted" th:if="${!itemStat.last}">
                     </div>
                 </div>
                 <div th:if="${audioLijst.isEmpty()}" class="empty-state">
@@ -56,14 +58,14 @@
 
     <!-- Video Section -->
     <div class="col-md-6">
-        <div class="card h-100">
+        <div class="card">
             <div class="card-header">
                 <i class="bi bi-film"></i> Video & YouTube
             </div>
             <div class="card-body" th:with="videoLijst=${mediaBestanden.?[isVideo() or isYoutube()]}">
                 <div th:if="${!videoLijst.isEmpty()}">
-                    <div th:each="item : ${videoLijst}" class="media-item">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div th:each="item : ${videoLijst}" class="media-item mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="flex-grow-1">
                                 <h6 class="media-title" th:text="${item.beschrijving}">Titel</h6>
                                 <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"></small>
@@ -71,11 +73,12 @@
                             <form th:action="@{/profile/delete/{id}(id=${item.id})}"
                                   method="post"
                                   class="ms-2"
-                                  onsubmit="return confirm('Weet je zeker dat je dit item wilt verwijderen?');">
+                                  th:confirm-msg="|Weet je zeker dat je &quot;${item.beschrijving}&quot; wilt verwijderen?|"
+                                  onsubmit="return confirm(this.getAttribute('confirm-msg'));">
                                 <input type="hidden" name="username" th:value="${muzikant.user.username}" />
                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
                                     <i class="bi bi-trash"></i>
-                                </button>
+                                Verwijder </button>
                             </form>
                         </div>
 
@@ -93,6 +96,7 @@
                                 Je browser ondersteunt geen video.
                             </video>
                         </div>
+                        <hr class="mt-4 text-muted" th:if="${!itemStat.last}">
                     </div>
                 </div>
                 <div th:if="${videoLijst.isEmpty()}" class="empty-state">
