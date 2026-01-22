@@ -115,10 +115,14 @@ public class LessonController {
   }
 
   @PostMapping("/lesson/{lessonId}/like")
-  @Transactional
   public String toggleLike(
     @PathVariable Long lessonId,
     @RequestParam(required = false) String redirect,
+    @RequestParam(required = false) String name,
+    @RequestParam(required = false) String types,
+    @RequestParam(required = false) String instruments,
+    @RequestParam(required = false) String genres,
+    @RequestParam(required = false) Boolean likedByMe,
     HttpSession session,
     Model model
   ) {
@@ -155,7 +159,34 @@ public class LessonController {
 
     // Redirect back to home page if requested, otherwise go to lesson detail page
     if ("home".equals(redirect)) {
-      return "redirect:/home";
+      StringBuilder redirectUrl = new StringBuilder("redirect:/home?");
+      boolean hasParams = false;
+
+      if (name != null && !name.isBlank()) {
+        redirectUrl.append("name=").append(name);
+        hasParams = true;
+      }
+      if (types != null && !types.isBlank()) {
+        if (hasParams) redirectUrl.append("&");
+        redirectUrl.append("types=").append(types);
+        hasParams = true;
+      }
+      if (instruments != null && !instruments.isBlank()) {
+        if (hasParams) redirectUrl.append("&");
+        redirectUrl.append("instruments=").append(instruments);
+        hasParams = true;
+      }
+      if (genres != null && !genres.isBlank()) {
+        if (hasParams) redirectUrl.append("&");
+        redirectUrl.append("genres=").append(genres);
+        hasParams = true;
+      }
+      if (likedByMe != null && likedByMe) {
+        if (hasParams) redirectUrl.append("&");
+        redirectUrl.append("likedByMe=true");
+      }
+
+      return redirectUrl.toString();
     }
     return "redirect:/lesson/" + lessonId;
   }

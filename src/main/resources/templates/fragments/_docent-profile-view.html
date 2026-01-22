@@ -37,6 +37,7 @@
           </div>
 
           <a
+            th:if="${isOwner}"
             th:href="@{'/profile/docent/' + ${docentName} + '/edit'}"
             class="btn btn-primary mt-3"
             >Profiel bewerken</a

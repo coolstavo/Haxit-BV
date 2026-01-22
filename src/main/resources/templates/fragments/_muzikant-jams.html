@@ -9,8 +9,11 @@
         <div
           class="card-header bg-light d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0">📋 Jouw Jams</h5>
+          <h5 class="mb-0" th:text="${isOwner ? '📋 Jouw Jams' : '📋 Jams'}">
+            📋 Jams
+          </h5>
           <button
+            th:if="${isOwner}"
             type="button"
             class="btn btn-primary btn-sm"
             data-bs-toggle="modal"
@@ -29,7 +32,7 @@
                   <th>Instrumenten</th>
                   <th>Genres</th>
                   <th>Locatie</th>
-                  <th>Acties</th>
+                  <th th:if="${isOwner}">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -86,7 +89,7 @@
                       ></span>
                     </small>
                   </td>
-                  <td>
+                  <td th:if="${isOwner}">
                     <form
                       method="post"
                       th:action="@{'/jam/' + ${jam.id} + '/delete'}"
@@ -116,8 +119,11 @@
         <div
           class="card-header bg-light d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0">📋 Jouw Jams</h5>
+          <h5 class="mb-0" th:text="${isOwner ? '📋 Jouw Jams' : '📋 Jams'}">
+            📋 Jams
+          </h5>
           <button
+            th:if="${isOwner}"
             type="button"
             class="btn btn-primary btn-sm"
             data-bs-toggle="modal"

@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,7 +47,8 @@ public class MuzikantProfileController {
   private final JamRepository jamRepository;
 
   // Pad waar profielfoto's worden opgeslagen
-  private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profilepics/";
+  private static final String UPLOAD_DIR =
+    System.getProperty("user.dir") + "/uploads/profilepics/";
 
   public MuzikantProfileController(
     UserRepository userRepository,
@@ -68,14 +68,13 @@ public class MuzikantProfileController {
     this.jamRepository = jamRepository;
   }
 
-  public String getProfile(String username, Model model) {
+  public String getProfile(String username, Model model, HttpSession session) {
     User profile = userRepository.findByUsername(username).orElse(null);
 
     if (profile == null) return handleError(model);
 
     Muzikant muzikant = muzikantRepository.findByUser(profile).orElse(null);
     if (muzikant != null) {
-
       List<MuzikantInstrument> muzikantInstruments =
         muzikantInstrumentRepository.findByMuzikantId(muzikant.getId());
       List<Instrument> allInstruments = instrumentRepository.findAll();
@@ -96,6 +95,13 @@ public class MuzikantProfileController {
       // Get jams created by this muzikant
       List<Jam> jams = jamRepository.findByMuzikantUser(profile);
       model.addAttribute("jams", jams);
+
+      // Check if current user is viewing their own profile
+      Object currentUsernameObj = session.getAttribute("currentUsername");
+      boolean isOwner =
+        currentUsernameObj != null &&
+        currentUsernameObj.toString().equals(username);
+      model.addAttribute("isOwner", isOwner);
 
       return "profile-muzikant";
     }
@@ -139,7 +145,6 @@ public class MuzikantProfileController {
     @ModelAttribute Muzikant muzikant,
     @RequestParam("imageFile") MultipartFile file
   ) throws IOException {
-
     Muzikant existingMuzikant = muzikantRepository
       .findById(muzikant.getId())
       .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
@@ -150,15 +155,19 @@ public class MuzikantProfileController {
         Files.createDirectories(uploadPath);
       }
 
-      // Achterhaal bestandsextensie 
+      // Achterhaal bestandsextensie
       String originalName = file.getOriginalFilename();
       String extension = "";
       if (originalName != null && originalName.contains(".")) {
-          extension = originalName.substring(originalName.lastIndexOf("."));
+        extension = originalName.substring(originalName.lastIndexOf("."));
       }
 
       // Maak bestandsnaam uniek
-      String uniqueName = existingMuzikant.getUser().getUsername() + "_" + UUID.randomUUID().toString() + extension;
+      String uniqueName =
+        existingMuzikant.getUser().getUsername() +
+        "_" +
+        UUID.randomUUID().toString() +
+        extension;
 
       // Sla fysieke bestand op
       Path path = Paths.get(UPLOAD_DIR + uniqueName);

@@ -24,7 +24,12 @@
     <div th:fragment="docentLessonsTable(lessons, docentName, edit)">
       <div th:if="${!lessons.isEmpty()}" class="card shadow-sm">
         <div class="card-body">
-          <h5 class="mb-3">Mijn Lesaanbiedingen</h5>
+          <h5
+            class="mb-3"
+            th:text="${isOwner ? 'Mijn Lesaanbiedingen' : 'Lesaanbiedingen'}"
+          >
+            Lesaanbiedingen
+          </h5>
           <div class="table-responsive">
             <table class="table table-hover">
               <thead>
@@ -37,7 +42,7 @@
                   <th>Locatie</th>
                   <th>Geplande Lessen</th>
                   <th>Wachtende Goedkeuring</th>
-                  <th th:if="${edit}">Acties</th>
+                  <th th:if="${isOwner}">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,7 +111,7 @@
                       >0</span
                     >
                   </td>
-                  <td th:if="${edit}" onclick="event.stopPropagation()">
+                  <td th:if="${isOwner}" onclick="event.stopPropagation()">
                     <a
                       th:href="@{'/profile/docent/delete-lesson/' + ${lesson.id}(docentName=${docentName})}"
                       class="btn btn-sm btn-danger"
