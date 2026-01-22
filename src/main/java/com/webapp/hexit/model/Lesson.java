@@ -3,6 +3,9 @@ package com.webapp.hexit.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class Lesson {
@@ -48,6 +51,14 @@ public class Lesson {
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
+
+  @OneToMany(
+    mappedBy = "lesson",
+    cascade = CascadeType.ALL,
+    orphanRemoval = true
+  )
+  @JsonIgnoreProperties({ "lesson" })
+  private List<LessonGenre> lessonGenres = new ArrayList<>();
 
   public Lesson() {}
 
@@ -154,5 +165,31 @@ public class Lesson {
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public List<LessonGenre> getLessonGenres() {
+    return lessonGenres;
+  }
+
+  public void setLessonGenres(List<LessonGenre> lessonGenres) {
+    this.lessonGenres = lessonGenres;
+  }
+
+  /**
+   * Helper method to get genres for display purposes
+   */
+  public List<Genre> getGenres() {
+    return lessonGenres
+      .stream()
+      .map(LessonGenre::getGenre)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Helper method to add a genre to the lesson
+   */
+  public void addGenre(Genre genre) {
+    LessonGenre lessonGenre = new LessonGenre(this, genre);
+    lessonGenres.add(lessonGenre);
   }
 }

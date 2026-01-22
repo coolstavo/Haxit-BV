@@ -1,50 +1,182 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="addEventModal" class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addEventModalLabel">Nieuw Event Toevoegen</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addEventForm">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="eventTitle" class="form-label">Titel</label>
-                        <input type="text" class="form-control" id="eventTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="eventDescription" class="form-label">Beschrijving</label>
-                        <textarea class="form-control" id="eventDescription" name="description" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="eventType" class="form-label">Type</label>
-                        <select class="form-select" id="eventType" name="type" required>
-                            <option value="">Selecteer type...</option>
-                            <option value="Opdracht">Opdracht</option>
-                            <option value="Les">Les</option>
-                            <option value="Bedrijf">Bedrijf</option>
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="eventLat" class="form-label">Latitude</label>
-                            <input type="number" step="0.000001" class="form-control" id="eventLat" name="lat" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="eventLng" class="form-label">Longitude</label>
-                            <input type="number" step="0.000001" class="form-control" id="eventLng" name="lng" required>
-                        </div>
-                    </div>
-                    <div class="alert alert-info">
-                        <small>Klik op de kaart om automatisch coördinaten in te vullen!</small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
-                    <button type="submit" class="btn btn-primary">Event Toevoegen</button>
-                </div>
-            </form>
+  <div
+    th:fragment="addEventModal"
+    class="modal fade"
+    id="addEventModal"
+    tabindex="-1"
+    aria-labelledby="addEventModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addEventModalLabel">
+            <i class="bi bi-calendar-event"></i> Nieuw Event Toevoegen
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
+        <form id="addEventForm">
+          <div class="modal-body">
+            <!-- Message Display -->
+            <div id="eventMsg" class="alert" style="display: none"></div>
+
+            <div class="mb-3">
+              <label for="eventTitle" class="form-label">
+                <strong>Titel</strong>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="eventTitle"
+                name="title"
+                placeholder="Geef je event een naam"
+                required
+              />
+              <small class="form-text text-muted"
+                >Bijvoorbeeld: 'Live Muziek Festival'</small
+              >
+            </div>
+            <div class="mb-3">
+              <label for="eventDescription" class="form-label">
+                <strong>Beschrijving</strong>
+              </label>
+              <textarea
+                class="form-control"
+                id="eventDescription"
+                name="description"
+                rows="3"
+                placeholder="Beschrijf je event"
+                required
+              ></textarea>
+              <small class="form-text text-muted"
+                >Vertel meer over het event en wat bezoekers kunnen
+                verwachten</small
+              >
+            </div>
+
+            <!-- Instruments Selection -->
+            <div class="mb-3">
+              <label class="form-label">
+                <strong>Instrumenten</strong>
+              </label>
+              <div
+                class="border rounded p-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <div
+                  th:each="instrument : ${allInstruments}"
+                  class="form-check"
+                >
+                  <input
+                    class="form-check-input event-instrument-checkbox"
+                    type="checkbox"
+                    th:value="${instrument.id}"
+                    th:id="${'event-instrument-' + instrument.id}"
+                  />
+                  <label
+                    class="form-check-label"
+                    th:for="${'event-instrument-' + instrument.id}"
+                    th:text="${instrument.naam}"
+                  ></label>
+                </div>
+              </div>
+              <small class="form-text text-muted"
+                >Selecteer de instrumenten voor dit event</small
+              >
+            </div>
+
+            <!-- Genres Selection -->
+            <div class="mb-3">
+              <label class="form-label">
+                <strong>Genres</strong>
+              </label>
+              <div
+                class="border rounded p-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <div th:each="genre : ${allGenres}" class="form-check">
+                  <input
+                    class="form-check-input event-genre-checkbox"
+                    type="checkbox"
+                    th:value="${genre.id}"
+                    th:id="${'event-genre-' + genre.id}"
+                  />
+                  <label
+                    class="form-check-label"
+                    th:for="${'event-genre-' + genre.id}"
+                    th:text="${genre.name}"
+                  ></label>
+                </div>
+              </div>
+              <small class="form-text text-muted"
+                >Selecteer de muziekgenres voor dit event</small
+              >
+            </div>
+
+            <!-- Map Section -->
+            <div class="mb-3">
+              <label class="form-label">
+                <strong>Locatie Selecteren</strong>
+              </label>
+              <div class="alert alert-info mb-3">
+                <i class="bi bi-info-circle"></i> Klik op de kaart om je event
+                locatie te selecteren
+              </div>
+              <div id="eventMap" class="event-modal-map"></div>
+              <small class="form-text text-muted mt-2"
+                >De coördinaten worden automatisch ingevuld wanneer je op de
+                kaart klikt</small
+              >
+            </div>
+
+            <!-- Coordinates Display -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="eventLat" class="form-label">Latitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLat"
+                  name="lat"
+                  placeholder="Breedte"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="eventLng" class="form-label">Longitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLng"
+                  name="lng"
+                  placeholder="Lengte"
+                  readonly
+                />
+              </div>
+            </div>
+          </div>
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-x-circle"></i> Annuleren
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Event Toevoegen
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
+  </div>
 </html>

@@ -11,6 +11,10 @@
     />
     <link
       rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <link rel="stylesheet" th:href="@{/css/style.css}" />
@@ -101,6 +105,29 @@
                   </form>
                 </div>
                 <p class="mb-1" th:text="${event.description}">Beschrijving</p>
+
+                <!-- Instruments -->
+                <div
+                  th:if="${event.instruments != null && !event.instruments.isEmpty()}"
+                >
+                  <span
+                    th:each="instrument : ${event.instruments}"
+                    class="badge bg-primary me-1"
+                    th:text="${instrument.naam}"
+                  ></span>
+                </div>
+
+                <!-- Genres -->
+                <div
+                  th:if="${event.genres != null && !event.genres.isEmpty()}"
+                  class="mt-1"
+                >
+                  <span
+                    th:each="genre : ${event.genres}"
+                    class="badge bg-secondary me-1"
+                    th:text="${genre.name}"
+                  ></span>
+                </div>
               </div>
             </div>
 
@@ -157,6 +184,29 @@
                   </form>
                 </div>
                 <p class="mb-1" th:text="${jam.description}">Beschrijving</p>
+
+                <!-- Instruments -->
+                <div
+                  th:if="${jam.instruments != null && !jam.instruments.isEmpty()}"
+                >
+                  <span
+                    th:each="instrument : ${jam.instruments}"
+                    class="badge bg-primary me-1"
+                    th:text="${instrument.naam}"
+                  ></span>
+                </div>
+
+                <!-- Genres -->
+                <div
+                  th:if="${jam.genres != null && !jam.genres.isEmpty()}"
+                  class="mt-1"
+                >
+                  <span
+                    th:each="genre : ${jam.genres}"
+                    class="badge bg-secondary me-1"
+                    th:text="${genre.name}"
+                  ></span>
+                </div>
               </div>
             </div>
 
@@ -190,7 +240,17 @@
                       >
                       Les
                     </h5>
-                    <span class="badge rounded-pill bg-success">Les</span>
+                    <div class="mb-2">
+                      <span class="badge rounded-pill bg-success me-1"
+                        >Les</span
+                      >
+                      <span class="badge bg-primary">
+                        <i class="bi bi-music-note-beamed me-1"></i>
+                        <span th:text="${lesson.instrument?.naam}"
+                          >Instrument</span
+                        >
+                      </span>
+                    </div>
                   </div>
                   <form
                     method="post"
@@ -240,6 +300,18 @@
                   th:if="${lesson.levels}"
                   th:text="'Niveaus: ' + ${lesson.levels}"
                 ></small>
+
+                <!-- Genres -->
+                <div
+                  th:if="${lesson.genres != null && !lesson.genres.isEmpty()}"
+                  class="mt-1"
+                >
+                  <span
+                    th:each="genre : ${lesson.genres}"
+                    class="badge bg-secondary me-1"
+                    th:text="${genre.name}"
+                  ></span>
+                </div>
               </div>
             </div>
           </div>
