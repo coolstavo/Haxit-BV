@@ -8,19 +8,11 @@
       <div class="row align-items-center">
         <!-- Profile Picture -->
         <div class="col-md-2 text-center">
-          <div th:if="${muzikantImage}">
-            <img
-              th:src="|data:image/jpeg;base64,${muzikantImage}|"
-              alt="Profielfoto"
-              class="profile-pic"
-            />
-          </div>
-          <div th:unless="${muzikantImage}">
-            <img
-              src="/images/default-placeholder.png"
-              alt="Geen foto"
-              class="profile-pic"
-            />
+          <div>
+              <img th:src="${muzikant.profilePic != null ? muzikant.profilePic : '/images/default-placeholder.png'}"
+                  alt="Profielfoto"
+                  class="rounded-circle border"
+                  style="width: 200px; height: 200px; object-fit: cover;" />
           </div>
         </div>
 

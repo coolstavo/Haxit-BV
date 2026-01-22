@@ -35,7 +35,7 @@ public class ProfileController {
   public String profile(@PathVariable String username, Model model) {
     User profile = userRepository.findByUsername(username).orElse(null);
 
-    if (profile == null) return handleError(model);
+    if (profile == null) throw new RuntimeException("Gebruiker niet gevonden: " + username);
 
     switch (profile.getRole()) {
       case MUZIKANT:
@@ -45,7 +45,7 @@ public class ProfileController {
       case BEDRIJF:
         return companyProfileController.getCompanyProfile(username, model);
       default:
-        return handleError(model);
+        throw new RuntimeException("Rol van " + username + " niet herkend.");
     }
   }
 
@@ -53,7 +53,7 @@ public class ProfileController {
   public String profileEdit(@PathVariable String username, Model model) {
     User profile = userRepository.findByUsername(username).orElse(null);
 
-    if (profile == null) return handleError(model);
+    if (profile == null) throw new RuntimeException("Gebruiker niet gevonden: " + username);
 
     switch (profile.getRole()) {
       case MUZIKANT:
@@ -63,13 +63,16 @@ public class ProfileController {
       case BEDRIJF:
         return companyProfileController.editCompanyProfile(username, model);
       default:
-        return handleError(model);
+        throw new RuntimeException("Rol van " + username + " niet herkend.");
     }
   }
 
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public String handleError(Model model) {
+  public String handleError(Exception ex, Model model) {
+
+    ex.printStackTrace();
+
     model.addAttribute(
       "errorMessage",
       "Er is een fout opgetreden! We konden uw verzoek niet verwerken."
