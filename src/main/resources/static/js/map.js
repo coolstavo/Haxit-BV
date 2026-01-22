@@ -195,16 +195,20 @@ if (addEventForm) {
       type: document.getElementById("eventType").value,
       lat: parseFloat(document.getElementById("eventLat").value),
       lng: parseFloat(document.getElementById("eventLng").value),
+      username: window.currentUsername,
     };
 
     // Send to backend
-    fetch("/api/events/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    fetch(
+      "/api/events/add?username=" + encodeURIComponent(window.currentUsername),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       },
-      body: JSON.stringify(formData),
-    })
+    )
       .then((response) => response.json())
       .then((data) => {
         // toevoegen aan map
@@ -251,7 +255,17 @@ if (addEventForm) {
           "</div>" +
           '<p class="mb-1">' +
           data.description +
-          "</p>";
+          "</p>" +
+          '<small class="text-muted">' +
+          "Aangemaakt door <strong>" +
+          data.user.username +
+          "</strong>" +
+          "</small>";
+        '<div class="user-profile">' +
+          "<strong>" +
+          data.user.username +
+          "</strong>" +
+          "</div>";
         document.querySelector(".list-group").appendChild(eventCard);
 
         eventIndex++;

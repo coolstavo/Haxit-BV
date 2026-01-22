@@ -116,6 +116,25 @@
   box-shadow: 0 0 0 0.25rem rgba(143, 78, 21, 0.25);
 }
 
+.user-profile {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.user-profile .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-profile .avatar-small {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
 /* Profile link styles */
 h3 small a,
 .card-body p a {

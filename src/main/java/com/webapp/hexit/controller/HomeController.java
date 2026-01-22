@@ -65,6 +65,7 @@ public class HomeController {
     @RequestParam(name = "types", required = false) String types,
     @RequestParam(name = "instruments", required = false) String instruments,
     @RequestParam(name = "genres", required = false) String genres,
+    @RequestParam(name = "likedByMe", required = false) Boolean likedByMe,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
@@ -273,6 +274,7 @@ public class HomeController {
     @RequestParam(name = "types", required = false) String types,
     @RequestParam(name = "instruments", required = false) String instruments,
     @RequestParam(name = "genres", required = false) String genres,
+    @RequestParam(name = "likedByMe", required = false) Boolean likedByMe,
     HttpSession session,
     Model model
   ) {
@@ -433,6 +435,28 @@ public class HomeController {
 
     // Get current user
     var userOpt = userRepository.findByUsername(username);
+
+    // Filter by liked by me
+    if (likedByMe != null && likedByMe && userOpt.isPresent()) {
+      final var user = userOpt.get();
+
+      events = events
+        .stream()
+        .filter(event -> eventLikeRepository.existsByUserAndEvent(user, event))
+        .collect(Collectors.toList());
+
+      lessons = lessons
+        .stream()
+        .filter(lesson ->
+          lessonLikeRepository.existsByUserAndLesson(user, lesson)
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam -> jamLikeRepository.existsByUserAndJam(user, jam))
+        .collect(Collectors.toList());
+    }
 
     // Create like count maps
     Map<Long, Long> eventLikeCounts = new HashMap<>();

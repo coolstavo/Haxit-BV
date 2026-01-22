@@ -33,7 +33,7 @@
       <!-- View Mode -->
       <div th:if="${!edit}" class="card shadow-sm mb-4">
         <div class="card-body">
-          <div th:if="${!hasData}">
+          <div th:if="${!hasData && isOwner}">
             <p class="text-muted">Nog geen gegevens ingevuld</p>
             <a
               th:href="@{'/profile/' + ${companyName} + '/edit'}"
@@ -108,6 +108,7 @@
             </div>
 
             <a
+              th:if="${isOwner}"
               th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}"
               class="btn btn-primary mt-4"
               >Bewerken</a
@@ -259,8 +260,14 @@
         <div
           class="card-header bg-light d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0">📋 Jouw Events</h5>
+          <h5
+            class="mb-0"
+            th:text="${isOwner ? '📋 Jouw Events' : '📋 Events'}"
+          >
+            📋 Events
+          </h5>
           <button
+            th:if="${isOwner}"
             type="button"
             class="btn btn-primary btn-sm"
             data-bs-toggle="modal"
@@ -279,7 +286,7 @@
                   <th>Instrumenten</th>
                   <th>Genres</th>
                   <th>Locatie</th>
-                  <th>Acties</th>
+                  <th th:if="${isOwner}">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -336,7 +343,7 @@
                       ></span>
                     </small>
                   </td>
-                  <td>
+                  <td th:if="${isOwner}">
                     <form
                       method="post"
                       th:action="@{'/event/' + ${event.id} + '/delete'}"
@@ -366,8 +373,14 @@
         <div
           class="card-header bg-light d-flex justify-content-between align-items-center"
         >
-          <h5 class="mb-0">📋 Jouw Events</h5>
+          <h5
+            class="mb-0"
+            th:text="${isOwner ? '📋 Jouw Events' : '📋 Events'}"
+          >
+            📋 Events
+          </h5>
           <button
+            th:if="${isOwner}"
             type="button"
             class="btn btn-primary btn-sm"
             data-bs-toggle="modal"
@@ -382,8 +395,11 @@
       </div>
     </div>
 
-    <!-- Add Event Modal -->
-    <div th:insert="~{fragments/_addEventModal :: addEventModal}"></div>
+    <!-- Add Event Modal (only for profile owner) -->
+    <div
+      th:if="${isOwner}"
+      th:insert="~{fragments/_addEventModal :: addEventModal}"
+    ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

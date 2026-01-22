@@ -16,6 +16,7 @@ import com.webapp.hexit.repository.LessonGenreRepository;
 import com.webapp.hexit.repository.LessonLikeRepository;
 import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +115,11 @@ public class DocentProfileController {
   /**
    * Public method for unified profile routing
    */
-  public String getDocentProfile(String username, Model model) {
+  public String getDocentProfile(
+    String username,
+    Model model,
+    HttpSession session
+  ) {
     User user = userRepository.findByUsername(username).orElse(null);
 
     if (user == null) {
@@ -134,6 +139,13 @@ public class DocentProfileController {
       model.addAttribute("lessons", List.of());
       model.addAttribute("lessonStats", new HashMap<>());
     }
+
+    // Check if current user is viewing their own profile
+    Object currentUsernameObj = session.getAttribute("currentUsername");
+    boolean isOwner =
+      currentUsernameObj != null &&
+      currentUsernameObj.toString().equals(username);
+    model.addAttribute("isOwner", isOwner);
 
     model.addAttribute("docentName", username);
     model.addAttribute("username", username);
