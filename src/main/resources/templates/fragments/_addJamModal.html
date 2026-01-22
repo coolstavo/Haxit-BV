@@ -22,6 +22,9 @@
         </div>
         <form id="addJamForm">
           <div class="modal-body">
+            <!-- Message Display -->
+            <div id="jamMsg" class="alert" style="display: none"></div>
+
             <!-- Title Input -->
             <div class="mb-3">
               <label for="jamTitle" class="form-label">
@@ -55,6 +58,65 @@
               ></textarea>
               <small class="form-text text-muted"
                 >Vertel meer over het genre, het niveau en wat je zoekt</small
+              >
+            </div>
+
+            <!-- Instruments Selection -->
+            <div class="mb-3">
+              <label class="form-label">
+                <strong>Instrumenten</strong>
+              </label>
+              <div
+                class="border rounded p-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <div
+                  th:each="instrument : ${allInstruments}"
+                  class="form-check"
+                >
+                  <input
+                    class="form-check-input jam-instrument-checkbox"
+                    type="checkbox"
+                    th:value="${instrument.id}"
+                    th:id="${'jam-instrument-' + instrument.id}"
+                  />
+                  <label
+                    class="form-check-label"
+                    th:for="${'jam-instrument-' + instrument.id}"
+                    th:text="${instrument.naam}"
+                  ></label>
+                </div>
+              </div>
+              <small class="form-text text-muted"
+                >Selecteer de instrumenten die je zoekt voor deze jam</small
+              >
+            </div>
+
+            <!-- Genres Selection -->
+            <div class="mb-3">
+              <label class="form-label">
+                <strong>Genres</strong>
+              </label>
+              <div
+                class="border rounded p-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <div th:each="genre : ${allGenres}" class="form-check">
+                  <input
+                    class="form-check-input jam-genre-checkbox"
+                    type="checkbox"
+                    th:value="${genre.id}"
+                    th:id="${'jam-genre-' + genre.id}"
+                  />
+                  <label
+                    class="form-check-label"
+                    th:for="${'jam-genre-' + genre.id}"
+                    th:text="${genre.name}"
+                  ></label>
+                </div>
+              </div>
+              <small class="form-text text-muted"
+                >Selecteer de muziekgenres voor deze jam</small
               >
             </div>
 

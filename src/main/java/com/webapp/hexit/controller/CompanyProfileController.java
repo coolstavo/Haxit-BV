@@ -2,10 +2,14 @@ package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Company;
 import com.webapp.hexit.model.Event;
+import com.webapp.hexit.model.Genre;
+import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.CompanyRepository;
 import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.GenreRepository;
+import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.UserRepository;
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +29,8 @@ public class CompanyProfileController {
   private final CompanyRepository companyRepository;
   private final UserRepository userRepository;
   private final EventRepository eventRepository;
+  private final InstrumentRepository instrumentRepository;
+  private final GenreRepository genreRepository;
   private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   private static final String[] ALLOWED_MIME_TYPES = {
     "image/jpeg",
@@ -34,11 +40,15 @@ public class CompanyProfileController {
   public CompanyProfileController(
     CompanyRepository companyRepository,
     UserRepository userRepository,
-    EventRepository eventRepository
+    EventRepository eventRepository,
+    InstrumentRepository instrumentRepository,
+    GenreRepository genreRepository
   ) {
     this.companyRepository = companyRepository;
     this.userRepository = userRepository;
     this.eventRepository = eventRepository;
+    this.instrumentRepository = instrumentRepository;
+    this.genreRepository = genreRepository;
   }
 
   /**
@@ -65,6 +75,12 @@ public class CompanyProfileController {
     // Load company events
     List<Event> companyEvents = eventRepository.findByCompanyUser(user);
     model.addAttribute("companyEvents", companyEvents);
+
+    // Load instruments and genres for event creation
+    List<Instrument> allInstruments = instrumentRepository.findAll();
+    List<Genre> allGenres = genreRepository.findAll();
+    model.addAttribute("allInstruments", allInstruments);
+    model.addAttribute("allGenres", allGenres);
 
     model.addAttribute("companyName", username);
     model.addAttribute("username", username);
@@ -98,25 +114,16 @@ public class CompanyProfileController {
     List<Event> companyEvents = eventRepository.findByCompanyUser(user);
     model.addAttribute("companyEvents", companyEvents);
 
+    // Load instruments and genres for event creation
+    List<Instrument> allInstruments = instrumentRepository.findAll();
+    List<Genre> allGenres = genreRepository.findAll();
+    model.addAttribute("allInstruments", allInstruments);
+    model.addAttribute("allGenres", allGenres);
+
     model.addAttribute("companyName", username);
     model.addAttribute("username", username);
     model.addAttribute("userRole", "BEDRIJF");
     model.addAttribute("edit", true);
-    model.addAttribute(
-      "genresOptions",
-      new String[] {
-        "Jazz",
-        "Pop",
-        "Klassiek",
-        "Rock",
-        "Hip Hop",
-        "Elektronisch",
-        "R&B",
-        "Country",
-        "Blues",
-        "Metal",
-      }
-    );
     return "company-profile";
   }
 

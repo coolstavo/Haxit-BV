@@ -10,18 +10,42 @@ const currentMuzikantUserId = document.querySelector('[th\\:href*="/profile/"]')
 
 let jamMap;
 let jamMarker;
+let eventMap;
+let eventMarker;
 
 // Initialize when DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize jam map if the container exists
-  if (document.getElementById("jamMap")) {
-    setTimeout(() => initializeJamMap(), 100);
+  // Initialize maps when modals are shown (not on page load)
+  const jamModal = document.getElementById("addJamModal");
+  if (jamModal) {
+    jamModal.addEventListener("shown.bs.modal", function () {
+      initializeJamMap();
+      if (jamMap) {
+        setTimeout(() => jamMap.invalidateSize(), 100);
+      }
+    });
+  }
+
+  const eventModal = document.getElementById("addEventModal");
+  if (eventModal) {
+    eventModal.addEventListener("shown.bs.modal", function () {
+      initializeEventMap();
+      if (eventMap) {
+        setTimeout(() => eventMap.invalidateSize(), 100);
+      }
+    });
   }
 
   // Form submission
   const addJamForm = document.getElementById("addJamForm");
   if (addJamForm) {
     addJamForm.addEventListener("submit", handleJamFormSubmit);
+  }
+
+  // Event form submission
+  const addEventForm = document.getElementById("addEventForm");
+  if (addEventForm) {
+    addEventForm.addEventListener("submit", handleEventFormSubmit);
   }
 
   // Delete confirmation on jams
@@ -105,6 +129,82 @@ function initializeJamMap() {
 }
 
 /**
+ * Initialize Leaflet map for event location selection
+ */
+function initializeEventMap() {
+  if (eventMap) {
+    eventMap.invalidateSize();
+    return;
+  }
+
+  const mapContainer = document.getElementById("eventMap");
+  if (!mapContainer) {
+    console.warn("Event map container not found");
+    return;
+  }
+
+  // Define bounds for Netherlands
+  const maxBounds = L.latLngBounds(L.latLng(50.75, 3.5), L.latLng(53.7, 8.0));
+
+  // Create map
+  eventMap = L.map("eventMap", {
+    maxBounds: maxBounds,
+    maxBoundsViscosity: 1.0,
+  }).setView([53.2194, 6.5665], 12);
+
+  eventMap.setMaxBounds(maxBounds);
+
+  // Add tile layer
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
+    className: "map-tiles",
+  }).addTo(eventMap);
+
+  // Custom pin icon
+  const pinIcon = L.icon({
+    iconUrl: "/assets/pin-red.png",
+    iconSize: [25, 40],
+    iconAnchor: [12, 40],
+    popupAnchor: [1, -34],
+    shadowUrl: "/assets/pin-shadow.png",
+    shadowSize: [41, 41],
+    shadowAnchor: [13, 41],
+  });
+
+  // Map click handler
+  eventMap.on("click", function (event) {
+    const lat = event.latlng.lat.toFixed(6);
+    const lng = event.latlng.lng.toFixed(6);
+
+    // Update form fields
+    document.getElementById("eventLat").value = lat;
+    document.getElementById("eventLng").value = lng;
+
+    // Remove previous marker
+    if (eventMarker) {
+      eventMap.removeLayer(eventMarker);
+    }
+
+    // Add new marker
+    eventMarker = L.marker([lat, lng], { icon: pinIcon })
+      .addTo(eventMap)
+      .bindPopup("Geselecteerde locatie<br>Lat: " + lat + "<br>Lng: " + lng)
+      .openPopup();
+  });
+
+  // Check if there are existing coordinates in form
+  const existingLat = document.getElementById("eventLat").value;
+  const existingLng = document.getElementById("eventLng").value;
+  if (existingLat && existingLng) {
+    eventMap.setView([parseFloat(existingLat), parseFloat(existingLng)], 15);
+    eventMarker = L.marker([parseFloat(existingLat), parseFloat(existingLng)], {
+      icon: pinIcon,
+    }).addTo(eventMap);
+  }
+}
+
+/**
  * Handle jam form submission
  */
 async function handleJamFormSubmit(event) {
@@ -142,14 +242,28 @@ async function handleJamFormSubmit(event) {
     return;
   }
 
+  // Collect selected instrument IDs
+  const instrumentCheckboxes = document.querySelectorAll(
+    ".jam-instrument-checkbox:checked",
+  );
+  const instrumentIds = Array.from(instrumentCheckboxes).map((cb) =>
+    parseInt(cb.value),
+  );
+
+  // Collect selected genre IDs
+  const genreCheckboxes = document.querySelectorAll(
+    ".jam-genre-checkbox:checked",
+  );
+  const genreIds = Array.from(genreCheckboxes).map((cb) => parseInt(cb.value));
+
   const jamData = {
     title: title,
     description: description,
     lat: lat,
     lng: lng,
-    muzikantUser: {
-      id: parseInt(userId),
-    },
+    muzikantUserId: parseInt(userId),
+    instrumentIds: instrumentIds,
+    genreIds: genreIds,
   };
 
   try {
@@ -200,6 +314,119 @@ async function handleJamFormSubmit(event) {
     );
   } finally {
     showLoadingState(false);
+  }
+}
+
+/**
+ * Handle event form submission
+ */
+async function handleEventFormSubmit(event) {
+  event.preventDefault();
+
+  const title = document.getElementById("eventTitle").value.trim();
+  const description = document.getElementById("eventDescription").value.trim();
+  const lat = parseFloat(document.getElementById("eventLat").value);
+  const lng = parseFloat(document.getElementById("eventLng").value);
+  const msgDiv = document.getElementById("eventMsg");
+
+  // Validation
+  if (!title || !description || !lat || !lng) {
+    showMessage("Vul alstublieft alle velden in.", "danger", msgDiv);
+    return;
+  }
+
+  if (isNaN(lat) || isNaN(lng)) {
+    showMessage(
+      "Ongeldige coördinaten. Klik op de kaart om de locatie te selecteren.",
+      "danger",
+      msgDiv,
+    );
+    return;
+  }
+
+  // Get user ID from the URL or data attribute
+  const userIdElement = document.querySelector("[data-musician-id]");
+  const userId = userIdElement
+    ? userIdElement.getAttribute("data-musician-id")
+    : getMuzikantUserIdFromPage();
+
+  if (!userId) {
+    showMessage("Gebruiker ID kon niet worden bepaald.", "danger", msgDiv);
+    return;
+  }
+
+  // Collect selected instrument IDs
+  const instrumentCheckboxes = document.querySelectorAll(
+    ".event-instrument-checkbox:checked",
+  );
+  const instrumentIds = Array.from(instrumentCheckboxes).map((cb) =>
+    parseInt(cb.value),
+  );
+
+  // Collect selected genre IDs
+  const genreCheckboxes = document.querySelectorAll(
+    ".event-genre-checkbox:checked",
+  );
+  const genreIds = Array.from(genreCheckboxes).map((cb) => parseInt(cb.value));
+
+  const eventData = {
+    title: title,
+    description: description,
+    lat: lat,
+    lng: lng,
+    muzikantUserId: parseInt(userId),
+    instrumentIds: instrumentIds,
+    genreIds: genreIds,
+  };
+
+  try {
+    showLoadingState(true, "event");
+    const response = await fetch("/api/events/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (response.ok) {
+      const savedEvent = await response.json();
+
+      // Reset form
+      document.getElementById("addEventForm").reset();
+      document.getElementById("eventLat").value = "";
+      document.getElementById("eventLng").value = "";
+
+      // Clear marker
+      if (eventMarker && eventMap) {
+        eventMap.removeLayer(eventMarker);
+        eventMarker = null;
+      }
+
+      showMessage("Event succesvol aangemaakt!", "success", msgDiv);
+
+      // Reload page after short delay
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      showMessage(
+        errorData.message ||
+          "Er is iets fout gegaan bij het aanmaken van het event.",
+        "danger",
+        msgDiv,
+      );
+    }
+  } catch (error) {
+    console.error("Error creating event:", error);
+    showMessage(
+      "Er is een netwerkfout opgetreden. Probeer het later opnieuw.",
+      "danger",
+      msgDiv,
+    );
+  } finally {
+    showLoadingState(false, "event");
   }
 }
 
@@ -286,8 +513,11 @@ function getAlertIcon(type) {
 /**
  * Show/hide loading state on submit button
  */
-function showLoadingState(isLoading) {
-  const submitBtn = document.querySelector('#addJamForm button[type="submit"]');
+function showLoadingState(isLoading, formType = "jam") {
+  const formSelector = formType === "jam" ? "#addJamForm" : "#addEventForm";
+  const submitBtn = document.querySelector(
+    `${formSelector} button[type="submit"]`,
+  );
   if (!submitBtn) return;
 
   if (isLoading) {
@@ -296,7 +526,8 @@ function showLoadingState(isLoading) {
       '<span class="spinner-border spinner-border-sm me-2"></span>Aanmaken...';
   } else {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = "Jam Opslaan";
+    const buttonText = formType === "jam" ? "Jam Opslaan" : "Event Toevoegen";
+    submitBtn.innerHTML = `<i class="bi bi-plus-circle"></i> ${buttonText}`;
   }
 }
 
@@ -353,5 +584,8 @@ function refreshProfile() {
 window.addEventListener("resize", () => {
   if (jamMap) {
     jamMap.invalidateSize();
+  }
+  if (eventMap) {
+    eventMap.invalidateSize();
   }
 });

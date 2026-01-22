@@ -3,6 +3,7 @@ package com.webapp.hexit.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 public class Jam {
@@ -29,6 +30,12 @@ public class Jam {
 
   @OneToMany(mappedBy = "jam", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Jam_Comment> comments = new ArrayList<>();
+
+  @OneToMany(mappedBy = "jam", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<JamInstrument> jamInstruments = new ArrayList<>();
+
+  @OneToMany(mappedBy = "jam", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<JamGenre> jamGenres = new ArrayList<>();
 
   public Jam() {} // default constructor required by JPA
 
@@ -134,5 +141,57 @@ public class Jam {
 
   public void setComments(List<Jam_Comment> comments) {
     this.comments = comments;
+  }
+
+  public List<JamInstrument> getJamInstruments() {
+    return jamInstruments;
+  }
+
+  public void setJamInstruments(List<JamInstrument> jamInstruments) {
+    this.jamInstruments = jamInstruments;
+  }
+
+  public List<JamGenre> getJamGenres() {
+    return jamGenres;
+  }
+
+  public void setJamGenres(List<JamGenre> jamGenres) {
+    this.jamGenres = jamGenres;
+  }
+
+  /**
+   * Helper method to get instruments for display purposes
+   */
+  public List<Instrument> getInstruments() {
+    return jamInstruments
+      .stream()
+      .map(JamInstrument::getInstrument)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Helper method to get genres for display purposes
+   */
+  public List<Genre> getGenres() {
+    return jamGenres
+      .stream()
+      .map(JamGenre::getGenre)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Helper method to add an instrument to the jam
+   */
+  public void addInstrument(Instrument instrument) {
+    JamInstrument jamInstrument = new JamInstrument(this, instrument);
+    jamInstruments.add(jamInstrument);
+  }
+
+  /**
+   * Helper method to add a genre to the jam
+   */
+  public void addGenre(Genre genre) {
+    JamGenre jamGenre = new JamGenre(this, genre);
+    jamGenres.add(jamGenre);
   }
 }
