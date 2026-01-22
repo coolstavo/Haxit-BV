@@ -33,7 +33,7 @@
       <!-- View Mode -->
       <div th:if="${!edit}" class="card shadow-sm mb-4">
         <div class="card-body">
-          <div th:if="${!hasData}">
+          <div th:if="${!hasData && isOwner}">
             <p class="text-muted">Nog geen gegevens ingevuld</p>
             <a
               th:href="@{'/profile/' + ${companyName} + '/edit'}"
@@ -108,6 +108,7 @@
             </div>
 
             <a
+              th:if="${isOwner}"
               th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}"
               class="btn btn-primary mt-4"
               >Bewerken</a
@@ -256,8 +257,24 @@
         class="card shadow-sm mb-4"
         th:if="${companyEvents != null && #lists.size(companyEvents) > 0}"
       >
-        <div class="card-header bg-light">
-          <h5 class="mb-0">📋 Jouw Events</h5>
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5
+            class="mb-0"
+            th:text="${isOwner ? '📋 Jouw Events' : '📋 Events'}"
+          >
+            📋 Events
+          </h5>
+          <button
+            th:if="${isOwner}"
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addEventModal"
+          >
+            <i class="bi bi-plus-circle"></i> Event Aanmaken
+          </button>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -266,8 +283,10 @@
                 <tr>
                   <th>Titel</th>
                   <th>Beschrijving</th>
+                  <th>Instrumenten</th>
+                  <th>Genres</th>
                   <th>Locatie</th>
-                  <th>Acties</th>
+                  <th th:if="${isOwner}">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -288,6 +307,32 @@
                     >
                   </td>
                   <td>
+                    <span
+                      th:if="${event.instruments != null && !event.instruments.isEmpty()}"
+                      th:each="instrument : ${event.instruments}"
+                      class="badge bg-primary me-1"
+                      th:text="${instrument.naam}"
+                    ></span>
+                    <span
+                      th:if="${event.instruments == null || event.instruments.isEmpty()}"
+                      class="text-muted"
+                      >-</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:if="${event.genres != null && !event.genres.isEmpty()}"
+                      th:each="genre : ${event.genres}"
+                      class="badge bg-secondary me-1"
+                      th:text="${genre.name}"
+                    ></span>
+                    <span
+                      th:if="${event.genres == null || event.genres.isEmpty()}"
+                      class="text-muted"
+                      >-</span
+                    >
+                  </td>
+                  <td>
                     <small class="badge bg-info">
                       <span
                         th:text="${#numbers.formatDecimal(event.lat, 1, 4)}"
@@ -298,7 +343,7 @@
                       ></span>
                     </small>
                   </td>
-                  <td>
+                  <td th:if="${isOwner}">
                     <form
                       method="post"
                       th:action="@{'/event/' + ${event.id} + '/delete'}"
@@ -325,90 +370,70 @@
         class="card shadow-sm mb-4"
         th:if="${companyEvents == null || #lists.size(companyEvents) == 0}"
       >
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5
+            class="mb-0"
+            th:text="${isOwner ? '📋 Jouw Events' : '📋 Events'}"
+          >
+            📋 Events
+          </h5>
+          <button
+            th:if="${isOwner}"
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addEventModal"
+          >
+            <i class="bi bi-plus-circle"></i> Event Aanmaken
+          </button>
+        </div>
         <div class="card-body text-center py-4">
           <p class="text-muted mb-0">Je hebt nog geen events aangemaakt.</p>
         </div>
       </div>
-
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="mb-3">Nieuw Event Aanmaken</h5>
-          <form id="companyEventForm">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Titel *</label>
-                <input type="text" class="form-control" name="title" required />
-              </div>
-              <div class="col-12">
-                <label class="form-label">Beschrijving *</label>
-                <textarea
-                  class="form-control"
-                  name="description"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <!-- Mini Map -->
-              <div class="col-12">
-                <label class="form-label">Locatie *</label>
-                <small class="text-muted d-block mb-2"
-                  >Klik op de kaart om de locatie te selecteren</small
-                >
-                <div id="eventMap"></div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Latitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="eventLat"
-                  name="lat"
-                  required
-                  placeholder="53.2194"
-                  readonly
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Longitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="eventLng"
-                  name="lng"
-                  required
-                  placeholder="6.5665"
-                  readonly
-                />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">
-              Event Opslaan
-            </button>
-            <div id="companyEventMsg" class="mt-2" style="display: none"></div>
-          </form>
-        </div>
-      </div>
     </div>
+
+    <!-- Add Event Modal (only for profile owner) -->
+    <div
+      th:if="${isOwner}"
+      th:insert="~{fragments/_addEventModal :: addEventModal}"
+    ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script th:inline="javascript">
       const currentCompanyUserId = /*[[${company.user.id}]]*/ null;
 
-      // Initialize mini map for event location
-      let eventMap = null;
-      let eventMarker = null;
+      let eventMap;
+      let eventMarker;
 
-      if (document.getElementById("eventMap")) {
+      // Initialize event map when modal is shown
+      document
+        .getElementById("addEventModal")
+        .addEventListener("shown.bs.modal", function () {
+          if (!eventMap) {
+            initializeEventMap();
+          } else {
+            eventMap.invalidateSize();
+          }
+        });
+
+      function initializeEventMap() {
+        const mapContainer = document.getElementById("eventMap");
+        if (!mapContainer) {
+          console.warn("Event map container not found");
+          return;
+        }
+
+        // Define bounds for Netherlands
         const maxBounds = L.latLngBounds(
-          L.latLng(52.9, 6.0),
-          L.latLng(53.6, 7.3),
+          L.latLng(50.75, 3.5),
+          L.latLng(53.7, 8.0),
         );
 
+        // Create map
         eventMap = L.map("eventMap", {
           maxBounds: maxBounds,
           maxBoundsViscosity: 1.0,
@@ -416,57 +441,84 @@
 
         eventMap.setMaxBounds(maxBounds);
 
+        // Add tile layer
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
-          attribution: "&copy; OpenStreetMap-bijdragers",
+          attribution: "&copy; OpenStreetMap contributors",
+          className: "map-tiles",
         }).addTo(eventMap);
 
+        // Custom pin icon
         const pinIcon = L.icon({
           iconUrl: "/assets/pin-red.png",
-          iconSize: [15, 40],
-          iconAnchor: [15, 40],
-          popupAnchor: [-6, -40],
+          iconSize: [25, 40],
+          iconAnchor: [12, 40],
+          popupAnchor: [1, -34],
+          shadowUrl: "/assets/pin-shadow.png",
+          shadowSize: [41, 41],
+          shadowAnchor: [13, 41],
         });
 
-        // Click handler for map
-        eventMap.on("click", function (e) {
-          const lat = e.latlng.lat.toFixed(6);
-          const lng = e.latlng.lng.toFixed(6);
+        // Map click handler
+        eventMap.on("click", function (event) {
+          const lat = event.latlng.lat.toFixed(6);
+          const lng = event.latlng.lng.toFixed(6);
 
+          // Update form fields
           document.getElementById("eventLat").value = lat;
           document.getElementById("eventLng").value = lng;
 
-          // Remove old marker if exists
+          // Remove previous marker
           if (eventMarker) {
             eventMap.removeLayer(eventMarker);
           }
 
           // Add new marker
-          eventMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-            icon: pinIcon,
-          }).addTo(eventMap);
-          eventMarker.bindPopup("Event locatie").openPopup();
+          eventMarker = L.marker([lat, lng], { icon: pinIcon })
+            .addTo(eventMap)
+            .bindPopup(
+              "Geselecteerde locatie<br>Lat: " + lat + "<br>Lng: " + lng,
+            )
+            .openPopup();
         });
       }
 
-      // Event form submission
-      const form = document.getElementById("companyEventForm");
-      const msg = document.getElementById("companyEventMsg");
-
-      if (form) {
-        form.addEventListener("submit", async (e) => {
+      // Event form submission handler for modal
+      const eventForm = document.getElementById("addEventForm");
+      if (eventForm) {
+        eventForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          msg.style.display = "none";
 
-          const formData = new FormData(form);
+          // Collect form data
+          const title = document.getElementById("eventTitle").value;
+          const description = document.getElementById("eventDescription").value;
+          const lat = parseFloat(document.getElementById("eventLat").value);
+          const lng = parseFloat(document.getElementById("eventLng").value);
+
+          // Collect selected instrument IDs
+          const instrumentCheckboxes = document.querySelectorAll(
+            ".event-instrument-checkbox:checked",
+          );
+          const instrumentIds = Array.from(instrumentCheckboxes).map((cb) =>
+            parseInt(cb.value),
+          );
+
+          // Collect selected genre IDs
+          const genreCheckboxes = document.querySelectorAll(
+            ".event-genre-checkbox:checked",
+          );
+          const genreIds = Array.from(genreCheckboxes).map((cb) =>
+            parseInt(cb.value),
+          );
+
           const data = {
-            title: formData.get("title"),
-            description: formData.get("description"),
-            lat: parseFloat(formData.get("lat")),
-            lng: parseFloat(formData.get("lng")),
-            companyUser: {
-              id: currentCompanyUserId,
-            },
+            title: title,
+            description: description,
+            lat: lat,
+            lng: lng,
+            companyUserId: currentCompanyUserId,
+            instrumentIds: instrumentIds,
+            genreIds: genreIds,
           };
 
           try {
@@ -479,27 +531,31 @@
             if (!response.ok) throw new Error("Request failed");
 
             const savedEvent = await response.json();
-            form.reset();
 
-            // Remove marker from map
-            if (eventMarker) {
+            // Reset form
+            eventForm.reset();
+            document.getElementById("eventLat").value = "";
+            document.getElementById("eventLng").value = "";
+
+            // Clear marker
+            if (eventMarker && eventMap) {
               eventMap.removeLayer(eventMarker);
               eventMarker = null;
             }
 
-            msg.textContent =
-              "Event succesvol opgeslagen! Vernieuw de pagina om het in je tabel te zien.";
-            msg.className = "mt-2 alert alert-success";
-            msg.style.display = "block";
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("addEventModal"),
+            );
+            if (modal) modal.hide();
 
+            // Reload page to show new event
             setTimeout(() => {
               location.reload();
-            }, 2000);
+            }, 500);
           } catch (error) {
             console.error("Error:", error);
-            msg.textContent = "Fout bij opslaan. Probeer opnieuw.";
-            msg.className = "mt-2 alert alert-danger";
-            msg.style.display = "block";
+            alert("Fout bij opslaan. Probeer opnieuw.");
           }
         });
       }

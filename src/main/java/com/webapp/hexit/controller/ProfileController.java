@@ -3,6 +3,7 @@ package com.webapp.hexit.controller;
 import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,18 +33,32 @@ public class ProfileController {
   }
 
   @GetMapping("/profile/{username}")
-  public String profile(@PathVariable String username, Model model) {
+  public String profile(
+    @PathVariable String username,
+    Model model,
+    HttpSession session
+  ) {
     User profile = userRepository.findByUsername(username).orElse(null);
 
-    if (profile == null) throw new RuntimeException("Gebruiker niet gevonden: " + username);
+    if (profile == null) throw new RuntimeException(
+      "Gebruiker niet gevonden: " + username
+    );
 
     switch (profile.getRole()) {
       case MUZIKANT:
-        return muzikantProfileController.getProfile(username, model);
+        return muzikantProfileController.getProfile(username, model, session);
       case DOCENT:
-        return docentProfileController.getDocentProfile(username, model);
+        return docentProfileController.getDocentProfile(
+          username,
+          model,
+          session
+        );
       case BEDRIJF:
-        return companyProfileController.getCompanyProfile(username, model);
+        return companyProfileController.getCompanyProfile(
+          username,
+          model,
+          session
+        );
       default:
         throw new RuntimeException("Rol van " + username + " niet herkend.");
     }
@@ -53,7 +68,9 @@ public class ProfileController {
   public String profileEdit(@PathVariable String username, Model model) {
     User profile = userRepository.findByUsername(username).orElse(null);
 
-    if (profile == null) throw new RuntimeException("Gebruiker niet gevonden: " + username);
+    if (profile == null) throw new RuntimeException(
+      "Gebruiker niet gevonden: " + username
+    );
 
     switch (profile.getRole()) {
       case MUZIKANT:
@@ -70,7 +87,6 @@ public class ProfileController {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public String handleError(Exception ex, Model model) {
-
     ex.printStackTrace();
 
     model.addAttribute(

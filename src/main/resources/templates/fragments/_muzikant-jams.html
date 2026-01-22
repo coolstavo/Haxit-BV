@@ -6,8 +6,21 @@
         class="card shadow-sm mb-4"
         th:if="${jams != null && !jams.isEmpty()}"
       >
-        <div class="card-header bg-light">
-          <h5 class="mb-0">📋 Jouw Jams</h5>
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0" th:text="${isOwner ? '📋 Jouw Jams' : '📋 Jams'}">
+            📋 Jams
+          </h5>
+          <button
+            th:if="${isOwner}"
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addJamModal"
+          >
+            <i class="bi bi-plus-circle"></i> Jam Aanmaken
+          </button>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -16,8 +29,10 @@
                 <tr>
                   <th>Titel</th>
                   <th>Beschrijving</th>
+                  <th>Instrumenten</th>
+                  <th>Genres</th>
                   <th>Locatie</th>
-                  <th>Acties</th>
+                  <th th:if="${isOwner}">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -38,6 +53,32 @@
                     >
                   </td>
                   <td>
+                    <span
+                      th:if="${jam.instruments != null && !jam.instruments.isEmpty()}"
+                      th:each="instrument : ${jam.instruments}"
+                      class="badge bg-primary me-1"
+                      th:text="${instrument.naam}"
+                    ></span>
+                    <span
+                      th:if="${jam.instruments == null || jam.instruments.isEmpty()}"
+                      class="text-muted"
+                      >-</span
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:if="${jam.genres != null && !jam.genres.isEmpty()}"
+                      th:each="genre : ${jam.genres}"
+                      class="badge bg-secondary me-1"
+                      th:text="${genre.name}"
+                    ></span>
+                    <span
+                      th:if="${jam.genres == null || jam.genres.isEmpty()}"
+                      class="text-muted"
+                      >-</span
+                    >
+                  </td>
+                  <td>
                     <small class="badge bg-info">
                       <span
                         th:text="${#numbers.formatDecimal(jam.lat, 1, 4)}"
@@ -48,7 +89,7 @@
                       ></span>
                     </small>
                   </td>
-                  <td>
+                  <td th:if="${isOwner}">
                     <form
                       method="post"
                       th:action="@{'/jam/' + ${jam.id} + '/delete'}"
@@ -75,79 +116,24 @@
         class="card shadow-sm mb-4"
         th:if="${jams == null || jams.isEmpty()}"
       >
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0" th:text="${isOwner ? '📋 Jouw Jams' : '📋 Jams'}">
+            📋 Jams
+          </h5>
+          <button
+            th:if="${isOwner}"
+            type="button"
+            class="btn btn-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#addJamModal"
+          >
+            <i class="bi bi-plus-circle"></i> Jam Aanmaken
+          </button>
+        </div>
         <div class="card-body text-center py-4">
           <p class="text-muted mb-0">Je hebt nog geen jams aangemaakt.</p>
-        </div>
-      </div>
-
-      <!-- Nieuwe Jam Aanmaken -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="mb-3">Nieuwe Jam Aanmaken</h5>
-          <form id="addJamForm">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Titel *</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="jamTitle"
-                  name="title"
-                  required
-                />
-              </div>
-              <div class="col-12">
-                <label class="form-label">Beschrijving *</label>
-                <textarea
-                  class="form-control"
-                  id="jamDescription"
-                  name="description"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-
-              <!-- Mini Map -->
-              <div class="col-12">
-                <label class="form-label">Locatie *</label>
-                <small class="text-muted d-block mb-2"
-                  >Klik op de kaart om de locatie te selecteren</small
-                >
-                <div id="jamMap"></div>
-              </div>
-
-              <div class="col-md-6">
-                <label class="form-label">Latitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="jamLat"
-                  name="lat"
-                  required
-                  placeholder="53.2194"
-                  readonly
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Longitude *</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  class="form-control"
-                  id="jamLng"
-                  name="lng"
-                  required
-                  placeholder="6.5665"
-                  readonly
-                />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">
-              Jam Opslaan
-            </button>
-            <div id="jamMsg" class="mt-2" style="display: none"></div>
-          </form>
         </div>
       </div>
     </div>

@@ -116,6 +116,25 @@
   box-shadow: 0 0 0 0.25rem rgba(143, 78, 21, 0.25);
 }
 
+.user-profile {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.user-profile .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user-profile .avatar-small {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
 /* Profile link styles */
 h3 small a,
 .card-body p a {
@@ -127,4 +146,21 @@ h3 small a:hover,
 .card-body p a:hover {
   color: var(--hexit-brown);
   text-decoration: underline !important;
+}
+
+/* Modal map styles */
+.jam-modal-map,
+.event-modal-map {
+  height: 400px;
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #dee2e6;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .jam-modal-map,
+  .event-modal-map {
+    height: 300px;
+  }
 }

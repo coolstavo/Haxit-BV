@@ -12,6 +12,27 @@
             <span th:text="${lesson.instrument?.naam}">-</span>
           </p>
           <p>
+            <span class="badge bg-primary">
+              <i class="bi bi-music-note-beamed me-1"></i>
+              <span th:text="${lesson.instrument?.naam}">-</span>
+            </span>
+          </p>
+          <p>
+            <strong>Genres:</strong>
+            <span th:if="${lesson.genres != null && !lesson.genres.isEmpty()}">
+              <span
+                th:each="genre, iterStat : ${lesson.genres}"
+                class="badge bg-secondary me-1"
+                th:text="${genre.name}"
+              ></span>
+            </span>
+            <span
+              th:if="${lesson.genres == null || lesson.genres.isEmpty()}"
+              class="text-muted"
+              >Niet gespecificeerd</span
+            >
+          </p>
+          <p>
             <strong>Niveaus:</strong>
             <span
               th:text="${lesson.levels != null && !lesson.levels.isEmpty()} ? ${lesson.levels} : 'Niet gespecificeerd'"

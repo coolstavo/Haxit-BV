@@ -1,18 +1,22 @@
 package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.Docent;
+import com.webapp.hexit.model.Genre;
 import com.webapp.hexit.model.Instrument;
 import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.model.LessonBooking;
 import com.webapp.hexit.model.LessonStatus;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.DocentRepository;
+import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.LessonBookingRepository;
 import com.webapp.hexit.repository.LessonCommentRepository;
+import com.webapp.hexit.repository.LessonGenreRepository;
 import com.webapp.hexit.repository.LessonLikeRepository;
 import com.webapp.hexit.repository.LessonRepository;
 import com.webapp.hexit.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,8 @@ public class DocentProfileController {
   private final DocentRepository docentRepository;
   private final LessonRepository lessonRepository;
   private final InstrumentRepository instrumentRepository;
+  private final GenreRepository genreRepository;
+  private final LessonGenreRepository lessonGenreRepository;
   private final LessonBookingRepository lessonBookingRepository;
   private final LessonLikeRepository lessonLikeRepository;
   private final LessonCommentRepository lessonCommentRepository;
@@ -43,6 +49,8 @@ public class DocentProfileController {
     DocentRepository docentRepository,
     LessonRepository lessonRepository,
     InstrumentRepository instrumentRepository,
+    GenreRepository genreRepository,
+    LessonGenreRepository lessonGenreRepository,
     LessonBookingRepository lessonBookingRepository,
     LessonLikeRepository lessonLikeRepository,
     LessonCommentRepository lessonCommentRepository,
@@ -51,6 +59,8 @@ public class DocentProfileController {
     this.docentRepository = docentRepository;
     this.lessonRepository = lessonRepository;
     this.instrumentRepository = instrumentRepository;
+    this.genreRepository = genreRepository;
+    this.lessonGenreRepository = lessonGenreRepository;
     this.lessonBookingRepository = lessonBookingRepository;
     this.lessonLikeRepository = lessonLikeRepository;
     this.lessonCommentRepository = lessonCommentRepository;
@@ -105,7 +115,11 @@ public class DocentProfileController {
   /**
    * Public method for unified profile routing
    */
-  public String getDocentProfile(String username, Model model) {
+  public String getDocentProfile(
+    String username,
+    Model model,
+    HttpSession session
+  ) {
     User user = userRepository.findByUsername(username).orElse(null);
 
     if (user == null) {
@@ -125,6 +139,13 @@ public class DocentProfileController {
       model.addAttribute("lessons", List.of());
       model.addAttribute("lessonStats", new HashMap<>());
     }
+
+    // Check if current user is viewing their own profile
+    Object currentUsernameObj = session.getAttribute("currentUsername");
+    boolean isOwner =
+      currentUsernameObj != null &&
+      currentUsernameObj.toString().equals(username);
+    model.addAttribute("isOwner", isOwner);
 
     model.addAttribute("docentName", username);
     model.addAttribute("username", username);
@@ -162,9 +183,11 @@ public class DocentProfileController {
     model.addAttribute("userRole", "DOCENT");
     model.addAttribute("edit", true);
 
-    // Fetch instruments from database
-    List<Instrument> instruments = instrumentRepository.findAll();
-    model.addAttribute("instruments", instruments);
+    // Fetch instruments and genres from database
+    List<Instrument> allInstruments = instrumentRepository.findAll();
+    List<Genre> allGenres = genreRepository.findAll();
+    model.addAttribute("allInstruments", allInstruments);
+    model.addAttribute("allGenres", allGenres);
 
     model.addAttribute(
       "levels",
@@ -218,9 +241,11 @@ public class DocentProfileController {
     model.addAttribute("userRole", "DOCENT");
     model.addAttribute("edit", true);
 
-    // Fetch instruments from database
-    List<Instrument> instruments = instrumentRepository.findAll();
-    model.addAttribute("instruments", instruments);
+    // Fetch instruments and genres from database
+    List<Instrument> allInstruments = instrumentRepository.findAll();
+    List<Genre> allGenres = genreRepository.findAll();
+    model.addAttribute("allInstruments", allInstruments);
+    model.addAttribute("allGenres", allGenres);
 
     model.addAttribute(
       "levels",
@@ -284,6 +309,7 @@ public class DocentProfileController {
     @RequestParam String docentName,
     @RequestParam Long instrumentId,
     @RequestParam(required = false) String[] levels,
+    @RequestParam(required = false) Long[] genreIds,
     @RequestParam String lessonForm,
     @RequestParam Double rate,
     @RequestParam String rateType,
@@ -333,6 +359,18 @@ public class DocentProfileController {
       }
 
       lessonRepository.save(lesson);
+
+      // Add genres to the lesson
+      if (genreIds != null && genreIds.length > 0) {
+        for (Long genreId : genreIds) {
+          Optional<Genre> genre = genreRepository.findById(genreId);
+          if (genre.isPresent()) {
+            lesson.addGenre(genre.get());
+          }
+        }
+        lessonRepository.save(lesson);
+      }
+
       return "redirect:/profile/" + docentName + "/edit";
     } catch (Exception e) {
       model.addAttribute("errorMessage", "Fout bij opslaan van les");
@@ -361,6 +399,9 @@ public class DocentProfileController {
     lessonCommentRepository
       .findByLessonIdOrderByCreatedAtDesc(id)
       .forEach(comment -> lessonCommentRepository.delete(comment));
+
+    // Delete all genre associations for this lesson
+    lessonGenreRepository.deleteByLessonId(id);
 
     // Now delete the lesson itself
     lessonRepository.deleteById(id);

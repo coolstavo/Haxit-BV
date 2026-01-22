@@ -1,5 +1,9 @@
 <div th:fragment="searchbox">
-  <form class="mb-3" method="get" action="/">
+  <form
+    class="mb-3"
+    method="get"
+    th:action="${username != null && username != 'Gast'} ? @{/home} : @{/}"
+  >
     <!-- Name Search Field -->
     <div class="mb-2">
       <input
@@ -77,6 +81,52 @@
       </div>
     </div>
 
+    <!-- Liked By Me Filter Section (only for logged-in users) -->
+    <div class="card mb-3" th:if="${username != null && username != 'Gast'}">
+      <div class="card-header bg-light p-2">
+        <button
+          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#filterLikedByMe"
+          aria-expanded="false"
+        >
+          <strong>Favorieten</strong>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-chevron-down"
+            viewBox="0 0 16 16"
+            style="display: inline-block; float: right"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="collapse" id="filterLikedByMe">
+        <div class="card-body p-2">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="likedByMe"
+              value="true"
+              id="filterLikedByMe"
+              th:checked="${param.likedByMe != null && param.likedByMe[0] == 'true'}"
+            />
+            <label class="form-check-label" for="filterLikedByMe">
+              Alleen door mij geliked
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Instruments Filter Section -->
     <div
       class="card mb-3"
@@ -137,8 +187,74 @@
       </div>
     </div>
 
-    <button class="btn btn-outline-secondary w-100" type="submit">
-      Zoeken
-    </button>
+    <!-- Genres Filter Section -->
+    <div class="card mb-3" th:if="${genres != null && genres.size() > 0}">
+      <div class="card-header bg-light p-2">
+        <button
+          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#filterGenres"
+          aria-expanded="false"
+        >
+          <strong>Genres</strong>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            class="bi bi-chevron-down"
+            viewBox="0 0 16 16"
+            style="display: inline-block; float: right"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        class="collapse"
+        id="filterGenres"
+        style="max-height: 300px; overflow-y: auto"
+      >
+        <div class="card-body p-2">
+          <div
+            class="form-check"
+            th:each="genre : ${genres}"
+            th:id="'genre-' + ${genre.id}"
+          >
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="genres"
+              th:value="${genre.name}"
+              th:id="'filterGenre-' + ${genre.id}"
+              th:checked="${param.genres != null && #strings.contains(param.genres, genre.name)}"
+            />
+            <label
+              class="form-check-label"
+              th:for="'filterGenre-' + ${genre.id}"
+              th:text="${genre.name}"
+            >
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary flex-grow-1" type="submit">
+        Zoeken
+      </button>
+      <a
+        th:href="${username != null && username != 'Gast'} ? @{/home} : @{/}"
+        class="btn btn-outline-danger"
+        title="Reset filters"
+      >
+        Reset
+      </a>
+    </div>
   </form>
 </div>

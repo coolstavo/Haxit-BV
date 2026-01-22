@@ -10,6 +10,10 @@
     />
     <link
       rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <link rel="stylesheet" th:href="@{/css/style.css}" />
@@ -52,7 +56,7 @@
       <!-- New Lesson Form (only in edit mode) -->
       <div th:if="${edit}">
         <div
-          th:insert="~{fragments/_docent-lesson-form :: docentLessonForm(${docentName}, ${instruments}, ${levels}, ${lessonForms}, ${rateTypes})}"
+          th:insert="~{fragments/_docent-lesson-form :: docentLessonForm(${docentName}, ${allInstruments}, ${allGenres}, ${levels}, ${lessonForms}, ${rateTypes})}"
         ></div>
       </div>
     </div>

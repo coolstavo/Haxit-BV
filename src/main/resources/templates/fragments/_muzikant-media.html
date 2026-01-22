@@ -1,106 +1,164 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="mediaSection" class="row mb-4">
+  <div th:fragment="mediaSection" class="row mb-4">
     <!-- Audio Section -->
     <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-music"></i> Audio & SoundCloud
-            </div>
-            <div class="card-body" th:with="audioLijst=${mediaBestanden.?[isAudio() or isSoundCloud()]}">
-                <div th:if="${!audioLijst.isEmpty()}">
-                    <div th:each="item : ${audioLijst}" class="media-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="media-title" th:text="${item.beschrijving}">Titel</h6>
-                                <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"></small>
-                            </div>
-                            <form th:action="@{/profile/delete/{id}(id=${item.id})}"
-                                  method="post"
-                                  class="ms-2"
-                                  onsubmit="return confirm('Weet je zeker dat je dit item wilt verwijderen?');">
-                                <input type="hidden" name="username" th:value="${muzikant.user.username}" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- Audio Player -->
-                        <div th:if="${item.isAudio()}" class="mt-3">
-                            <audio controls class="w-100 media-player">
-                                <source th:src="${item.profileAudio.audioBestandPath}" type="audio/mpeg">
-                                Je browser ondersteunt geen audio.
-                            </audio>
-                        </div>
-
-                        <!-- SoundCloud Embed -->
-                        <div th:if="${item.isSoundCloud()}" class="mt-3">
-                            <iframe width="100%"
-                                    height="166"
-                                    scrolling="no"
-                                    frameborder="no"
-                                    allow="autoplay"
-                                    class="soundcloud-embed"
-                                    th:src="${item.getEmbedUrl()}">
-                            </iframe>
-                        </div>
-                    </div>
-                </div>
-                <div th:if="${audioLijst.isEmpty()}" class="empty-state">
-                    <div class="empty-state-icon">🎧</div>
-                    <p class="text-muted">Nog geen audio uploads</p>
-                </div>
-            </div>
+      <div class="card h-100">
+        <div class="card-header">
+          <i class="bi bi-music"></i> Audio & SoundCloud
         </div>
+        <div
+          class="card-body"
+          th:with="audioLijst=${mediaBestanden.?[isAudio() or isSoundCloud()]}"
+        >
+          <div th:if="${!audioLijst.isEmpty()}">
+            <div th:each="item : ${audioLijst}" class="media-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="media-title" th:text="${item.beschrijving}">
+                    Titel
+                  </h6>
+                  <small
+                    class="text-muted d-block"
+                    th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"
+                  ></small>
+                </div>
+                <form
+                  th:if="${isOwner}"
+                  th:action="@{/profile/delete/{id}(id=${item.id})}"
+                  method="post"
+                  class="ms-2"
+                  onsubmit="
+                    return confirm(
+                      'Weet je zeker dat je dit item wilt verwijderen?',
+                    );
+                  "
+                >
+                  <input
+                    type="hidden"
+                    name="username"
+                    th:value="${muzikant.user.username}"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    title="Verwijderen"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Audio Player -->
+              <div th:if="${item.isAudio()}" class="mt-3">
+                <audio controls class="w-100 media-player">
+                  <source
+                    th:src="${item.profileAudio.audioBestandPath}"
+                    type="audio/mpeg"
+                  />
+                  Je browser ondersteunt geen audio.
+                </audio>
+              </div>
+
+              <!-- SoundCloud Embed -->
+              <div th:if="${item.isSoundCloud()}" class="mt-3">
+                <iframe
+                  width="100%"
+                  height="166"
+                  scrolling="no"
+                  frameborder="no"
+                  allow="autoplay"
+                  class="soundcloud-embed"
+                  th:src="${item.getEmbedUrl()}"
+                >
+                </iframe>
+              </div>
+            </div>
+          </div>
+          <div th:if="${audioLijst.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">🎧</div>
+            <p class="text-muted">Nog geen audio uploads</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Video Section -->
     <div class="col-md-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-film"></i> Video & YouTube
-            </div>
-            <div class="card-body" th:with="videoLijst=${mediaBestanden.?[isVideo() or isYoutube()]}">
-                <div th:if="${!videoLijst.isEmpty()}">
-                    <div th:each="item : ${videoLijst}" class="media-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="media-title" th:text="${item.beschrijving}">Titel</h6>
-                                <small class="text-muted d-block" th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"></small>
-                            </div>
-                            <form th:action="@{/profile/delete/{id}(id=${item.id})}"
-                                  method="post"
-                                  class="ms-2"
-                                  onsubmit="return confirm('Weet je zeker dat je dit item wilt verwijderen?');">
-                                <input type="hidden" name="username" th:value="${muzikant.user.username}" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Verwijderen">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- YouTube Embed -->
-                        <div th:if="${item.isYoutube()}" class="mt-3">
-                            <div class="ratio ratio-16x9">
-                                <iframe th:src="${item.getEmbedUrl()}" allowfullscreen class="youtube-embed"></iframe>
-                            </div>
-                        </div>
-
-                        <!-- Video Player -->
-                        <div th:if="${item.isVideo()}" class="mt-3">
-                            <video controls class="w-100 media-player">
-                                <source th:src="${item.profileVideo.videoBestandPath}" type="video/mp4">
-                                Je browser ondersteunt geen video.
-                            </video>
-                        </div>
-                    </div>
-                </div>
-                <div th:if="${videoLijst.isEmpty()}" class="empty-state">
-                    <div class="empty-state-icon">🎬</div>
-                    <p class="text-muted">Nog geen video uploads</p>
-                </div>
-            </div>
+      <div class="card h-100">
+        <div class="card-header">
+          <i class="bi bi-film"></i> Video & YouTube
         </div>
+        <div
+          class="card-body"
+          th:with="videoLijst=${mediaBestanden.?[isVideo() or isYoutube()]}"
+        >
+          <div th:if="${!videoLijst.isEmpty()}">
+            <div th:each="item : ${videoLijst}" class="media-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="media-title" th:text="${item.beschrijving}">
+                    Titel
+                  </h6>
+                  <small
+                    class="text-muted d-block"
+                    th:text="${#temporals.format(item.uploadDate, 'dd-MM-yyyy HH:mm')}"
+                  ></small>
+                </div>
+                <form
+                  th:if="${isOwner}"
+                  th:action="@{/profile/delete/{id}(id=${item.id})}"
+                  method="post"
+                  class="ms-2"
+                  onsubmit="
+                    return confirm(
+                      'Weet je zeker dat je dit item wilt verwijderen?',
+                    );
+                  "
+                >
+                  <input
+                    type="hidden"
+                    name="username"
+                    th:value="${muzikant.user.username}"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-sm btn-outline-danger"
+                    title="Verwijderen"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+
+              <!-- YouTube Embed -->
+              <div th:if="${item.isYoutube()}" class="mt-3">
+                <div class="ratio ratio-16x9">
+                  <iframe
+                    th:src="${item.getEmbedUrl()}"
+                    allowfullscreen
+                    class="youtube-embed"
+                  ></iframe>
+                </div>
+              </div>
+
+              <!-- Video Player -->
+              <div th:if="${item.isVideo()}" class="mt-3">
+                <video controls class="w-100 media-player">
+                  <source
+                    th:src="${item.profileVideo.videoBestandPath}"
+                    type="video/mp4"
+                  />
+                  Je browser ondersteunt geen video.
+                </video>
+              </div>
+            </div>
+          </div>
+          <div th:if="${videoLijst.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">🎬</div>
+            <p class="text-muted">Nog geen video uploads</p>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 </html>
