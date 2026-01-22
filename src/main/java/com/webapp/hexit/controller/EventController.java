@@ -12,6 +12,7 @@ import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.UserRepository;
+import com.webapp.hexit.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
