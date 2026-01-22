@@ -5,6 +5,7 @@ import com.webapp.hexit.model.Jam;
 import com.webapp.hexit.model.Lesson;
 import com.webapp.hexit.repository.EventLikeRepository;
 import com.webapp.hexit.repository.EventRepository;
+import com.webapp.hexit.repository.GenreRepository;
 import com.webapp.hexit.repository.InstrumentRepository;
 import com.webapp.hexit.repository.JamLikeRepository;
 import com.webapp.hexit.repository.JamRepository;
@@ -31,6 +32,7 @@ public class HomeController {
   private final JamRepository jamRepository;
   private final UserRepository userRepository;
   private final InstrumentRepository instrumentRepository;
+  private final GenreRepository genreRepository;
   private final EventLikeRepository eventLikeRepository;
   private final JamLikeRepository jamLikeRepository;
   private final LessonLikeRepository lessonLikeRepository;
@@ -41,6 +43,7 @@ public class HomeController {
     JamRepository jamRepository,
     UserRepository userRepository,
     InstrumentRepository instrumentRepository,
+    GenreRepository genreRepository,
     EventLikeRepository eventLikeRepository,
     JamLikeRepository jamLikeRepository,
     LessonLikeRepository lessonLikeRepository
@@ -50,6 +53,7 @@ public class HomeController {
     this.jamRepository = jamRepository;
     this.userRepository = userRepository;
     this.instrumentRepository = instrumentRepository;
+    this.genreRepository = genreRepository;
     this.eventLikeRepository = eventLikeRepository;
     this.jamLikeRepository = jamLikeRepository;
     this.lessonLikeRepository = lessonLikeRepository;
@@ -60,6 +64,8 @@ public class HomeController {
     @RequestParam(name = "name", required = false) String name,
     @RequestParam(name = "types", required = false) String types,
     @RequestParam(name = "instruments", required = false) String instruments,
+    @RequestParam(name = "genres", required = false) String genres,
+    @RequestParam(name = "likedByMe", required = false) Boolean likedByMe,
     Model model
   ) {
     List<Event> events = eventRepository.findAll();
@@ -76,6 +82,12 @@ public class HomeController {
     final Set<String> selectedInstruments = new HashSet<>();
     if (instruments != null && !instruments.isBlank()) {
       selectedInstruments.addAll(Arrays.asList(instruments.split(",")));
+    }
+
+    // Parse genres filter (comma-separated)
+    final Set<String> selectedGenres = new HashSet<>();
+    if (genres != null && !genres.isBlank()) {
+      selectedGenres.addAll(Arrays.asList(genres.split(",")));
     }
 
     // Filter by name search
@@ -142,6 +154,63 @@ public class HomeController {
           lesson ->
             lesson.getInstrument() != null &&
             selectedInstruments.contains(lesson.getInstrument().getNaam())
+        )
+        .collect(Collectors.toList());
+
+      events = events
+        .stream()
+        .filter(event ->
+          event
+            .getInstruments()
+            .stream()
+            .anyMatch(instrument ->
+              selectedInstruments.contains(instrument.getNaam())
+            )
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam ->
+          jam
+            .getInstruments()
+            .stream()
+            .anyMatch(instrument ->
+              selectedInstruments.contains(instrument.getNaam())
+            )
+        )
+        .collect(Collectors.toList());
+    }
+
+    // Filter by genres
+    if (!selectedGenres.isEmpty()) {
+      events = events
+        .stream()
+        .filter(event ->
+          event
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
+        )
+        .collect(Collectors.toList());
+
+      lessons = lessons
+        .stream()
+        .filter(lesson ->
+          lesson
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam ->
+          jam
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
         )
         .collect(Collectors.toList());
     }
@@ -183,6 +252,7 @@ public class HomeController {
     model.addAttribute("jamUserLikes", new HashSet<Long>());
     model.addAttribute("lessonUserLikes", new HashSet<Long>());
     model.addAttribute("instruments", instrumentRepository.findAll());
+    model.addAttribute("genres", genreRepository.findAll());
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
@@ -203,6 +273,8 @@ public class HomeController {
     @RequestParam(name = "name", required = false) String name,
     @RequestParam(name = "types", required = false) String types,
     @RequestParam(name = "instruments", required = false) String instruments,
+    @RequestParam(name = "genres", required = false) String genres,
+    @RequestParam(name = "likedByMe", required = false) Boolean likedByMe,
     HttpSession session,
     Model model
   ) {
@@ -228,6 +300,12 @@ public class HomeController {
     final Set<String> selectedInstruments = new HashSet<>();
     if (instruments != null && !instruments.isBlank()) {
       selectedInstruments.addAll(Arrays.asList(instruments.split(",")));
+    }
+
+    // Parse genres filter (comma-separated)
+    final Set<String> selectedGenres = new HashSet<>();
+    if (genres != null && !genres.isBlank()) {
+      selectedGenres.addAll(Arrays.asList(genres.split(",")));
     }
 
     // Filter by name search
@@ -296,10 +374,89 @@ public class HomeController {
             selectedInstruments.contains(lesson.getInstrument().getNaam())
         )
         .collect(Collectors.toList());
+
+      events = events
+        .stream()
+        .filter(event ->
+          event
+            .getInstruments()
+            .stream()
+            .anyMatch(instrument ->
+              selectedInstruments.contains(instrument.getNaam())
+            )
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam ->
+          jam
+            .getInstruments()
+            .stream()
+            .anyMatch(instrument ->
+              selectedInstruments.contains(instrument.getNaam())
+            )
+        )
+        .collect(Collectors.toList());
+    }
+
+    // Filter by genres
+    if (!selectedGenres.isEmpty()) {
+      events = events
+        .stream()
+        .filter(event ->
+          event
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
+        )
+        .collect(Collectors.toList());
+
+      lessons = lessons
+        .stream()
+        .filter(lesson ->
+          lesson
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam ->
+          jam
+            .getGenres()
+            .stream()
+            .anyMatch(genre -> selectedGenres.contains(genre.getName()))
+        )
+        .collect(Collectors.toList());
     }
 
     // Get current user
     var userOpt = userRepository.findByUsername(username);
+
+    // Filter by liked by me
+    if (likedByMe != null && likedByMe && userOpt.isPresent()) {
+      final var user = userOpt.get();
+
+      events = events
+        .stream()
+        .filter(event -> eventLikeRepository.existsByUserAndEvent(user, event))
+        .collect(Collectors.toList());
+
+      lessons = lessons
+        .stream()
+        .filter(lesson ->
+          lessonLikeRepository.existsByUserAndLesson(user, lesson)
+        )
+        .collect(Collectors.toList());
+
+      jams = jams
+        .stream()
+        .filter(jam -> jamLikeRepository.existsByUserAndJam(user, jam))
+        .collect(Collectors.toList());
+    }
 
     // Create like count maps
     Map<Long, Long> eventLikeCounts = new HashMap<>();
@@ -366,6 +523,7 @@ public class HomeController {
     model.addAttribute("jamUserLikes", jamUserLikes);
     model.addAttribute("lessonUserLikes", lessonUserLikes);
     model.addAttribute("instruments", instrumentRepository.findAll());
+    model.addAttribute("genres", genreRepository.findAll());
     model.addAttribute("loginRequired", loginRequired != null && loginRequired);
     return "index";
   }

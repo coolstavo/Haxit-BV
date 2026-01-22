@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <body>
     <div
-      th:fragment="docentLessonForm(docentName, instruments, levels, lessonForms, rateTypes)"
+      th:fragment="docentLessonForm(docentName, allInstruments, allGenres, levels, lessonForms, rateTypes)"
     >
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
@@ -18,7 +18,7 @@
                 <select name="instrumentId" class="form-select" required>
                   <option value="">-- Selecteer instrument --</option>
                   <option
-                    th:each="inst : ${instruments}"
+                    th:each="inst : ${allInstruments}"
                     th:value="${inst.id}"
                     th:text="${inst.naam}"
                   ></option>
@@ -38,9 +38,12 @@
               </div>
 
               <div class="col-12">
-                <label class="form-label">Niveaus</label>
-                <div class="border rounded p-3">
-                  <div th:each="level : ${levels}" class="form-check">
+                <label class="form-label"><strong>Niveaus</strong></label>
+                <div
+                  class="border rounded p-3 bg-white"
+                  style="max-height: 200px; overflow-y: auto; min-height: 100px"
+                >
+                  <div th:each="level : ${levels}" class="form-check mb-2">
                     <input
                       class="form-check-input"
                       type="checkbox"
@@ -55,6 +58,37 @@
                     ></label>
                   </div>
                 </div>
+                <small class="form-text text-muted"
+                  >Selecteer de niveaus waarop je les geeft</small
+                >
+              </div>
+
+              <div class="col-12">
+                <label class="form-label"
+                  ><strong>Genres (optioneel)</strong></label
+                >
+                <div
+                  class="border rounded p-3 bg-white"
+                  style="max-height: 200px; overflow-y: auto; min-height: 100px"
+                >
+                  <div th:each="genre : ${allGenres}" class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      name="genreIds"
+                      th:value="${genre.id}"
+                      th:id="${'genre-' + genre.id}"
+                    />
+                    <label
+                      class="form-check-label"
+                      th:for="${'genre-' + genre.id}"
+                      th:text="${genre.name}"
+                    ></label>
+                  </div>
+                </div>
+                <small class="form-text text-muted"
+                  >Selecteer de muziekgenres voor deze les</small
+                >
               </div>
 
               <div class="col-md-6">

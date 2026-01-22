@@ -147,3 +147,20 @@ h3 small a:hover,
   color: var(--hexit-brown);
   text-decoration: underline !important;
 }
+
+/* Modal map styles */
+.jam-modal-map,
+.event-modal-map {
+  height: 400px;
+  width: 100%;
+  border-radius: 8px;
+  border: 2px solid #dee2e6;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .jam-modal-map,
+  .event-modal-map {
+    height: 300px;
+  }
+}
