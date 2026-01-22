@@ -27,26 +27,6 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a
-            class="nav-link active"
-            th:if="${username} != 'Gast'"
-            th:href="@{/home}"
-            >Home</a
-          >
-          <a
-            class="nav-link active"
-            th:if="${username} == 'Gast'"
-            th:href="@{/}"
-        >
-            <img
-                src="/assets/new-logo.svg"
-                alt="Listen logo"
-                id="logo"
-                class="me-2"
-            />
-            Listen
-        </a>
-
         <button
             class="navbar-toggler"
             type="button"
