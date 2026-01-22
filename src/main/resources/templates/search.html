@@ -20,65 +20,116 @@
                 <h1 class="text-center">Search Profiles</h1>
             </header>
             <main>
-                <section class="mb-4">
-                    <form action="/search" method="get" class="row g-3">
-                        <div class="col-md-6">
-                            <label
-                                for="searchQuery"
-                                class="form-label"
-                                aria-label="Search input"
-                                >Search:</label
-                            >
+                <section class="mb-5">
+                    <form action="/search" method="get" class="row g-3 align-items-center mb-4">
+                        <!-- Search Bar -->
+                        <div class="col-md-4">
+                            <label for="searchQuery" class="form-label visually-hidden">Search:</label>
                             <input
                                 type="text"
                                 id="searchQuery"
                                 name="query"
                                 class="form-control"
                                 placeholder="Enter name, title, or keyword"
-                                required
                             />
                         </div>
+
+                        <!-- Collapsible Filters -->
                         <div class="col-md-4">
-                            <label
-                                for="filter"
-                                class="form-label"
-                                aria-label="Filter dropdown"
-                                >Filter by:</label
-                            >
-                            <select
-                                id="filter"
-                                name="filter"
-                                class="form-select"
-                            >
-                                <option value="all">All</option>
-                                <option value="title">Title</option>
-                                <option value="type">Type</option>
-                                <option value="location">Location</option>
-                            </select>
+                            <div class="card mb-0">
+                                <div class="card-header bg-light p-2">
+                                    <button
+                                        class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#filterTypes"
+                                        aria-expanded="false"
+                                    >
+                                        <strong>Type Filter</strong>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            fill="currentColor"
+                                            class="bi bi-chevron-down"
+                                            viewBox="0 0 16 16"
+                                            style="display: inline-block; float: right;"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="collapse" id="filterTypes">
+                                    <div class="card-body p-2">
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                name="filters"
+                                                value="bedrijf"
+                                                id="filterCompany"
+                                            />
+                                            <label class="form-check-label" for="filterCompany">Bedrijf</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                name="filters"
+                                                value="lessen"
+                                                id="filterLessons"
+                                            />
+                                            <label class="form-check-label" for="filterLessons">docent</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                name="filters"
+                                                value="muziekant"
+                                                id="filterMusician"
+                                            />
+                                            <label class="form-check-label" for="filterMusician">Muziekant</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                Search
-                            </button>
+
+                        <!-- Search and Reset Buttons -->
+                        <div class="col-md-4 d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary w-45">Search</button>
+                            <a href="/search" class="btn btn-secondary w-45">Reset</a>
                         </div>
                     </form>
                 </section>
-                <section>
                     <h2>Results</h2>
 
                     <div th:if="${users == null || users.isEmpty()}">
                         <p>No users found.</p>
                     </div>
+                    <table class="table table-striped" th:if="${users != null}">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td>
+                                    <a th:href="@{'/profile/' + ${user.username}}" th:text="${user.username}"></a>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary" th:text="${user.role}"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                    <ul class="list-group" th:if="${users != null}">
-                        <li class="list-group-item" th:each="user : ${users}">
-                            <strong th:text="${user.username}"></strong>
-                            <span
-                                class="badge bg-secondary"
-                                th:text="${user.role}"
-                            ></span>
-                        </li>
-                    </ul>
                 </section>
             </main>
         </div>

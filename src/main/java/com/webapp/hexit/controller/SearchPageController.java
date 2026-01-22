@@ -1,5 +1,6 @@
 package com.webapp.hexit.controller;
 
+import com.webapp.hexit.model.Role;
 import com.webapp.hexit.model.User;
 import com.webapp.hexit.service.UserService;
 import java.util.List;
@@ -18,19 +19,45 @@ public class SearchPageController {
     @GetMapping("/search")
     public String searchUsers(
         @RequestParam(required = false) String query,
-        @RequestParam(required = false) String filter,
+        @RequestParam(required = false) List<String> filters, // Accept multiple filters
         Model model
     ) {
         List<User> users;
 
-        if (query == null || query.isBlank()) {
-            users = userService.getAllUsers();
-        } else {
+        // Initialize users list
+        users = userService.getAllUsers();
+
+        // Apply search query if provided
+        if (query != null && !query.isBlank()) {
             users = userService.searchByUsername(query);
+        }
+
+        // Apply filters independently if provided
+        if (filters != null && !filters.isEmpty()) {
+            users = users
+                .stream()
+                .filter(user ->
+                    filters
+                        .stream()
+                        .anyMatch(filter -> {
+                            switch (filter.toLowerCase()) {
+                                case "bedrijf":
+                                    return user.getRole() == Role.BEDRIJF;
+                                case "lessen":
+                                    return user.getRole() == Role.DOCENT;
+                                case "muziekant":
+                                    return user.getRole() == Role.MUZIKANT;
+                                default:
+                                    return false;
+                            }
+                        })
+                )
+                .toList();
         }
 
         model.addAttribute("users", users);
         model.addAttribute("query", query);
+        model.addAttribute("filters", filters);
 
         return "search";
     }
