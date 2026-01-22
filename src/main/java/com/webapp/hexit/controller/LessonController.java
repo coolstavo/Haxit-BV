@@ -2,6 +2,7 @@ package com.webapp.hexit.controller;
 
 import com.webapp.hexit.model.*;
 import com.webapp.hexit.repository.*;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,28 +21,38 @@ public class LessonController {
   private final LessonBookingRepository lessonBookingRepository;
   private final UserRepository userRepository;
   private final MuzikantRepository muzikantRepository;
-  private final DocentRepository docentRepository;
+  private final LessonLikeRepository lessonLikeRepository;
+  private final LessonCommentRepository lessonCommentRepository;
 
   public LessonController(
     LessonRepository lessonRepository,
     LessonBookingRepository lessonBookingRepository,
     UserRepository userRepository,
     MuzikantRepository muzikantRepository,
-    DocentRepository docentRepository
+    LessonLikeRepository lessonLikeRepository,
+    LessonCommentRepository lessonCommentRepository
   ) {
     this.lessonRepository = lessonRepository;
     this.lessonBookingRepository = lessonBookingRepository;
     this.userRepository = userRepository;
     this.muzikantRepository = muzikantRepository;
-    this.docentRepository = docentRepository;
+    this.lessonLikeRepository = lessonLikeRepository;
+    this.lessonCommentRepository = lessonCommentRepository;
   }
 
-  @GetMapping("/lesson/{lessonId}/{username}")
+  @GetMapping("/lesson/{lessonId}")
   public String getLessonPage(
     @PathVariable Long lessonId,
-    @PathVariable String username,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
     if (lessonOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Les niet gevonden");
@@ -58,7 +70,6 @@ public class LessonController {
 
     User user = userOpt.get();
     model.addAttribute("user", user);
-    model.addAttribute("username", username);
 
     boolean isTeacher = user.getRole() == Role.DOCENT;
     boolean isStudent = user.getRole() == Role.MUZIKANT;
@@ -87,13 +98,162 @@ public class LessonController {
     model.addAttribute("bookings", bookings);
     model.addAttribute("hasBookings", !bookings.isEmpty());
 
+    // Get likes and comments
+    long likeCount = lessonLikeRepository.countByLessonId(lessonId);
+    boolean userHasLiked = lessonLikeRepository.existsByUserAndLesson(
+      user,
+      lesson
+    );
+    List<Lesson_Comment> comments =
+      lessonCommentRepository.findByLessonIdOrderByCreatedAtDesc(lessonId);
+
+    model.addAttribute("likeCount", likeCount);
+    model.addAttribute("userHasLiked", userHasLiked);
+    model.addAttribute("comments", comments);
+
     return "lesson";
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/request")
+  @PostMapping("/lesson/{lessonId}/like")
+  @Transactional
+  public String toggleLike(
+    @PathVariable Long lessonId,
+    @RequestParam(required = false) String redirect,
+    HttpSession session,
+    Model model
+  ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
+    Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
+    if (lessonOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Les niet gevonden");
+      return "error";
+    }
+
+    Lesson lesson = lessonOpt.get();
+
+    Optional<User> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Gebruiker niet gevonden");
+      return "error";
+    }
+
+    User user = userOpt.get();
+
+    // Toggle like
+    if (lessonLikeRepository.existsByUserAndLesson(user, lesson)) {
+      lessonLikeRepository.deleteByUserAndLesson(user, lesson);
+    } else {
+      Lesson_Like like = new Lesson_Like(user, lesson, LocalDateTime.now());
+      lessonLikeRepository.save(like);
+    }
+
+    // Redirect back to home page if requested, otherwise go to lesson detail page
+    if ("home".equals(redirect)) {
+      return "redirect:/home";
+    }
+    return "redirect:/lesson/" + lessonId;
+  }
+
+  @PostMapping("/lesson/{lessonId}/comment")
+  public String addComment(
+    @PathVariable Long lessonId,
+    @RequestParam String content,
+    HttpSession session,
+    Model model
+  ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
+    if (content == null || content.trim().isEmpty()) {
+      return "redirect:/lesson/" + lessonId;
+    }
+
+    Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
+    if (lessonOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Les niet gevonden");
+      return "error";
+    }
+
+    Lesson lesson = lessonOpt.get();
+
+    Optional<User> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Gebruiker niet gevonden");
+      return "error";
+    }
+
+    User user = userOpt.get();
+
+    Lesson_Comment comment = new Lesson_Comment(
+      user,
+      lesson,
+      content.trim(),
+      LocalDateTime.now()
+    );
+    lessonCommentRepository.save(comment);
+
+    return "redirect:/lesson/" + lessonId;
+  }
+
+  @Transactional
+  @PostMapping("/lesson/{lessonId}/comment/{commentId}/delete")
+  public String deleteComment(
+    @PathVariable Long lessonId,
+    @PathVariable Long commentId,
+    HttpSession session,
+    Model model
+  ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
+    Optional<Lesson_Comment> commentOpt = lessonCommentRepository.findById(
+      commentId
+    );
+    if (commentOpt.isEmpty()) {
+      return "redirect:/lesson/" + lessonId;
+    }
+
+    Lesson_Comment comment = commentOpt.get();
+
+    Optional<User> userOpt = userRepository.findByUsername(username);
+    if (userOpt.isEmpty()) {
+      model.addAttribute("errorMessage", "Gebruiker niet gevonden");
+      return "error";
+    }
+
+    User user = userOpt.get();
+
+    // Only allow comment deletion by the comment author
+    if (!comment.getUser().getId().equals(user.getId())) {
+      model.addAttribute(
+        "errorMessage",
+        "Geen toegang om deze opmerking te verwijderen"
+      );
+      return "error";
+    }
+
+    lessonCommentRepository.delete(comment);
+
+    return "redirect:/lesson/" + lessonId;
+  }
+
+  @PostMapping("/lesson/{lessonId}/request")
   public String requestLesson(
     @PathVariable Long lessonId,
-    @PathVariable String username,
     @RequestParam(required = false) @DateTimeFormat(
       iso = DateTimeFormat.ISO.DATE_TIME
     ) LocalDateTime proposal1,
@@ -104,8 +264,16 @@ public class LessonController {
       iso = DateTimeFormat.ISO.DATE_TIME
     ) LocalDateTime proposal3,
     @RequestParam(required = false) String message,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<Lesson> lessonOpt = lessonRepository.findById(lessonId);
     if (lessonOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Les niet gevonden");
@@ -153,19 +321,26 @@ public class LessonController {
 
     lessonBookingRepository.save(booking);
 
-    return "redirect:/lesson/" + lessonId + "/" + username + "?success=true";
+    return "redirect:/lesson/" + lessonId + "?success=true";
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/accept")
+  @PostMapping("/lesson/{lessonId}/accept")
   public String acceptBooking(
     @PathVariable Long lessonId,
-    @PathVariable String username,
     @RequestParam Long bookingId,
     @RequestParam @DateTimeFormat(
       iso = DateTimeFormat.ISO.DATE_TIME
     ) LocalDateTime chosenTime,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -207,16 +382,23 @@ public class LessonController {
 
     lessonBookingRepository.save(booking);
 
-    return "redirect:/lesson/" + lessonId + "/" + username;
+    return "redirect:/lesson/" + lessonId;
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/reject")
+  @PostMapping("/lesson/{lessonId}/reject")
   public String rejectBooking(
     @PathVariable Long lessonId,
-    @PathVariable String username,
     @RequestParam Long bookingId,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -253,13 +435,12 @@ public class LessonController {
 
     lessonBookingRepository.save(booking);
 
-    return "redirect:/lesson/" + lessonId + "/" + username;
+    return "redirect:/lesson/" + lessonId;
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/update-proposals")
+  @PostMapping("/lesson/{lessonId}/update-proposals")
   public String updateProposals(
     @PathVariable Long lessonId,
-    @PathVariable String username,
     @RequestParam Long bookingId,
     @RequestParam(required = false) @DateTimeFormat(
       iso = DateTimeFormat.ISO.DATE_TIME
@@ -270,8 +451,16 @@ public class LessonController {
     @RequestParam(required = false) @DateTimeFormat(
       iso = DateTimeFormat.ISO.DATE_TIME
     ) LocalDateTime proposal3,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<User> userOpt = userRepository.findByUsername(username);
     if (userOpt.isEmpty()) {
       model.addAttribute("errorMessage", "Gebruiker niet gevonden");
@@ -339,18 +528,23 @@ public class LessonController {
 
     lessonBookingRepository.save(booking);
 
-    return (
-      "redirect:/lesson/" + lessonId + "/" + username + "?resubmitted=true"
-    );
+    return ("redirect:/lesson/" + lessonId + "?resubmitted=true");
   }
 
-  @PostMapping("/lesson/{lessonId}/{username}/cancel-booking")
+  @PostMapping("/lesson/{lessonId}/cancel-booking")
   public String cancelBooking(
     @PathVariable Long lessonId,
-    @PathVariable String username,
     @RequestParam Long bookingId,
+    HttpSession session,
     Model model
   ) {
+    // Get current user from session
+    Object usernameObj = session.getAttribute("currentUsername");
+    if (usernameObj == null) {
+      return "redirect:/login-page";
+    }
+    String username = usernameObj.toString();
+
     Optional<LessonBooking> bookingOpt = lessonBookingRepository.findById(
       bookingId
     );
@@ -363,7 +557,7 @@ public class LessonController {
     booking.setStatus(LessonStatus.GEANNULEERD);
     lessonBookingRepository.save(booking);
 
-    return "redirect:/lesson/" + lessonId + "/" + username;
+    return "redirect:/lesson/" + lessonId;
   }
 
   @ExceptionHandler(Exception.class)

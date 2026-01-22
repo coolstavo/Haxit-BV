@@ -11,7 +11,7 @@
             Stel maximaal 3 voorkeurstijden voor wanneer je les wilt volgen.
           </p>
           <form
-            th:action="@{'/lesson/' + ${lesson.id} + '/' + ${username} + '/request'}"
+            th:action="@{'/lesson/' + ${lesson.id} + '/request'}"
             method="post"
           >
             <div class="row g-3">

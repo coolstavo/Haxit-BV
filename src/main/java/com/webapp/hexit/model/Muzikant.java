@@ -7,105 +7,97 @@ import java.util.List;
 @Entity
 public class Muzikant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] profilePic;
+  private String profilePic;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @OneToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    private String naam;
-    private int leeftijd;
+  private int leeftijd;
 
-    @ManyToMany
-    @JoinTable(
-        name = "musician_genre",
-        joinColumns = @JoinColumn(name = "muzikant_id"),
-        inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
-    private List<Genre> genres = new ArrayList<>();
+  @ManyToMany
+  @JoinTable(
+    name = "musician_genre",
+    joinColumns = @JoinColumn(name = "muzikant_id"),
+    inverseJoinColumns = @JoinColumn(name = "genre_id")
+  )
+  private List<Genre> genres = new ArrayList<>();
 
-    public Muzikant() {}
+  public Muzikant() {}
 
-    public Muzikant(User user, String naam, int leeftijd) {
-        this.user = user;
-        this.naam = naam;
-        this.leeftijd = leeftijd;
-    }
+  public Muzikant(User user, int leeftijd) {
+    this.user = user;
+    this.leeftijd = leeftijd;
+  }
 
-    @ManyToMany
-    @JoinTable(
-        name = "musician_instrument",
-        joinColumns = @JoinColumn(name = "muzikant_id"),
-        inverseJoinColumns = @JoinColumn(name = "instrument_id")
-    )
-    private List<Instrument> instruments = new ArrayList<>();
+  @ManyToMany
+  @JoinTable(
+    name = "musician_instrument",
+    joinColumns = @JoinColumn(name = "muzikant_id"),
+    inverseJoinColumns = @JoinColumn(name = "instrument_id")
+  )
+  private List<Instrument> instruments = new ArrayList<>();
 
-    // Getters and Setters
+  // Getters and Setters
 
-    public Muzikant getMuzikant() {
-        return this;
-    }
+  public Muzikant getMuzikant() {
+    return this;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public User getUser() {
+    return user;
+  }
 
-    // In Muzikant.java
-    public void setId(Long id) {
-        this.id = id;
-    }
+  // In Muzikant.java
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public byte[] getProfilePic() {
-        return profilePic;
-    }
+  public String getProfilePic() {
+    return profilePic;
+  }
 
-    public void setProfilePic(byte[] profilePic) {
-        this.profilePic = profilePic;
-    }
+  public void setProfilePic(String profilePic) {
+    this.profilePic = profilePic;
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-    public String getNaam() {
-        return naam;
-    }
+  public String getNaam() {
+    return user != null ? user.getUsername() : null;
+  }
 
-    public void setNaam(String naam) {
-        this.naam = naam;
-    }
+  public int getLeeftijd() {
+    return leeftijd;
+  }
 
-    public int getLeeftijd() {
-        return leeftijd;
-    }
+  public List<Genre> getGenres() {
+    return genres;
+  }
 
-    public List<Genre> getGenres() {
-        return genres;
-    }
+  public void setGenres(List<Genre> genres) {
+    this.genres = genres;
+  }
 
-    public void setGenres(List<Genre> genres) {
-        this.genres = genres;
-    }
+  public void setLeeftijd(int leeftijd) {
+    this.leeftijd = leeftijd;
+  }
 
-    public void setLeeftijd(int leeftijd) {
-        this.leeftijd = leeftijd;
-    }
+  public List<Instrument> getInstruments() {
+    return instruments;
+  }
 
-    public List<Instrument> getInstruments() {
-        return instruments;
-    }
-
-    public void setInstruments(List<Instrument> instruments) {
-        this.instruments = instruments;
-    }
+  public void setInstruments(List<Instrument> instruments) {
+    this.instruments = instruments;
+  }
 }

@@ -1,0 +1,116 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <div th:fragment="jamFormSection" class="jam-form-section">
+    <div class="jam-form-container" id="jamFormContainer">
+      <div class="jam-form-header">
+        <h5 class="jam-form-title">
+          <i class="bi bi-plus-circle"></i> Nieuwe Jam Aanmaken
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          id="closeJamFormBtn"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <form id="addJamForm" class="jam-form-content">
+        <!-- Left Column: Title and Description -->
+        <div class="form-group-section">
+          <!-- Title Input -->
+          <div class="mb-3">
+            <label for="jamTitle" class="form-label">
+              <i class="bi bi-music"></i> Titel
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="jamTitle"
+              name="title"
+              placeholder="Geef je jam een naam"
+              required
+            />
+            <small class="form-text text-muted"
+              >Bijvoorbeeld: 'Zondagse Jazz Sessie'</small
+            >
+          </div>
+
+          <!-- Description Input -->
+          <div class="mb-3">
+            <label for="jamDescription" class="form-label">
+              <i class="bi bi-file-text"></i> Beschrijving
+            </label>
+            <textarea
+              class="form-control"
+              id="jamDescription"
+              name="description"
+              rows="3"
+              placeholder="Beschrijf je jam sessie (genre, niveau, etc.)"
+              required
+            ></textarea>
+            <small class="form-text text-muted"
+              >Vertel meer over het genre, het niveau en wat je zoekt</small
+            >
+          </div>
+        </div>
+
+        <!-- Right Column: Map Section -->
+        <div class="map-section">
+          <label class="form-label">
+            <i class="bi bi-geo-alt-fill"></i> Locatie Selecteren
+          </label>
+          <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle"></i> Klik op de kaart om je jamlocatie
+            te selecteren
+          </div>
+          <div id="jamMap" class="jam-form-map"></div>
+          <small class="form-text text-muted mt-2"
+            >De coördinaten worden automatisch ingevuld wanneer je op de kaart
+            klikt</small
+          >
+        </div>
+
+        <!-- Coordinates Display (Full Width) -->
+        <div class="row coordinates-row">
+          <div class="col-md-6 mb-3">
+            <label for="jamLat" class="form-label">
+              <i class="bi bi-pin"></i> Latitude
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              class="form-control"
+              id="jamLat"
+              name="lat"
+              placeholder="Breedte"
+              readonly
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="jamLng" class="form-label">
+              <i class="bi bi-pin"></i> Longitude
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              class="form-control"
+              id="jamLng"
+              name="lng"
+              placeholder="Lengte"
+              readonly
+            />
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="jam-form-actions">
+          <button type="button" class="btn btn-secondary" id="cancelJamFormBtn">
+            <i class="bi bi-x-circle"></i> Annuleren
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Jam Aanmaken
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</html>

@@ -1,278 +1,508 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="nl">
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bedrijfsprofiel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
     <style>
-        #eventMap { height: 300px; width: 100%; border-radius: 8px; margin-bottom: 15px; }
+      #eventMap {
+        height: 300px;
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
     </style>
-</head>
-<body class="bg">
+  </head>
+  <body class="bg">
     <div th:insert="~{fragments/_navbar :: navbar}"></div>
 
     <div class="container mt-4">
-        <h3 class="mb-3">Bedrijfsprofiel van <span th:text="${companyName}">Bedrijf</span></h3>
-        
-        <!-- View Mode -->
-        <div th:if="${!edit}" class="card shadow-sm mb-4">
-            <div class="card-body">
-                <div th:if="${!hasData}">
-                    <p class="text-muted">Nog geen gegevens ingevuld</p>
-                    <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary">Profiel Invullen</a>
+      <h3 class="mb-3">
+        Bedrijfsprofiel van <span th:text="${companyName}">Bedrijf</span>
+      </h3>
+
+      <!-- View Mode -->
+      <div th:if="${!edit}" class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div th:if="${!hasData}">
+            <p class="text-muted">Nog geen gegevens ingevuld</p>
+            <a
+              th:href="@{'/profile/' + ${companyName} + '/edit'}"
+              class="btn btn-primary"
+              >Profiel Invullen</a
+            >
+          </div>
+
+          <div th:if="${hasData}">
+            <div class="row">
+              <div class="col-md-3">
+                <div th:if="${company.logo}" class="mb-3">
+                  <img
+                    th:src="@{'/api/company/logo/' + ${company.id}}"
+                    alt="Logo"
+                    class="img-fluid"
+                    style="max-width: 150px; border-radius: 8px"
+                  />
                 </div>
-                
-                <div th:if="${hasData}">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div th:if="${company.logo}" class="mb-3">
-                                <img th:src="@{'/api/company/logo/' + ${company.id}}" alt="Logo" class="img-fluid" style="max-width: 150px; border-radius: 8px;">
-                            </div>
-                            <div th:unless="${company.logo}" class="mb-3">
-                                <div class="bg-light p-3 text-center rounded" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
-                                    <small class="text-muted">Geen logo</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-9">
-                            <p><strong>Locatie:</strong> <span th:text="${company.location}">-</span></p>
-                            <p th:if="${company.websiteUrl}">
-                                <strong>Website:</strong> 
-                                <a th:href="${company.websiteUrl}" th:text="${company.websiteUrl}" target="_blank" rel="noopener">-</a>
-                            </p>
-                            <p th:if="${company.genres}"><strong>Gezochte genres:</strong> <span th:text="${company.genres}">-</span></p>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h5>Over ons</h5>
-                        <p style="white-space: pre-line;" th:text="${company.aboutUs}">-</p>
-                    </div>
-
-                    <div class="mt-4">
-                        <h5>Gezochte muzikanten</h5>
-                        <p style="white-space: pre-line;" th:text="${company.musiciansWanted}">-</p>
-                    </div>
-
-                    <a th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}" class="btn btn-primary mt-4">Bewerken</a>
+                <div th:unless="${company.logo}" class="mb-3">
+                  <div
+                    class="bg-light p-3 text-center rounded"
+                    style="
+                      width: 150px;
+                      height: 150px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <small class="text-muted">Geen logo</small>
+                  </div>
                 </div>
+              </div>
+              <div class="col-md-9">
+                <p>
+                  <strong>Locatie:</strong>
+                  <span th:text="${company.location}">-</span>
+                </p>
+                <p th:if="${company.websiteUrl}">
+                  <strong>Website:</strong>
+                  <a
+                    th:href="${company.websiteUrl}"
+                    th:text="${company.websiteUrl}"
+                    target="_blank"
+                    rel="noopener"
+                    >-</a
+                  >
+                </p>
+                <p th:if="${company.genres}">
+                  <strong>Gezochte genres:</strong>
+                  <span th:text="${company.genres}">-</span>
+                </p>
+              </div>
             </div>
-        </div>
 
-        <!-- Edit Mode -->
-        <div th:if="${edit}" class="card shadow-sm">
-            <div class="card-body">
-                <form method="post" action="/profile/bedrijf/save" enctype="multipart/form-data">
-                    <input type="hidden" name="companyName" th:value="${companyName}">
-
-                    <div class="mb-3">
-                        <label class="form-label">Bedrijfsnaam</label>
-                        <input type="text" class="form-control" th:value="${companyName}" disabled>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Locatie (stad/regio) *</label>
-                        <input type="text" name="location" class="form-control" th:value="${company.location}" placeholder="Bijv. Groningen" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Website-URL</label>
-                        <input type="url" name="websiteUrl" class="form-control" th:value="${company.websiteUrl}" placeholder="https://www.bedrijf.nl">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Over ons *</label>
-                        <textarea name="aboutUs" class="form-control" rows="4" required placeholder="Beschrijf wie jullie zijn..." th:text="${company.aboutUs}"></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Bedrijfslogo (JPG, PNG; max. 5MB)</label>
-                        <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png">
-                        <small class="text-muted">Ondersteunde formaten: JPG, PNG. Maximaal 5MB.</small>
-                        <div th:if="${company.logo}" class="mt-2">
-                            <small class="text-muted">Huidig logo:</small><br>
-                            <img th:src="@{'/api/company/logo/' + ${company.id}}" alt="Logo" class="img-fluid mt-2" style="max-width: 150px; border-radius: 8px;">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Gezochte genres</label>
-                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                            <div th:each="genre : ${genresOptions}" class="form-check">
-                                <input class="form-check-input" type="checkbox" name="genres" 
-                                       th:value="${genre}" 
-                                       th:id="${'genre-' + genre}"
-                                       th:checked="${company.genres != null && #strings.contains(company.genres, genre)}">
-                                <label class="form-check-label" th:for="${'genre-' + genre}" th:text="${genre}"></label>
-                            </div>
-                        </div>
-                        <small class="text-muted">Selecteer een of meer genres waarin jullie muzikanten zoeken</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Gezochte muzikanten *</label>
-                        <textarea name="musiciansWanted" class="form-control" rows="5" required placeholder="Beschrijf welke muzikanten jullie zoeken (ervaring, instrumenten, genre, etc.)" th:text="${company.musiciansWanted}"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Opslaan</button>
-                    <a th:href="@{'/profile/bedrijf/' + ${companyName}}" class="btn btn-secondary">Annuleren</a>
-                </form>
+            <div class="mt-4">
+              <h5>Over ons</h5>
+              <p style="white-space: pre-line" th:text="${company.aboutUs}">
+                -
+              </p>
             </div>
+
+            <div class="mt-4">
+              <h5>Gezochte muzikanten</h5>
+              <p
+                style="white-space: pre-line"
+                th:text="${company.musiciansWanted}"
+              >
+                -
+              </p>
+            </div>
+
+            <a
+              th:href="@{'/profile/bedrijf/' + ${companyName} + '/edit'}"
+              class="btn btn-primary mt-4"
+              >Bewerken</a
+            >
+          </div>
         </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div th:if="${edit}" class="card shadow-sm">
+        <div class="card-body">
+          <form
+            method="post"
+            action="/profile/bedrijf/save"
+            enctype="multipart/form-data"
+          >
+            <input type="hidden" name="companyName" th:value="${companyName}" />
+
+            <div class="mb-3">
+              <label class="form-label">Bedrijfsnaam</label>
+              <input
+                type="text"
+                class="form-control"
+                th:value="${companyName}"
+                disabled
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Locatie (stad/regio) *</label>
+              <input
+                type="text"
+                name="location"
+                class="form-control"
+                th:value="${company.location}"
+                placeholder="Bijv. Groningen"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Website-URL</label>
+              <input
+                type="url"
+                name="websiteUrl"
+                class="form-control"
+                th:value="${company.websiteUrl}"
+                placeholder="https://www.bedrijf.nl"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Over ons *</label>
+              <textarea
+                name="aboutUs"
+                class="form-control"
+                rows="4"
+                required
+                placeholder="Beschrijf wie jullie zijn..."
+                th:text="${company.aboutUs}"
+              ></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"
+                >Bedrijfslogo (JPG, PNG; max. 5MB)</label
+              >
+              <input
+                type="file"
+                name="logo"
+                class="form-control"
+                accept=".jpg,.jpeg,.png"
+              />
+              <small class="text-muted"
+                >Ondersteunde formaten: JPG, PNG. Maximaal 5MB.</small
+              >
+              <div th:if="${company.logo}" class="mt-2">
+                <small class="text-muted">Huidig logo:</small><br />
+                <img
+                  th:src="@{'/api/company/logo/' + ${company.id}}"
+                  alt="Logo"
+                  class="img-fluid mt-2"
+                  style="max-width: 150px; border-radius: 8px"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Gezochte genres</label>
+              <div
+                class="border rounded p-3"
+                style="max-height: 200px; overflow-y: auto"
+              >
+                <div th:each="genre : ${genresOptions}" class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="genres"
+                    th:value="${genre}"
+                    th:id="${'genre-' + genre}"
+                    th:checked="${company.genres != null && #strings.contains(company.genres, genre)}"
+                  />
+                  <label
+                    class="form-check-label"
+                    th:for="${'genre-' + genre}"
+                    th:text="${genre}"
+                  ></label>
+                </div>
+              </div>
+              <small class="text-muted"
+                >Selecteer een of meer genres waarin jullie muzikanten
+                zoeken</small
+              >
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Gezochte muzikanten *</label>
+              <textarea
+                name="musiciansWanted"
+                class="form-control"
+                rows="5"
+                required
+                placeholder="Beschrijf welke muzikanten jullie zoeken (ervaring, instrumenten, genre, etc.)"
+                th:text="${company.musiciansWanted}"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+            <a
+              th:href="@{'/profile/' + ${companyName}}"
+              class="btn btn-secondary"
+              >Annuleren</a
+            >
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- Event aanmaken sectie (alleen als bedrijf data heeft en NIET in edit mode) -->
-    <div th:if="${hasData != null && hasData == true && edit != null && edit == false}" class="container mt-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="mb-3">Nieuw Event Aanmaken</h5>
-                <form id="companyEventForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Titel *</label>
-                            <input type="text" class="form-control" name="title" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Type *</label>
-                            <select class="form-select" name="type" required>
-                                <option value="Bedrijf" selected>Bedrijf</option>
-                                <option value="Opdracht">Opdracht</option>
-                                <option value="Les">Les</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Beschrijving *</label>
-                            <textarea class="form-control" name="description" rows="3" required></textarea>
-                        </div>
-                        
-                        <!-- Mini Map -->
-                        <div class="col-12">
-                            <label class="form-label">Locatie *</label>
-                            <small class="text-muted d-block mb-2">Klik op de kaart om de locatie te selecteren</small>
-                            <div id="eventMap"></div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label class="form-label">Latitude *</label>
-                            <input type="number" step="0.000001" class="form-control" id="eventLat" name="lat" required placeholder="53.2194" readonly />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Longitude *</label>
-                            <input type="number" step="0.000001" class="form-control" id="eventLng" name="lng" required placeholder="6.5665" readonly />
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3">Event Opslaan</button>
-                    <div id="companyEventMsg" class="mt-2" style="display:none;"></div>
-                </form>
-            </div>
+    <div
+      th:if="${hasData != null && hasData == true && edit != null && edit == false}"
+      class="container mt-4"
+    >
+      <!-- Events Table -->
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${companyEvents != null && #lists.size(companyEvents) > 0}"
+      >
+        <div class="card-header bg-light">
+          <h5 class="mb-0">📋 Jouw Events</h5>
         </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Titel</th>
+                  <th>Beschrijving</th>
+                  <th>Locatie</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="event : ${companyEvents}">
+                  <td>
+                    <a
+                      th:href="@{'/event/' + ${event.id}}"
+                      th:text="${event.title}"
+                      class="text-decoration-none"
+                      >Event Title</a
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:text="${#strings.abbreviate(event.description, 50)}"
+                      class="text-muted"
+                      >Description</span
+                    >
+                  </td>
+                  <td>
+                    <small class="badge bg-info">
+                      <span
+                        th:text="${#numbers.formatDecimal(event.lat, 1, 4)}"
+                      ></span
+                      >,
+                      <span
+                        th:text="${#numbers.formatDecimal(event.lng, 1, 4)}"
+                      ></span>
+                    </small>
+                  </td>
+                  <td>
+                    <form
+                      method="post"
+                      th:action="@{'/event/' + ${event.id} + '/delete'}"
+                      style="display: inline"
+                      onsubmit="
+                        return confirm(
+                          'Weet je zeker dat je dit event wilt verwijderen?',
+                        );
+                      "
+                    >
+                      <button type="submit" class="btn btn-sm btn-danger">
+                        🗑️ Verwijderen
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${companyEvents == null || #lists.size(companyEvents) == 0}"
+      >
+        <div class="card-body text-center py-4">
+          <p class="text-muted mb-0">Je hebt nog geen events aangemaakt.</p>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3">Nieuw Event Aanmaken</h5>
+          <form id="companyEventForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Titel *</label>
+                <input type="text" class="form-control" name="title" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Beschrijving *</label>
+                <textarea
+                  class="form-control"
+                  name="description"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <!-- Mini Map -->
+              <div class="col-12">
+                <label class="form-label">Locatie *</label>
+                <small class="text-muted d-block mb-2"
+                  >Klik op de kaart om de locatie te selecteren</small
+                >
+                <div id="eventMap"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Latitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLat"
+                  name="lat"
+                  required
+                  placeholder="53.2194"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Longitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="eventLng"
+                  name="lng"
+                  required
+                  placeholder="6.5665"
+                  readonly
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              Event Opslaan
+            </button>
+            <div id="companyEventMsg" class="mt-2" style="display: none"></div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Initialize mini map for event location
-        let eventMap = null;
-        let eventMarker = null;
-        
-        if (document.getElementById('eventMap')) {
-            const maxBounds = L.latLngBounds(
-                L.latLng(52.9, 6.0),   
-                L.latLng(53.6, 7.3)   
-            );
-            
-            eventMap = L.map('eventMap', {
-                maxBounds: maxBounds,
-                maxBoundsViscosity: 1.0
-            }).setView([53.2194, 6.5665], 12);
-            
-            eventMap.setMaxBounds(maxBounds);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap-bijdragers'
-            }).addTo(eventMap);
-            
-            const pinIcon = L.icon({
-                iconUrl: '/assets/pin-red.png',
-                iconSize: [15, 40],
-                iconAnchor: [15, 40],
-                popupAnchor: [-6, -40]
-            });
-            
-            // Click handler for map
-            eventMap.on('click', function(e) {
-                const lat = e.latlng.lat.toFixed(6);
-                const lng = e.latlng.lng.toFixed(6);
-                
-                document.getElementById('eventLat').value = lat;
-                document.getElementById('eventLng').value = lng;
-                
-                // Remove old marker if exists
-                if (eventMarker) {
-                    eventMap.removeLayer(eventMarker);
-                }
-                
-                // Add new marker
-                eventMarker = L.marker([e.latlng.lat, e.latlng.lng], {icon: pinIcon}).addTo(eventMap);
-                eventMarker.bindPopup('Event locatie').openPopup();
-            });
-        }
-        
-        // Event form submission
-        const form = document.getElementById('companyEventForm');
-        const msg = document.getElementById('companyEventMsg');
-        
-        if (form) {
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                msg.style.display = 'none';
-                
-                const formData = new FormData(form);
-                const data = {
-                    title: formData.get('title'),
-                    description: formData.get('description'),
-                    type: formData.get('type'),
-                    lat: parseFloat(formData.get('lat')),
-                    lng: parseFloat(formData.get('lng'))
-                };
+    <script th:inline="javascript">
+      const currentCompanyUserId = /*[[${company.user.id}]]*/ null;
 
-                try {
-                    const response = await fetch('/api/events/add', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    if (!response.ok) throw new Error('Request failed');
-                    
-                    const savedEvent = await response.json();
-                    form.reset();
-                    
-                    // Remove marker from map
-                    if (eventMarker) {
-                        eventMap.removeLayer(eventMarker);
-                        eventMarker = null;
-                    }
-                    
-                    msg.textContent = 'Event succesvol opgeslagen! Het verschijnt nu op de kaart.';
-                    msg.className = 'mt-2 alert alert-success';
-                    msg.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        msg.style.display = 'none';
-                    }, 5000);
-                } catch (error) {
-                    console.error('Error:', error);
-                    msg.textContent = 'Fout bij opslaan. Probeer opnieuw.';
-                    msg.className = 'mt-2 alert alert-danger';
-                    msg.style.display = 'block';
-                }
+      // Initialize mini map for event location
+      let eventMap = null;
+      let eventMarker = null;
+
+      if (document.getElementById("eventMap")) {
+        const maxBounds = L.latLngBounds(
+          L.latLng(52.9, 6.0),
+          L.latLng(53.6, 7.3),
+        );
+
+        eventMap = L.map("eventMap", {
+          maxBounds: maxBounds,
+          maxBoundsViscosity: 1.0,
+        }).setView([53.2194, 6.5665], 12);
+
+        eventMap.setMaxBounds(maxBounds);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap-bijdragers",
+        }).addTo(eventMap);
+
+        const pinIcon = L.icon({
+          iconUrl: "/assets/pin-red.png",
+          iconSize: [15, 40],
+          iconAnchor: [15, 40],
+          popupAnchor: [-6, -40],
+        });
+
+        // Click handler for map
+        eventMap.on("click", function (e) {
+          const lat = e.latlng.lat.toFixed(6);
+          const lng = e.latlng.lng.toFixed(6);
+
+          document.getElementById("eventLat").value = lat;
+          document.getElementById("eventLng").value = lng;
+
+          // Remove old marker if exists
+          if (eventMarker) {
+            eventMap.removeLayer(eventMarker);
+          }
+
+          // Add new marker
+          eventMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+            icon: pinIcon,
+          }).addTo(eventMap);
+          eventMarker.bindPopup("Event locatie").openPopup();
+        });
+      }
+
+      // Event form submission
+      const form = document.getElementById("companyEventForm");
+      const msg = document.getElementById("companyEventMsg");
+
+      if (form) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          msg.style.display = "none";
+
+          const formData = new FormData(form);
+          const data = {
+            title: formData.get("title"),
+            description: formData.get("description"),
+            lat: parseFloat(formData.get("lat")),
+            lng: parseFloat(formData.get("lng")),
+            companyUser: {
+              id: currentCompanyUserId,
+            },
+          };
+
+          try {
+            const response = await fetch("/api/events/add", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
             });
-        }
+
+            if (!response.ok) throw new Error("Request failed");
+
+            const savedEvent = await response.json();
+            form.reset();
+
+            // Remove marker from map
+            if (eventMarker) {
+              eventMap.removeLayer(eventMarker);
+              eventMarker = null;
+            }
+
+            msg.textContent =
+              "Event succesvol opgeslagen! Vernieuw de pagina om het in je tabel te zien.";
+            msg.className = "mt-2 alert alert-success";
+            msg.style.display = "block";
+
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
+          } catch (error) {
+            console.error("Error:", error);
+            msg.textContent = "Fout bij opslaan. Probeer opnieuw.";
+            msg.className = "mt-2 alert alert-danger";
+            msg.style.display = "block";
+          }
+        });
+      }
     </script>
-</body>
+  </body>
 </html>

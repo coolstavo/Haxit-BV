@@ -1,51 +1,90 @@
-<html xmlns:th="http://www.thymeleaf.org">
-    <nav
-        th:fragment="navbar"
-        class="navbar navbar-expand-lg navbar-dark navbar-brown mb-4"
+<nav
+  xmlns:th="http://www.thymeleaf.org"
+  th:fragment="navbar"
+  class="navbar navbar-expand-lg navbar-dark navbar-brown mb-4"
+>
+  <div class="container">
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center"
+      th:if="${username} == 'Gast'"
+      th:href="@{/}"
     >
-        <div class="container">
-            <a
-                class="navbar-brand fw-bold d-flex align-items-center"
-                th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}"
+      <img
+        src="/assets/new-logo.svg"
+        alt="Listen logo"
+        id="logo"
+        class="me-2"
+      />
+      Listen
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a
+            class="nav-link active"
+            th:if="${username} != 'Gast'"
+            th:href="@{/home}"
+            >Home</a
+          >
+          <a
+            class="nav-link active"
+            th:if="${username} == 'Gast'"
+            th:href="@{/}"
+            >Home</a
+          >
+        </li>
+
+        <li class="nav-item" th:if="${username} != 'Gast'">
+          <a class="nav-link" th:href="@{'/profile/' + ${username}}">
+            Profiel
+          </a>
+        </li>
+
+        <li class="nav-item" th:if="${username} != 'Gast'">
+          <a class="nav-link position-relative" th:href="@{/messages}">
+            <span class="ms-1">Berichten</span>
+
+            <span
+              id="unreadBadge"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              th:style="${unreadCount > 0} ? '' : 'display:none;'"
             >
-                <img
-                    src="/assets/new-logo.svg"
-                    alt="Listen logo"
-                    id="logo"
-                    class="me-2"
-                />
-                Listen
-            </a>
+              <span id="unreadBadgeValue" th:text="${unreadCount}">0</span>
+            </span>
+          </a>
+          <a
+            class="nav-link btn btn-secondary text-white ms-2 px-3"
+            th:href="@{/search}"
+            >Zoek Profielen</a
+          >
+        </li>
 
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarNav"
-            >
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <li class="nav-item" th:if="${username} == 'Gast'">
+          <a
+            class="nav-link btn btn-primary text-white ms-2 px-3"
+            th:href="@{/login-page}"
+            >Inloggen</a
+          >
+        </li>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" th:href="${username} != 'Gast' ? @{'/' + ${username}} : @{/}">Home</a></li>
-                <li class="nav-item" th:if="${username} != 'Gast'">
-                    <a class="nav-link"
-                       th:href="${userRole == 'BEDRIJF'} ? @{'/profile/bedrijf/' + ${username}} : (${userRole == 'DOCENT'} ? @{'/profile/docent/' + ${username}} : @{'/profile/' + ${username}})">
-                        Profiel
-                    </a>
-                </li>
-                <li class="nav-item" th:if="${username} == 'Gast'">
-                    <a class="nav-link btn btn-primary text-white ms-2 px-3" th:href="@{/login-page}">Inloggen</a>
-                </li>
-                <li class="nav-item" th:if="${username} != 'Gast'">
-                    <a class="nav-link btn btn-secondary text-white ms-2 px-3" th:href="@{/}">Uitloggen</a>
-                </li>
-                <li class="nav-item" th:if="${userRole == 'MUZIKANT'}">
-                    <a class="nav-link btn btn-secondary text-white ms-2 px-3" th:href="@{/search}">Zoek Profielen</a>
-                </li>
-
-            </ul>
-        </div>
-    </nav>
-</html>
+        <li class="nav-item" th:if="${username} != 'Gast'">
+          <a
+            class="nav-link btn btn-secondary text-white ms-2 px-3"
+            th:href="@{/logout}"
+            >Uitloggen</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

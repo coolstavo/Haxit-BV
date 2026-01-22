@@ -1,0 +1,155 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <div th:fragment="jamsSection" class="jams-section mb-4">
+    <div class="container mt-4">
+      <!-- Jams Table -->
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${jams != null && !jams.isEmpty()}"
+      >
+        <div class="card-header bg-light">
+          <h5 class="mb-0">📋 Jouw Jams</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Titel</th>
+                  <th>Beschrijving</th>
+                  <th>Locatie</th>
+                  <th>Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="jam : ${jams}">
+                  <td>
+                    <a
+                      th:href="@{'/jam/' + ${jam.id}}"
+                      th:text="${jam.title}"
+                      class="text-decoration-none"
+                      >Jam Titel</a
+                    >
+                  </td>
+                  <td>
+                    <span
+                      th:text="${#strings.abbreviate(jam.description, 50)}"
+                      class="text-muted"
+                      >Beschrijving</span
+                    >
+                  </td>
+                  <td>
+                    <small class="badge bg-info">
+                      <span
+                        th:text="${#numbers.formatDecimal(jam.lat, 1, 4)}"
+                      ></span
+                      >,
+                      <span
+                        th:text="${#numbers.formatDecimal(jam.lng, 1, 4)}"
+                      ></span>
+                    </small>
+                  </td>
+                  <td>
+                    <form
+                      method="post"
+                      th:action="@{'/jam/' + ${jam.id} + '/delete'}"
+                      style="display: inline"
+                      onsubmit="
+                        return confirm(
+                          'Weet je zeker dat je deze jam wilt verwijderen?',
+                        );
+                      "
+                    >
+                      <button type="submit" class="btn btn-sm btn-danger">
+                        🗑️ Verwijderen
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="card shadow-sm mb-4"
+        th:if="${jams == null || jams.isEmpty()}"
+      >
+        <div class="card-body text-center py-4">
+          <p class="text-muted mb-0">Je hebt nog geen jams aangemaakt.</p>
+        </div>
+      </div>
+
+      <!-- Nieuwe Jam Aanmaken -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="mb-3">Nieuwe Jam Aanmaken</h5>
+          <form id="addJamForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Titel *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="jamTitle"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Beschrijving *</label>
+                <textarea
+                  class="form-control"
+                  id="jamDescription"
+                  name="description"
+                  rows="3"
+                  required
+                ></textarea>
+              </div>
+
+              <!-- Mini Map -->
+              <div class="col-12">
+                <label class="form-label">Locatie *</label>
+                <small class="text-muted d-block mb-2"
+                  >Klik op de kaart om de locatie te selecteren</small
+                >
+                <div id="jamMap"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Latitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="jamLat"
+                  name="lat"
+                  required
+                  placeholder="53.2194"
+                  readonly
+                />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Longitude *</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  class="form-control"
+                  id="jamLng"
+                  name="lng"
+                  required
+                  placeholder="6.5665"
+                  readonly
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">
+              Jam Opslaan
+            </button>
+            <div id="jamMsg" class="mt-2" style="display: none"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</html>

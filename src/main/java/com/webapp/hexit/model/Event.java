@@ -1,97 +1,114 @@
 package com.webapp.hexit.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Event {
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  private String title;
+  private String description;
+  private double lat;
+  private double lng;
 
-    private String title;
-    private String description;
-    private double lat;
-    private double lng;
-    private String type;
+  @ManyToOne
+  @JoinColumn(name = "company_user_id")
+  private User companyUser;
 
-    public Event() {} // default constructor required by JPA
+  // Backwards compatibility with old userId column
+  @Column(name = "user_id")
+  private Long userId;
 
-    public Event(
-        String title,
-        String description,
-        double lat,
-        double lng,
-        String type,
-        User user
-    ) {
-        this.title = title;
-        this.description = description;
-        this.lat = lat;
-        this.lng = lng;
-        this.type = type;
-        this.user = user;
+  public Event() {} // default constructor required by JPA
+
+  public Event(
+    String title,
+    String description,
+    double lat,
+    double lng,
+    User companyUser
+  ) {
+    this.title = title;
+    this.description = description;
+    this.lat = lat;
+    this.lng = lng;
+    this.companyUser = companyUser;
+    if (companyUser != null) {
+      this.userId = companyUser.getId();
     }
+  }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+  // Constructor for backwards compatibility
+  public Event(
+    String title,
+    String description,
+    double lat,
+    double lng,
+    Long userId
+  ) {
+    this.title = title;
+    this.description = description;
+    this.lat = lat;
+    this.lng = lng;
+    this.userId = userId;
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  // Getters and Setters
+  public Long getId() {
+    return id;
+  }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public double getLat() {
-        return lat;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
+  public double getLat() {
+    return lat;
+  }
 
-    public double getLng() {
-        return lng;
-    }
+  public void setLat(double lat) {
+    this.lat = lat;
+  }
 
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
+  public double getLng() {
+    return lng;
+  }
 
-    public String getType() {
-        return type;
-    }
+  public void setLng(double lng) {
+    this.lng = lng;
+  }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+  public User getCompanyUser() {
+    return companyUser;
+  }
 
-    public User getUser() {
-        return user;
+  public void setCompanyUser(User companyUser) {
+    this.companyUser = companyUser;
+    if (companyUser != null) {
+      this.userId = companyUser.getId();
     }
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
 }

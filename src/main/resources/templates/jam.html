@@ -1,0 +1,267 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jam Details</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+      #jamLocationMap {
+        height: 300px;
+        width: 100%;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body class="bg">
+    <div th:insert="~{fragments/_navbar :: navbar}"></div>
+
+    <div class="container mt-4">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>
+          <span th:text="${jam.title}">Jam Titel</span>
+          <small class="text-muted" th:if="${jam.muzikantUser}">
+            door
+            <a
+              th:href="@{'/profile/' + ${jam.muzikantUser.username}}"
+              th:text="${jam.muzikantUser.username}"
+              class="text-decoration-none"
+              >Muzikant</a
+            >
+          </small>
+        </h3>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-warning text-dark" th:if="${isOwner}"
+            >Jouw Jam</span
+          >
+          <!-- Like Button -->
+          <form
+            method="post"
+            th:action="@{'/jam/' + ${jam.id} + '/like'}"
+            class="m-0"
+          >
+            <button
+              type="submit"
+              class="btn btn-sm"
+              th:classappend="${userHasLiked} ? 'btn-danger' : 'btn-outline-danger'"
+              style="min-width: 80px"
+            >
+              <span th:if="${userHasLiked}"
+                >❤️ <span th:text="${likeCount}">0</span></span
+              >
+              <span th:if="${!userHasLiked}"
+                >🤍 <span th:text="${likeCount}">0</span></span
+              >
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Left column: Jam Details -->
+        <div class="col-md-6">
+          <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">🎵 Jam Details</h5>
+            </div>
+            <div class="card-body">
+              <p>
+                <strong>Titel:</strong>
+                <span th:text="${jam.title}">-</span>
+              </p>
+              <p th:if="${jam.muzikantUser}">
+                <strong>Muzikant:</strong>
+                <a
+                  th:href="@{'/profile/' + ${jam.muzikantUser.username}}"
+                  th:text="${jam.muzikantUser.username}"
+                  class="text-decoration-none"
+                  >-</a
+                >
+              </p>
+              <p>
+                <strong>Beschrijving:</strong>
+              </p>
+              <p
+                style="white-space: pre-line; margin-bottom: 0"
+                th:text="${jam.description}"
+              >
+                -
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: Location -->
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header bg-light">
+              <h5 class="mb-0">📍 Locatie</h5>
+            </div>
+            <div class="card-body">
+              <div id="jamLocationMap"></div>
+              <p class="mt-3 mb-0">
+                <strong>Coördinaten:</strong><br />
+                Latitude: <span th:text="${jam.lat}">-</span><br />
+                Longitude: <span th:text="${jam.lng}">-</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="card shadow-sm mb-4">
+        <div
+          class="card-header bg-light d-flex justify-content-between align-items-center"
+        >
+          <h5 class="mb-0">💬 Opmerkingen</h5>
+          <span
+            class="badge bg-secondary"
+            th:text="${#lists.size(comments)} + ' opmerkingen'"
+            >0 opmerkingen</span
+          >
+        </div>
+        <div class="card-body">
+          <!-- Add Comment Form -->
+          <form
+            method="post"
+            th:action="@{'/jam/' + ${jam.id} + '/comment'}"
+            class="mb-4"
+          >
+            <div class="mb-3">
+              <label for="commentContent" class="form-label"
+                >Plaats een opmerking</label
+              >
+              <textarea
+                class="form-control"
+                id="commentContent"
+                name="content"
+                rows="3"
+                placeholder="Schrijf je opmerking hier..."
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              📝 Opmerking plaatsen
+            </button>
+          </form>
+
+          <!-- Comments List -->
+          <div th:if="${#lists.isEmpty(comments)}" class="text-center py-4">
+            <p class="text-muted mb-0">
+              Nog geen opmerkingen. Wees de eerste om een opmerking te plaatsen!
+            </p>
+          </div>
+
+          <div th:if="${!#lists.isEmpty(comments)}">
+            <hr class="my-3" />
+            <div th:each="comment, commentStat : ${comments}" class="mb-3">
+              <div class="card">
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-2"
+                  >
+                    <div>
+                      <strong th:text="${comment.user.username}"
+                        >Gebruiker</strong
+                      >
+                      <small
+                        class="text-muted ms-2"
+                        th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"
+                        >01-01-2024 12:00</small
+                      >
+                    </div>
+                    <!-- Delete button - only show to comment author -->
+                    <form
+                      th:if="${comment.user.username == username}"
+                      method="post"
+                      th:action="@{'/jam/' + ${jam.id} + '/comment/' + ${comment.id} + '/delete'}"
+                      onsubmit="
+                        return confirm(
+                          'Weet je zeker dat je deze opmerking wilt verwijderen?',
+                        );
+                      "
+                      class="d-inline"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger"
+                      >
+                        🗑️ Verwijderen
+                      </button>
+                    </form>
+                  </div>
+                  <p
+                    class="mb-0"
+                    style="white-space: pre-line"
+                    th:text="${comment.content}"
+                  >
+                    Opmerking inhoud
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="mb-4 mt-4">
+        <a href="javascript:history.back()" class="btn btn-secondary"
+          >← Terug</a
+        >
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+      // Initialize map for jam location
+      const maxBounds = L.latLngBounds(
+        L.latLng(52.9, 6.0),
+        L.latLng(53.6, 7.3),
+      );
+
+      const jamMap = L.map("jamLocationMap", {
+        maxBounds: maxBounds,
+        maxBoundsViscosity: 1.0,
+      }).setView([/*[[${jam.lat}]]*/ 53.2194, /*[[${jam.lng}]]*/ 6.5665], 15);
+
+      jamMap.setMaxBounds(maxBounds);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap-bijdragers",
+      }).addTo(jamMap);
+
+      const pinIcon = L.icon({
+        iconUrl: "/assets/pin-red.png",
+        iconSize: [15, 40],
+        iconAnchor: [15, 40],
+        popupAnchor: [-6, -40],
+      });
+
+      const marker = L.marker(
+        [/*[[${jam.lat}]]*/ 53.2194, /*[[${jam.lng}]]*/ 6.5665],
+        { icon: pinIcon },
+      ).addTo(jamMap);
+
+      marker.bindPopup(
+        "<b>" +
+          /*[[${jam.title}]]*/ "" +
+          "</b><br>" +
+          /*[[${jam.description}]]*/ "",
+      );
+      marker.openPopup();
+    </script>
+  </body>
+</html>

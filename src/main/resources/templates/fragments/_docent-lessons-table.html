@@ -112,8 +112,7 @@
       <script>
         function navigateToLesson(rowElement) {
           const lessonId = rowElement.getAttribute("data-lesson-id");
-          const username = rowElement.getAttribute("data-username");
-          window.location.href = `/lesson/${lessonId}/${username}`;
+          window.location.href = `/lesson/${lessonId}`;
         }
       </script>
     </div>

@@ -1,108 +1,149 @@
 :root {
-    --hexit-brown: #8f4e15;
-    --hexit-brown-dark: #5d3108;
+  --hexit-brown: #8f4e15;
+  --hexit-brown-dark: #5d3108;
 }
 
 #map {
-    height: 89vh;
-    width: 100%;
-    border-radius: 8px;
+  height: 89vh;
+  width: 100%;
+  border-radius: 8px;
 }
 .event-card {
-    cursor: pointer;
-    transition: transform 0.2s;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 .event-card:hover {
-    transform: scale(1.02);
-    background-color: #f8f9fa;
+  transform: scale(1.02);
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Like button styles */
+.btn-outline-danger {
+  transition: all 0.2s ease;
+}
+
+.btn-outline-danger:hover {
+  transform: scale(1.05);
+}
+
+.btn-danger {
+  animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 768px) {
-    #map {
-        height: 400px;
-    }
+  #map {
+    height: 400px;
+  }
 }
 
 .navbar-brown {
-    background-color: var(--hexit-brown);
+  background-color: var(--hexit-brown);
 }
 
 .btn-primary {
-    background-color: var(--hexit-brown);
-    border-color: var(--hexit-brown);
+  background-color: var(--hexit-brown);
+  border-color: var(--hexit-brown);
 }
 .btn-primary:hover {
-    background-color: var(--hexit-brown-dark);
-    border-color: var(--hexit-brown-dark);
+  background-color: var(--hexit-brown-dark);
+  border-color: var(--hexit-brown-dark);
 }
 
 .bg {
-    background-color: #f1eeea;
+  background-color: #f1eeea;
 }
 
 #logo {
-    height: 32px;
+  height: 32px;
 }
 
 .modal-header {
-    background-color: var(--hexit-brown);
-    color: white;
+  background-color: var(--hexit-brown);
+  color: white;
 }
 
 .modal-header .btn-close {
-    filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1);
 }
 
 /* Filter Styles */
 .card-header {
-    border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .card-header .btn-link {
-    text-decoration: none;
-    color: var(--hexit-brown);
-    font-weight: 500;
+  text-decoration: none;
+  color: var(--hexit-brown);
+  font-weight: 500;
 }
 
 .card-header .btn-link:hover {
-    color: var(--hexit-brown-dark);
+  color: var(--hexit-brown-dark);
 }
 
 .form-check {
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-check-label {
-    user-select: none;
-    cursor: pointer;
-    margin-bottom: 0;
+  user-select: none;
+  cursor: pointer;
+  margin-bottom: 0;
 }
 
 .form-check-input:checked {
-    background-color: var(--hexit-brown);
-    border-color: var(--hexit-brown);
+  background-color: var(--hexit-brown);
+  border-color: var(--hexit-brown);
 }
 
 .form-check-input:focus {
-    border-color: var(--hexit-brown);
-    box-shadow: 0 0 0 0.25rem rgba(143, 78, 21, 0.25);
+  border-color: var(--hexit-brown);
+  box-shadow: 0 0 0 0.25rem rgba(143, 78, 21, 0.25);
 }
 
 .user-profile {
-    margin-top: 10px;
-    text-align: left;
+  margin-top: 10px;
+  text-align: left;
 }
 
 .user-profile .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 .user-profile .avatar-small {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+/* Profile link styles */
+h3 small a,
+.card-body p a {
+  color: #6c757d;
+  transition: color 0.2s ease;
+}
+
+h3 small a:hover,
+.card-body p a:hover {
+  color: var(--hexit-brown);
+  text-decoration: underline !important;
 }
