@@ -20,6 +20,15 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.card-hover {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+    
+.card-hover:hover {
+    background-color: #fafafa; 
+}
+
 /* Like button styles */
 .btn-outline-danger {
   transition: all 0.2s ease;
