@@ -3,6 +3,8 @@ package com.webapp.hexit.controller;
 import com.webapp.hexit.model.Event;
 import com.webapp.hexit.model.Jam;
 import com.webapp.hexit.model.Lesson;
+import com.webapp.hexit.model.Muzikant;
+import com.webapp.hexit.model.User;
 import com.webapp.hexit.repository.EventLikeRepository;
 import com.webapp.hexit.repository.EventRepository;
 import com.webapp.hexit.repository.GenreRepository;
@@ -11,8 +13,11 @@ import com.webapp.hexit.repository.JamLikeRepository;
 import com.webapp.hexit.repository.JamRepository;
 import com.webapp.hexit.repository.LessonLikeRepository;
 import com.webapp.hexit.repository.LessonRepository;
+import com.webapp.hexit.repository.MuzikantRepository;
 import com.webapp.hexit.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +41,7 @@ public class HomeController {
   private final EventLikeRepository eventLikeRepository;
   private final JamLikeRepository jamLikeRepository;
   private final LessonLikeRepository lessonLikeRepository;
+  private final MuzikantRepository muzikantRepository;
 
   public HomeController(
     EventRepository eventRepository,
@@ -46,7 +52,8 @@ public class HomeController {
     GenreRepository genreRepository,
     EventLikeRepository eventLikeRepository,
     JamLikeRepository jamLikeRepository,
-    LessonLikeRepository lessonLikeRepository
+    LessonLikeRepository lessonLikeRepository,
+    MuzikantRepository muzikantRepository
   ) {
     this.eventRepository = eventRepository;
     this.lessonRepository = lessonRepository;
@@ -57,6 +64,7 @@ public class HomeController {
     this.eventLikeRepository = eventLikeRepository;
     this.jamLikeRepository = jamLikeRepository;
     this.lessonLikeRepository = lessonLikeRepository;
+    this.muzikantRepository = muzikantRepository;
   }
 
   @GetMapping("/")
@@ -256,6 +264,7 @@ public class HomeController {
     model.addAttribute("username", "Gast");
     model.addAttribute("userRole", "GAST");
     model.addAttribute("loginRequired", false);
+    model.addAttribute("aanbevelingen", List.of());
     return "index";
   }
 
@@ -283,8 +292,45 @@ public class HomeController {
     if (usernameObj == null) {
       return "redirect:/?loginRequired=true";
     }
-
     String username = usernameObj.toString();
+
+    List<Muzikant> aanbevelingen = new ArrayList<>();
+    
+    User currentUser = userRepository.findByUsername(username).orElse(null);
+    
+    if (currentUser != null) {
+        Muzikant ik = muzikantRepository.findByUser(currentUser).orElse(null);
+
+        if (ik != null && !ik.getGenres().isEmpty()) {
+
+            // Haal muzikanten op met gedeelde genres
+            List<Muzikant> muzikanten = muzikantRepository.findMatches(
+                ik.getGenres(), 
+                username
+            );
+
+            // Sorteer muzikanten eerst op stad, daarna aantal genres
+            aanbevelingen = muzikanten.stream()
+                .sorted((m1, m2) -> {
+                    // Eerst checken of ze in dezelfde stad wonen
+                    boolean m1InStad = ik.getStad() != null && ik.getStad().equals(m1.getStad());
+                    boolean m2InStad = ik.getStad() != null && ik.getStad().equals(m2.getStad());
+
+                    // Als de een wel in zelfde stad woont en de ander niet komt die eerst
+                    if (m1InStad != m2InStad) {
+                        return m1InStad ? -1 : 1; 
+                    }
+
+                    // Als ze allebei wel of niet in zelfde stad wonen sorteer op aantal gedeelde genres
+                    long count1 = m1.getGenres().stream().filter(ik.getGenres()::contains).count();
+                    long count2 = m2.getGenres().stream().filter(ik.getGenres()::contains).count();
+
+                    // Vergelijk aantallen in aflopende volgorde
+                    return Long.compare(count2, count1);
+                })
+                .collect(Collectors.toList());
+        }
+    }
 
     List<Event> events = eventRepository.findAll();
     List<Lesson> lessons = lessonRepository.findAll();
@@ -516,6 +562,7 @@ public class HomeController {
     model.addAttribute("events", events);
     model.addAttribute("lessons", lessons);
     model.addAttribute("jams", jams);
+    model.addAttribute("aanbevelingen", aanbevelingen);
     model.addAttribute("eventLikeCounts", eventLikeCounts);
     model.addAttribute("jamLikeCounts", jamLikeCounts);
     model.addAttribute("lessonLikeCounts", lessonLikeCounts);
