@@ -27,12 +27,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -67,6 +64,22 @@ public class MuzikantProfileController {
     this.profileFileRepository = profileFileRepository;
     this.jamRepository = jamRepository;
   }
+
+  // Lijst van steden voor locatie selectie
+  private List<String> getSteden() {
+        return List.of(
+            "Alkmaar", "Almelo", "Almere", "Alphen aan den Rijn", "Amersfoort", 
+            "Amstelveen", "Amsterdam", "Apeldoorn", "Arnhem", "Assen", 
+            "Bergen op Zoom", "Breda", "Delft", "Den Bosch", "Den Haag", 
+            "Den Helder", "Deventer", "Dordrecht", "Ede", "Eindhoven", 
+            "Emmen", "Enschede", "Gouda", "Groningen", "Haarlem", 
+            "Heerlen", "Helmond", "Hengelo", "Hilversum", "Leeuwarden", 
+            "Leiden", "Lelystad", "Maastricht", "Middelburg", "Nijmegen", 
+            "Oss", "Roosendaal", "Rotterdam", "Schiedam", "Sittard", 
+            "Tilburg", "Utrecht", "Venlo", "Vlissingen", "Zaandam", 
+            "Zaanstad", "Zoetermeer", "Zwolle"
+        );
+    }
 
   public String getProfile(String username, Model model, HttpSession session) {
     User profile = userRepository.findByUsername(username).orElse(null);
@@ -126,6 +139,7 @@ public class MuzikantProfileController {
     model.addAttribute("allInstruments", allInstruments);
     List<Genre> allGenres = genreRepository.findAll();
     model.addAttribute("allGenres", allGenres);
+    model.addAttribute("alleSteden", getSteden());
     return "profile-edit-muzikant";
   }
 
@@ -188,6 +202,8 @@ public class MuzikantProfileController {
       .orElseThrow(() -> new RuntimeException("Muzikant niet gevonden"));
 
     existingMuzikant.setLeeftijd(muzikant.getLeeftijd());
+
+    existingMuzikant.setStad(muzikant.getStad());
 
     List<Instrument> selectedInstruments = muzikant.getInstruments();
     existingMuzikant.setInstruments(selectedInstruments);

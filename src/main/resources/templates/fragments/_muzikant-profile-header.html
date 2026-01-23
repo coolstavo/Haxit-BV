@@ -18,14 +18,21 @@
 
         <!-- Profile Info -->
         <div class="col-md-10">
-          <h1 th:text="${muzikant.user.username}" class="profile-name mb-2">
+          <h1 th:text="${muzikant.user.username}" class="profile-name mb-3">
             Muzikant Naam
           </h1>
 
           <!-- Age -->
-          <p class="profile-age mb-3">
+          <p class="profile-age mb-2">
             <strong>Leeftijd:</strong>
-            <span th:text="${muzikant.leeftijd}">0</span> jaar
+            <span th:text="${muzikant.leeftijd > 0 ? muzikant.leeftijd + ' jaar' : 'Onbekend'}">
+                Onbekend
+            </span>
+          </p>
+
+          <!-- Location -->
+          <p><strong>Locatie:</strong> 
+            <span th:text="${muzikant.stad != null ? muzikant.stad : 'Onbekend'}">Stad</span>
           </p>
         </div>
       </div>
