@@ -30,7 +30,16 @@
                     </div>
                     <div th:if="${muzikantInstruments.isEmpty()}" class="empty-state">
                         <div class="empty-state-icon">🎹</div>
-                        <p class="text-muted mb-0">Geen instrumenten toegevoegd. Bewerk je profiel om instrumenten toe te voegen.</p>
+                        <p class="text-muted mb-0">
+                            <span th:if="${isOwner}">
+                                Je hebt nog geen instrumenten toegevoegd. 
+                                <a th:href="@{/profile/edit}" class="text-primary text-decoration-underline">Bewerk je profiel</a> om dit te doen!
+                            </span>
+
+                            <span th:unless="${isOwner}">
+                                Deze muzikant heeft nog geen instrumenten toegevoegd.
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -65,7 +74,16 @@
                     
                     <div th:if="${muzikant.genres.isEmpty()}" class="empty-state">
                         <div class="empty-state-icon">🎵</div>
-                        <p class="text-muted mb-0">Geen genres toegevoegd. Bewerk je profiel om genres toe te voegen.</p>
+                        <p class="text-muted mb-0">
+                            <span th:if="${isOwner}">
+                                Je hebt nog geen genres toegevoegd. 
+                                <a th:href="@{/profile/edit}" class="text-primary text-decoration-underline">Bewerk je profiel</a> om genres toe te voegen!
+                            </span>
+
+                            <span th:unless="${isOwner}">
+                                Deze muzikant heeft nog geen genres gekozen.
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>

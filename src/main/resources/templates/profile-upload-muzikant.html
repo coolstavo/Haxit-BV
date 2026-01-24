@@ -14,11 +14,8 @@
         <div th:insert="~{fragments/_navbar :: navbar}"></div>
 
         <div class="container mt-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="mb-3">
                 <h3>Media Uploaden</h3>
-                <a th:href="@{/profile/{username}(username=${username})}" class="btn btn-secondary">
-                    Terug naar profiel
-                </a>
             </div>
 
             <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
@@ -30,9 +27,14 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <p class="text-muted">
-                        Upload een audio/video bestand of een YouTube/SoundCloud link.
-                    </p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <p class="text-muted mb-0">
+                            Upload een audio/video bestand of een YouTube/SoundCloud link.
+                        </p>
+                        <a th:href="@{/profile/{username}(username=${username})}" class="btn btn-secondary">
+                            Terug naar profiel
+                        </a>
+                    </div>
 
                     <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
                         

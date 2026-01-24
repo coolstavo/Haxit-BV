@@ -133,7 +133,23 @@
           </button>
         </div>
         <div class="card-body text-center py-4">
-          <p class="text-muted mb-0">Je hebt nog geen jams aangemaakt.</p>
+          <p class="text-muted mb-0">
+            
+            <span th:if="${isOwner}">
+                Je hebt nog geen jams aangemaakt.
+                <br>
+                <button type="button" 
+                        class="btn btn-sm btn-outline-primary mt-2"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#addJamModal">
+                    Start een Jam!
+                </button>
+            </span>
+
+            <span th:unless="${isOwner}">
+                Deze muzikant heeft nog geen jams aangemaakt.
+            </span>
+          </p>
         </div>
       </div>
     </div>
