@@ -27,16 +27,16 @@
       <div th:if="${loginRequired}" class="alert alert-warning">
         Log in om je profiel te bekijken.
       </div>
-      <div class="row">
-        <div class="col-md-8 mb-4">
-          <div class="card shadow-sm">
-            <div class="card-body p-0">
-              <div id="map"></div>
+      <div class="row" style="--panel-height: calc(100vh - 95px);">
+        <div class="col-md-8 mb-4" style="height: var(--panel-height);">
+          <div class="card shadow-sm h-100">
+            <div class="card-body p-0 h-100">
+              <div id="map" class="h-100" style="min-height: 300px;"></div>
             </div>
           </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-4 d-flex flex-column" style="height: var(--panel-height);">
           <div th:if="${aanbevelingen != null and !aanbevelingen.isEmpty()}" class="mb-4 mt-1">
             <h5 class="mb-3 fw-bold">
               <i class="text-warning"></i> Aanbevolen voor jou
@@ -71,7 +71,7 @@
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="mb-0">Actuele Opdrachten & Lessen</h4>
           </div>
-          <div class="list-group overflow-auto" style="max-height: 85vh">
+          <div class="list-group overflow-auto flex-grow-1" style="max-height: 100%; min-height: 0;">
             <!-- Events -->
             <div
               class="list-group-item event-card border-0 shadow-sm mb-2 rounded position-relative"
