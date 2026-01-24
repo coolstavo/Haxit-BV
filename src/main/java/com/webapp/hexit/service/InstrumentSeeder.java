@@ -44,7 +44,10 @@ public class InstrumentSeeder implements CommandLineRunner {
         "Keyboard",
         "Orgel",
         "Djembe",
-        "Contrabas"
+        "Contrabas",
+        "Rapper",
+        "Producer",
+        "DJ"
       );
 
       for (String name : instruments) {
