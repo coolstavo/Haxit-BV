@@ -17,7 +17,7 @@
         </div>
 
         <!-- Profile Info -->
-        <div class="col-md-10">
+        <div class="col-md-8">
           <h1 th:text="${muzikant.user.username}" class="profile-name mb-3">
             Muzikant Naam
           </h1>
@@ -34,6 +34,12 @@
           <p><strong>Locatie:</strong> 
             <span th:text="${muzikant.stad != null ? muzikant.stad : 'Onbekend'}">Stad</span>
           </p>
+          <!-- Action Buttons -->
+          <div class="col-md-2" th:if="${!isOwner}">
+            <a th:href="@{/messages/{username}(username=${muzikant.user.username})}" class="btn btn-outline-primary">
+              <i class="bi bi-envelope"></i> Bericht sturen
+            </a>
+          </div>
         </div>
       </div>
     </div>

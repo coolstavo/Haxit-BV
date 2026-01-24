@@ -77,7 +77,16 @@
           </div>
           <div th:if="${audioLijst.isEmpty()}" class="empty-state">
             <div class="empty-state-icon">🎧</div>
-            <p class="text-muted">Nog geen audio uploads</p>
+            <p class="text-muted">
+              <span th:if="${isOwner}">
+                  Je hebt nog geen audio geüpload. 
+                  <a th:href="@{/profile/upload}" class="text-primary text-decoration-underline">Upload je eerste track!</a>
+              </span>
+
+              <span th:unless="${isOwner}">
+                  Deze muzikant heeft nog geen audio geüpload.
+              </span>
+            </p>
           </div>
         </div>
       </div>
@@ -157,7 +166,16 @@
           </div>
           <div th:if="${videoLijst.isEmpty()}" class="empty-state">
             <div class="empty-state-icon">🎬</div>
-            <p class="text-muted">Nog geen video uploads</p>
+            <p class="text-muted">
+              <span th:if="${isOwner}">
+                  Je hebt nog geen video's geüpload. 
+                  <a th:href="@{/profile/upload}" class="text-primary text-decoration-underline">Upload je eerste video!</a>
+              </span>
+
+              <span th:unless="${isOwner}">
+                  Deze muzikant heeft nog geen video's geüpload.
+              </span>
+            </p>
           </div>
         </div>
       </div>
