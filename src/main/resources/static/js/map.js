@@ -52,18 +52,26 @@ var eventIndex = events.length;
 // Groningen and Drenthe
 var maxBounds = L.latLngBounds(L.latLng(52.9, 6.0), L.latLng(53.6, 7.3));
 
+
 var map = L.map("map", {
   maxBounds: maxBounds,
   maxBoundsViscosity: 1.0,
+  preferCanvas: true,
+  renderer: L.canvas({ tolerance: 5 }),
 }).setView([53.2194, 6.5665], 13);
 
 map.setMaxBounds(maxBounds);
 
-// Oude map
 var roads = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "&copy; OpenStreetMap-bijdragers",
+  keepBuffer: 2,
 }).addTo(map);
+
+
+setTimeout(function() {
+  map.invalidateSize();
+}, 100);
 
 var customIcon = L.icon({
   iconUrl:
@@ -74,6 +82,9 @@ var customIcon = L.icon({
   className: "custom-div-icon",
 });
 
+
+var markerLayer = L.layerGroup().addTo(map);
+
 // Events op de kaart
 if (Array.isArray(events) && events.length > 0) {
   events.forEach(function (event, index) {
@@ -81,7 +92,7 @@ if (Array.isArray(events) && events.length > 0) {
     var lng = Number(event.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-    var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var marker = L.marker([lat, lng], { icon: customIcon });
     var eventUrl = "/event/" + event.id;
     var popupText =
       "<b><a href='" +
@@ -94,6 +105,7 @@ if (Array.isArray(events) && events.length > 0) {
       "<br>" +
       "<span class='badge rounded-pill navbar-brown'> event </span>";
     marker.bindPopup(popupText);
+    markerLayer.addLayer(marker);
 
     markers["event-" + index] = marker;
   });
@@ -106,7 +118,7 @@ if (Array.isArray(lessons) && lessons.length > 0) {
     var lng = Number(lesson.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-    var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var marker = L.marker([lat, lng], { icon: customIcon });
     var lessonUrl = "/lesson/" + lesson.id;
     var popupText =
       "<b><a href='" +
@@ -125,6 +137,7 @@ if (Array.isArray(lessons) && lessons.length > 0) {
       (lesson.location ? "<small>" + lesson.location + "</small><br>" : "") +
       "<span class='badge rounded-pill bg-success'>Les</span>";
     marker.bindPopup(popupText);
+    markerLayer.addLayer(marker);
 
     markers["lesson-" + index] = marker;
   });
@@ -137,7 +150,7 @@ if (Array.isArray(jams) && jams.length > 0) {
     var lng = Number(jam.lng);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-    var marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+    var marker = L.marker([lat, lng], { icon: customIcon });
     var jamUrl = "/jam/" + jam.id;
     var popupText =
       "<b><a href='" +
@@ -150,6 +163,7 @@ if (Array.isArray(jams) && jams.length > 0) {
       "<br>" +
       "<span class='badge rounded-pill bg-warning text-dark'>Jam</span>";
     marker.bindPopup(popupText);
+    markerLayer.addLayer(marker);
 
     markers["jam-" + index] = marker;
   });
