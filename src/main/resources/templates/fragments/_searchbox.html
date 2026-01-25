@@ -1,258 +1,129 @@
 <div th:fragment="searchbox">
-  <form
-    class="mb-3"
-    method="get"
-    th:action="${username != null && username != 'Gast'} ? @{/home} : @{/}"
-  >
-    <!-- Name Search Field -->
-    <div class="mb-2">
-      <input
-        type="text"
-        name="name"
-        class="form-control"
-        placeholder="Zoek op naam, instrument of docent"
-        th:value="${param.name}"
-      />
+  <form class="mb-3" method="get" th:action="${username != null && username != 'Gast'} ? @{/home} : @{/}">
+    <div class="mb-3">
+      <input type="text" name="name" class="form-control" placeholder="Zoek op naam, instrument of docent"
+        th:value="${param.name}" />
     </div>
 
-    <!-- Type Filter Section -->
-    <div class="card mb-3">
-      <div class="card-header bg-light p-2">
-        <button
-          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#filterTypes"
-          aria-expanded="false"
-        >
-          <strong>Type Filter</strong>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-chevron-down"
-            viewBox="0 0 16 16"
-            style="display: inline-block; float: right"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-            />
-          </svg>
-        </button>
-      </div>
-      <div class="collapse" id="filterTypes">
-        <div class="card-body p-2">
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="types"
-              value="Lesson"
-              id="filterLesson"
-              th:checked="${param.types != null && #strings.contains(param.types, 'Lesson')}"
-            />
-            <label class="form-check-label" for="filterLesson"> Lessen </label>
+    <div class="row g-2 mb-3 align-items-start">
+
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header bg-light p-1">
+            <button
+              class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#filterTypes" aria-expanded="false">
+              <small><strong>Type</strong></small>
+              <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+            </button>
           </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="types"
-              value="Event"
-              id="filterEvent"
-              th:checked="${param.types != null && #strings.contains(param.types, 'Event')}"
-            />
-            <label class="form-check-label" for="filterEvent"> Events </label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="types"
-              value="Jam"
-              id="filterJam"
-              th:checked="${param.types != null && #strings.contains(param.types, 'Jam')}"
-            />
-            <label class="form-check-label" for="filterJam"> Jams </label>
+          <div class="collapse" id="filterTypes">
+            <div class="card-body p-2">
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="types" value="Lesson" id="filterLesson"
+                  th:checked="${param.types != null && #strings.contains(param.types, 'Lesson')}" />
+                <label class="form-check-label small" for="filterLesson"> Lessen </label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="types" value="Event" id="filterEvent"
+                  th:checked="${param.types != null && #strings.contains(param.types, 'Event')}" />
+                <label class="form-check-label small" for="filterEvent"> Events </label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="types" value="Jam" id="filterJam"
+                  th:checked="${param.types != null && #strings.contains(param.types, 'Jam')}" />
+                <label class="form-check-label small" for="filterJam"> Jams </label>
+              </div>
+              
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Liked By Me Filter Section (only for logged-in users) -->
-    <div class="card mb-3" th:if="${username != null && username != 'Gast'}">
-      <div class="card-header bg-light p-2">
-        <button
-          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#filterLikedByMe"
-          aria-expanded="false"
-        >
-          <strong>Favorieten</strong>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-chevron-down"
-            viewBox="0 0 16 16"
-            style="display: inline-block; float: right"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-            />
-          </svg>
-        </button>
-      </div>
-      <div class="collapse" id="filterLikedByMe">
-        <div class="card-body p-2">
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="likedByMe"
-              value="true"
-              id="filterLikedByMe"
-              th:checked="${param.likedByMe != null && param.likedByMe[0] == 'true'}"
-            />
-            <label class="form-check-label" for="filterLikedByMe">
-              Alleen door mij geliked
-            </label>
+      <div class="col-6" th:if="${username != null && username != 'Gast'}">
+        <div class="card">
+          <div class="card-header bg-light p-1">
+            <button
+              class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#filterLikedByMe" aria-expanded="false">
+              <small><strong>Favorieten</strong></small>
+              <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+            </button>
+          </div>
+          <div class="collapse" id="filterLikedByMe">
+            <div class="card-body p-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="likedByMe" value="true" id="filterLikedByMeCheck"
+                  th:checked="${param.likedByMe != null && param.likedByMe[0] == 'true'}" />
+                <label class="form-check-label small" for="filterLikedByMeCheck">
+                  Mijn likes
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Instruments Filter Section -->
-    <div
-      class="card mb-3"
-      th:if="${instruments != null && instruments.size() > 0}"
-    >
-      <div class="card-header bg-light p-2">
-        <button
-          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#filterInstruments"
-          aria-expanded="false"
-        >
-          <strong>Instrumenten</strong>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-chevron-down"
-            viewBox="0 0 16 16"
-            style="display: inline-block; float: right"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-            />
-          </svg>
-        </button>
-      </div>
-      <div
-        class="collapse"
-        id="filterInstruments"
-        style="max-height: 300px; overflow-y: auto"
-      >
-        <div class="card-body p-2">
-          <div
-            class="form-check"
-            th:each="instrument : ${instruments}"
-            th:id="'instrument-' + ${instrument.id}"
-          >
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="instruments"
-              th:value="${instrument.naam}"
-              th:id="'filterInstrument-' + ${instrument.id}"
-              th:checked="${param.instruments != null && #strings.contains(param.instruments, instrument.naam)}"
-            />
-            <label
-              class="form-check-label"
-              th:for="'filterInstrument-' + ${instrument.id}"
-              th:text="${instrument.naam}"
-            >
-            </label>
+      <div class="col-6" th:if="${instruments != null && instruments.size() > 0}">
+        <div class="card">
+          <div class="card-header bg-light p-1">
+            <button
+              class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#filterInstruments" aria-expanded="false">
+              <small><strong>Instrument</strong></small>
+              <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+            </button>
+          </div>
+          <div class="collapse" id="filterInstruments">
+            <div class="card-body p-2" style="max-height: 200px; overflow-y: auto;">
+              <div class="form-check" th:each="instrument : ${instruments}">
+                <input class="form-check-input" type="checkbox" name="instruments" th:value="${instrument.naam}"
+                  th:id="'filterInstrument-' + ${instrument.id}"
+                  th:checked="${param.instruments != null && #strings.contains(param.instruments, instrument.naam)}" />
+                <label class="form-check-label small" th:for="'filterInstrument-' + ${instrument.id}"
+                  th:text="${instrument.naam}">
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Genres Filter Section -->
-    <div class="card mb-3" th:if="${genres != null && genres.size() > 0}">
-      <div class="card-header bg-light p-2">
-        <button
-          class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#filterGenres"
-          aria-expanded="false"
-        >
-          <strong>Genres</strong>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-chevron-down"
-            viewBox="0 0 16 16"
-            style="display: inline-block; float: right"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-            />
-          </svg>
-        </button>
-      </div>
-      <div
-        class="collapse"
-        id="filterGenres"
-        style="max-height: 300px; overflow-y: auto"
-      >
-        <div class="card-body p-2">
-          <div
-            class="form-check"
-            th:each="genre : ${genres}"
-            th:id="'genre-' + ${genre.id}"
-          >
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="genres"
-              th:value="${genre.name}"
-              th:id="'filterGenre-' + ${genre.id}"
-              th:checked="${param.genres != null && #strings.contains(param.genres, genre.name)}"
-            />
-            <label
-              class="form-check-label"
-              th:for="'filterGenre-' + ${genre.id}"
-              th:text="${genre.name}"
-            >
-            </label>
+      <div class="col-6" th:if="${genres != null && genres.size() > 0}">
+        <div class="card">
+          <div class="card-header bg-light p-1">
+            <button
+              class="btn btn-link btn-sm text-dark text-decoration-none w-100 text-start d-flex justify-content-between align-items-center"
+              type="button" data-bs-toggle="collapse" data-bs-target="#filterGenres" aria-expanded="false">
+              <small><strong>Genres</strong></small>
+              <i class="bi bi-chevron-down" style="font-size: 0.8rem;"></i>
+            </button>
+          </div>
+          <div class="collapse" id="filterGenres">
+            <div class="card-body p-2" style="max-height: 200px; overflow-y: auto;">
+              <div class="form-check" th:each="genre : ${genres}">
+                <input class="form-check-input" type="checkbox" name="genres" th:value="${genre.name}"
+                  th:id="'filterGenre-' + ${genre.id}"
+                  th:checked="${param.genres != null && #strings.contains(param.genres, genre.name)}" />
+                <label class="form-check-label small" th:for="'filterGenre-' + ${genre.id}" th:text="${genre.name}">
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
 
     <div class="d-flex gap-2">
       <button class="btn btn-outline-secondary flex-grow-1" type="submit">
         Zoeken
       </button>
-      <a
-        th:href="${username != null && username != 'Gast'} ? @{/home} : @{/}"
-        class="btn btn-outline-danger"
-        title="Reset filters"
-      >
+      <a th:href="${username != null && username != 'Gast'} ? @{/home} : @{/}" class="btn btn-outline-danger"
+        title="Reset filters">
         Reset
       </a>
     </div>
